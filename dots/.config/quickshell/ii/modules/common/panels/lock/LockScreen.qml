@@ -121,6 +121,17 @@ Scope {
     }
 
     GlobalShortcut {
+        name: "unlock"
+        description: "Unlocks the screen. By default disabled for security reasons, enabled in Settings"
+
+        onPressed: {
+            if (!Config.options.lock.security.allowLogindUnlock) return;
+            GlobalStates.screenLocked = false;
+            lockContext.reset();
+        }
+    }
+
+    GlobalShortcut {
         name: "lockFocus"
         description: "Re-focuses the lock screen. This is because Hyprland after waking up for whatever reason"
             + "decides to keyboard-unfocus the lock screen"

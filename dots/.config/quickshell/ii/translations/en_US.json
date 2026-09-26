@@ -612,5 +612,7 @@
   "Use varying shapes for password characters": "Use varying shapes for password characters",
   "Battery full": "Battery full",
   "Pin": "Pin",
-  "Unpin": "Unpin"
+  "Unpin": "Unpin",
+  "Allow unlocking via logind": "Allow unlocking via logind",
+  "  Warning: Any program running as your user can unlock you desktop via logind. Enable only if you know what you're doing.\nAllows logind/loginctl to unlock your desktop. Useful for custom scripts or remote unlocking with something like KDE Connect.": "  Warning: Any program running as your user can unlock you desktop via logind. Enable only if you know what you're doing.\nAllows logind/loginctl to unlock your desktop. Useful for custom scripts or remote unlocking with something like KDE Connect."
 }

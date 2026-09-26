@@ -760,5 +760,7 @@
   "Unpin": "Откреп",
   "Color": "Цвет",
   "Default": "По умолчанию",
-  "Hex color, e.g. #ffffff": "HEX-цвет, например #ffffff"
+  "Hex color, e.g. #ffffff": "HEX-цвет, например #ffffff",
+  "Allow unlocking via logind": "Разрешить разблокировку через logind",
+  "  Warning: Any program running as your user can unlock you desktop via logind. Enable only if you know what you're doing.\nAllows logind/loginctl to unlock your desktop. Useful for custom scripts or remote unlocking with something like KDE Connect.": "  Внимание: Любая программа, запущенная от имени вашего пользователя, сможет разблокировать вашу сессию через logind. Включайте только если вы знаете, что делаете.\nРазрешает logind/loginctl разблокировать сессию. Полезно для кастомных скриптов или удаленного разблокирования через что-то вроде KDE Connect."
 }

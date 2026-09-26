@@ -385,6 +385,7 @@ Singleton {
                 property JsonObject security: JsonObject {
                     property bool unlockKeyring: true
                     property bool requirePasswordToPower: false
+                    property bool allowLogindUnlock: false
                 }
                 property bool materialShapeChars: true
             }

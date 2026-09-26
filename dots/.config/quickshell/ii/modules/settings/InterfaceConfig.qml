@@ -192,6 +192,18 @@ ContentPage {
                     text: Translation.tr("This is usually safe and needed for your browser and AI sidebar anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)")
                 }
             }
+
+            ConfigSwitch {
+                buttonIcon: "lock_open"
+                text: Translation.tr('Allow unlocking via logind')
+                checked: Config.options.lock.security.allowLogindUnlock
+                onCheckedChanged: {
+                    Config.options.lock.security.allowLogindUnlock = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("  Warning: Any program running as your user can unlock you desktop via logind. Enable only if you know what you're doing.\nAllows logind/loginctl to unlock your desktop. Useful for custom scripts or remote unlocking with something like KDE Connect.")
+                }
+            }
         }
 
         ContentSubsection {
