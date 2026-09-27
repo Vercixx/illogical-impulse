@@ -48,10 +48,31 @@ Singleton {
             ))
     )
     
-    readonly property var preppedNames: list.map(a => ({
-        name: Fuzzy.prepare(`${a.name} `),
-        entry: a
-    }))
+    readonly property var searchFields: [
+        { key: "name", weight: 1 },
+        { key: "genericName", weight: 0.9 },
+        { key: "keywords", weight: 0.9 },
+        { key: "comment", weight: 0.7 },
+        { key: "exec", weight: 0.6 },
+    ]
+
+    function searchTexts(a) {
+        return {
+            name: a.name,
+            genericName: a.genericName,
+            keywords: a.keywords.join(" "),
+            comment: a.comment,
+            exec: a.execString,
+        };
+    }
+
+    readonly property var preppedNames: list.map(a => {
+        const texts = searchTexts(a);
+        const prepped = { entry: a };
+        for (const f of searchFields)
+            prepped[f.key] = Fuzzy.prepare(`${texts[f.key]} `);
+        return prepped;
+    })
 
     readonly property var preppedIcons: list.map(a => ({
         name: Fuzzy.prepare(`${a.icon} `),
@@ -60,10 +81,14 @@ Singleton {
 
     function fuzzyQuery(search: string): var { // Idk why list<DesktopEntry> doesn't work
         if (root.sloppySearch) {
-            const results = list.map(obj => ({
-                entry: obj,
-                score: Levendist.computeScore(obj.name.toLowerCase(), search.toLowerCase())
-            })).filter(item => item.score > root.scoreThreshold)
+            const query = search.toLowerCase();
+            const results = list.map(obj => {
+                const texts = searchTexts(obj);
+                return {
+                    entry: obj,
+                    score: Math.max(...searchFields.map(f => f.weight * Levendist.computeScore(texts[f.key].toLowerCase(), query)))
+                };
+            }).filter(item => item.score > root.scoreThreshold)
                 .sort((a, b) => b.score - a.score)
             return results
                 .map(item => item.entry)
@@ -71,7 +96,8 @@ Singleton {
 
         return Fuzzy.go(search, preppedNames, {
             all: true,
-            key: "name"
+            keys: searchFields.map(f => f.key),
+            scoreFn: r => Math.max(...searchFields.map((f, i) => f.weight * r[i].score))
         }).map(r => {
             return r.obj.entry
         });
