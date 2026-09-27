@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import qs.services
 import qs.modules.common
@@ -356,4 +357,28 @@ ContentPage {
             }
         }
     }
+
+    NoticeBox {
+            Layout.fillWidth: true
+            text: Translation.tr('Looking for deeper system-level settings?')
+    
+            Item {
+                Layout.fillWidth: true
+            }
+            RippleButtonWithIcon {
+                id: openKdeSettingsButton
+                property bool justCopied: false
+                Layout.fillWidth: false
+                buttonRadius: Appearance.rounding.small
+                materialIcon: "settings"
+                mainText: Translation.tr("Open KDE System Settings")
+                onClicked: {
+                    Hyprland.dispatch("hl.dsp.exec_cmd('systemsettings')")
+                    root.close()
+                }
+                colBackground: ColorUtils.transparentize(Appearance.colors.colPrimaryContainer)
+                colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                colRipple: Appearance.colors.colPrimaryContainerActive
+            }
+        }
 }

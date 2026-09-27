@@ -762,5 +762,19 @@
   "Default": "По умолчанию",
   "Hex color, e.g. #ffffff": "HEX-цвет, например #ffffff",
   "Allow unlocking via logind": "Разрешить разблокировку через logind",
-  "  Warning: Any program running as your user can unlock you desktop via logind. Enable only if you know what you're doing.\nAllows logind/loginctl to unlock your desktop. Useful for custom scripts or remote unlocking with something like KDE Connect.": "  Внимание: Любая программа, запущенная от имени вашего пользователя, сможет разблокировать вашу сессию через logind. Включайте только если вы знаете, что делаете.\nРазрешает logind/loginctl разблокировать сессию. Полезно для кастомных скриптов или удаленного разблокирования через что-то вроде KDE Connect."
+  "  Warning: Any program running as your user can unlock you desktop via logind. Enable only if you know what you're doing.\nAllows logind/loginctl to unlock your desktop. Useful for custom scripts or remote unlocking with something like KDE Connect.": "  Внимание: Любая программа, запущенная от имени вашего пользователя, сможет разблокировать вашу сессию через logind. Включайте только если вы знаете, что делаете.\nРазрешает logind/loginctl разблокировать сессию. Полезно для кастомных скриптов или удаленного разблокирования через что-то вроде KDE Connect.",
+  "Software": "Программное обеспечение",
+  "Hardware": "Оборудование",
+  "Kernel": "Ядро",
+  "Graphics platform": "Графическая платформа",
+  "Processor": "Процессор",
+  "%1 threads": "Потоков: %1",
+  "Memory": "Память",
+  "Graphics": "Графика",
+  "Storage": "Накопители",
+  "Displays": "Дисплеи",
+  "Device": "Устройство",
+  "Copy details": "Копировать сведения",
+  "Looking for deeper system-level settings?": "Ищите более глубокие системные настройки?",
+  "Open KDE System Settings": "Открыть Параметры Системы KDE"
 }
