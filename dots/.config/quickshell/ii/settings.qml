@@ -129,6 +129,7 @@ ApplicationWindow {
             fill: parent
             margins: contentPadding
         }
+        focus: true
 
         Keys.onPressed: (event) => {
             if (event.modifiers === Qt.ControlModifier) {
@@ -155,21 +156,29 @@ ApplicationWindow {
             visible: Config.options?.windows.showTitlebar
             Layout.fillWidth: true
             Layout.fillHeight: false
-            implicitHeight: Math.max(titleText.implicitHeight, windowControlsRow.implicitHeight)
-            StyledText {
-                id: titleText
+            implicitHeight: Math.max(titleRow.implicitHeight, windowControlsRow.implicitHeight)
+            RowLayout {
+                id: titleRow
                 anchors {
                     left: Config.options.windows.centerTitle ? undefined : parent.left
                     horizontalCenter: Config.options.windows.centerTitle ? parent.horizontalCenter : undefined
                     verticalCenter: parent.verticalCenter
                     leftMargin: 12
                 }
-                color: Appearance.colors.colOnLayer0
-                text: Translation.tr("Settings")
-                font {
-                    family: Appearance.font.family.title
-                    pixelSize: Appearance.font.pixelSize.title
-                    variableAxes: Appearance.font.variableAxes.title
+                spacing: 6
+                MaterialSymbol {
+                    text: "settings"
+                    iconSize: Appearance.font.pixelSize.huge
+                    color: Appearance.colors.colOnLayer0
+                }
+                StyledText {
+                    color: Appearance.colors.colOnLayer0
+                    text: Translation.tr("Settings")
+                    font {
+                        family: Appearance.font.family.title
+                        pixelSize: Appearance.font.pixelSize.larger
+                        weight: Font.Bold
+                    }
                 }
             }
             RowLayout { // Window controls row
@@ -199,7 +208,7 @@ ApplicationWindow {
                 id: navRailWrapper
                 Layout.fillHeight: true
                 Layout.margins: 5
-                implicitWidth: navRail.expanded ? 150 : fab.baseSize
+                implicitWidth: navRail.expanded ? 150 : 56
                 Behavior on implicitWidth {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }
@@ -213,38 +222,6 @@ ApplicationWindow {
                     spacing: 10
                     expanded: root.width > 900
                     
-                    NavigationRailExpandButton {
-                        focus: root.visible
-                    }
-
-                    FloatingActionButton {
-                        id: fab
-                        property bool justCopied: false
-                        iconText: justCopied ? "check" : "edit"
-                        buttonText: justCopied ? Translation.tr("Path copied") : Translation.tr("Config file")
-                        expanded: navRail.expanded
-                        downAction: () => {
-                            Qt.openUrlExternally(`${Directories.config}/illogical-impulse/config.json`);
-                        }
-                        altAction: () => {
-                            Quickshell.clipboardText = CF.FileUtils.trimFileProtocol(`${Directories.config}/illogical-impulse/config.json`);
-                            fab.justCopied = true;
-                            revertTextTimer.restart()
-                        }
-
-                        Timer {
-                            id: revertTextTimer
-                            interval: 1500
-                            onTriggered: {
-                                fab.justCopied = false;
-                            }
-                        }
-
-                        StyledToolTip {
-                            text: Translation.tr("Open the shell config file\nAlternatively right-click to copy path")
-                        }
-                    }
-
                     NavigationRailTabArray {
                         currentIndex: root.currentPage
                         expanded: navRail.expanded
