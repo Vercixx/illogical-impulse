@@ -109,29 +109,26 @@ ContentPage {
                 Config.options.interactions.scrolling.fasterTouchpadScroll = checked;
             }
         }
-        ConfigRow {
-            uniform: true
-            ConfigSpinBox {
-                icon: "mouse"
-                text: Translation.tr("Mouse factor")
-                value: Config.options.interactions.scrolling.mouseScrollFactor
-                from: 10
-                to: 1000
-                stepSize: 10
-                onValueChanged: {
-                    Config.options.interactions.scrolling.mouseScrollFactor = value;
-                }
+        ConfigSpinBox {
+            icon: "mouse"
+            text: Translation.tr("Mouse factor")
+            value: Config.options.interactions.scrolling.mouseScrollFactor
+            from: 10
+            to: 1000
+            stepSize: 10
+            onValueChanged: {
+                Config.options.interactions.scrolling.mouseScrollFactor = value;
             }
-            ConfigSpinBox {
-                icon: "touch_app"
-                text: Translation.tr("Touchpad factor")
-                value: Config.options.interactions.scrolling.touchpadScrollFactor
-                from: 10
-                to: 2000
-                stepSize: 10
-                onValueChanged: {
-                    Config.options.interactions.scrolling.touchpadScrollFactor = value;
-                }
+        }
+        ConfigSpinBox {
+            icon: "touch_app"
+            text: Translation.tr("Touchpad factor")
+            value: Config.options.interactions.scrolling.touchpadScrollFactor
+            from: 10
+            to: 2000
+            stepSize: 10
+            onValueChanged: {
+                Config.options.interactions.scrolling.touchpadScrollFactor = value;
             }
         }
         ConfigSpinBox {
@@ -165,23 +162,20 @@ ContentPage {
                 text: Translation.tr("Hyprland leaves out 1 pixel on the right for interactions")
             }
         }
-        ConfigRow {
-            uniform: true
-            ConfigSwitch {
-                buttonIcon: "notifications_off"
-                text: Translation.tr("Kill other notification daemons")
-                checked: Config.options.conflictKiller.autoKillNotificationDaemons
-                onCheckedChanged: {
-                    Config.options.conflictKiller.autoKillNotificationDaemons = checked;
-                }
+        ConfigSwitch {
+            buttonIcon: "notifications_off"
+            text: Translation.tr("Kill other notification daemons")
+            checked: Config.options.conflictKiller.autoKillNotificationDaemons
+            onCheckedChanged: {
+                Config.options.conflictKiller.autoKillNotificationDaemons = checked;
             }
-            ConfigSwitch {
-                buttonIcon: "shelf_auto_hide"
-                text: Translation.tr("Kill other trays")
-                checked: Config.options.conflictKiller.autoKillTrays
-                onCheckedChanged: {
-                    Config.options.conflictKiller.autoKillTrays = checked;
-                }
+        }
+        ConfigSwitch {
+            buttonIcon: "shelf_auto_hide"
+            text: Translation.tr("Kill other trays")
+            checked: Config.options.conflictKiller.autoKillTrays
+            onCheckedChanged: {
+                Config.options.conflictKiller.autoKillTrays = checked;
             }
         }
         ConfigSpinBox {

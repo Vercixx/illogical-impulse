@@ -89,6 +89,7 @@ ContentPage {
         ConfigSlider {
             enabled: Config.options.appearance.transparency.enable && !Config.options.appearance.transparency.automatic
             buttonIcon: "texture"
+            textWidth: 180
             text: Translation.tr("Background")
             value: Config.options.appearance.transparency.backgroundTransparency
             from: 0
@@ -100,6 +101,7 @@ ContentPage {
         ConfigSlider {
             enabled: Config.options.appearance.transparency.enable && !Config.options.appearance.transparency.automatic
             buttonIcon: "layers"
+            textWidth: 180
             text: Translation.tr("Content areas")
             value: Config.options.appearance.transparency.contentTransparency
             from: 0

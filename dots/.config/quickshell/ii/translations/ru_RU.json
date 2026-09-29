@@ -849,7 +849,7 @@
   "Selection padding (px)": "Отступ выделения (px)",
   "Annotate with Satty instead of Swappy": "Аннотации через Satty вместо Swappy",
   "Image search base URL": "Базовый URL поиска по картинке",
-  "Pinned widget opacity": "Непрозрачность закреплённых виджетов",
+  "Pinned widget opacity": "Непрозрачность виджетов",
   "Date formats": "Форматы даты",
   "Uses Qt date format, e.g. ddd, dd/MM": "Формат даты Qt, например ddd, dd/MM",
   "Date": "Дата",

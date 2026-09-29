@@ -181,49 +181,43 @@ ContentPage {
         title: Translation.tr("Auto-hide")
         enabled: Config.options.bar.autoHide.enable
 
-        ConfigRow {
-            uniform: true
-            ConfigSwitch {
-                buttonIcon: "move_down"
-                text: Translation.tr("Push windows")
-                checked: Config.options.bar.autoHide.pushWindows
-                onCheckedChanged: {
-                    Config.options.bar.autoHide.pushWindows = checked;
-                }
-            }
-            ConfigSpinBox {
-                icon: "height"
-                text: Translation.tr("Hover region (px)")
-                value: Config.options.bar.autoHide.hoverRegionWidth
-                from: 1
-                to: 20
-                stepSize: 1
-                onValueChanged: {
-                    Config.options.bar.autoHide.hoverRegionWidth = value;
-                }
+        ConfigSwitch {
+            buttonIcon: "move_down"
+            text: Translation.tr("Push windows")
+            checked: Config.options.bar.autoHide.pushWindows
+            onCheckedChanged: {
+                Config.options.bar.autoHide.pushWindows = checked;
             }
         }
-        ConfigRow {
-            uniform: true
-            ConfigSwitch {
-                buttonIcon: "keyboard_command_key"
-                text: Translation.tr("Show when pressing Super")
-                checked: Config.options.bar.autoHide.showWhenPressingSuper.enable
-                onCheckedChanged: {
-                    Config.options.bar.autoHide.showWhenPressingSuper.enable = checked;
-                }
+        ConfigSpinBox {
+            icon: "height"
+            text: Translation.tr("Hover region (px)")
+            value: Config.options.bar.autoHide.hoverRegionWidth
+            from: 1
+            to: 20
+            stepSize: 1
+            onValueChanged: {
+                Config.options.bar.autoHide.hoverRegionWidth = value;
             }
-            ConfigSpinBox {
-                enabled: Config.options.bar.autoHide.showWhenPressingSuper.enable
-                icon: "timer"
-                text: Translation.tr("Delay (ms)")
-                value: Config.options.bar.autoHide.showWhenPressingSuper.delay
-                from: 0
-                to: 1000
-                stepSize: 20
-                onValueChanged: {
-                    Config.options.bar.autoHide.showWhenPressingSuper.delay = value;
-                }
+        }
+        ConfigSwitch {
+            buttonIcon: "keyboard_command_key"
+            text: Translation.tr("Show when pressing Super")
+            checked: Config.options.bar.autoHide.showWhenPressingSuper.enable
+            onCheckedChanged: {
+                Config.options.bar.autoHide.showWhenPressingSuper.enable = checked;
+            }
+        }
+        ConfigSpinBox {
+            enabled: Config.options.bar.autoHide.showWhenPressingSuper.enable
+            icon: "timer"
+            text: Translation.tr("Delay (ms)")
+            value: Config.options.bar.autoHide.showWhenPressingSuper.delay
+            from: 0
+            to: 1000
+            stepSize: 20
+            onValueChanged: {
+                Config.options.bar.autoHide.showWhenPressingSuper.delay = value;
             }
         }
     }

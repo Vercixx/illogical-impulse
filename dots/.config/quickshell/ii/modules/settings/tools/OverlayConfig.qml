@@ -29,6 +29,7 @@ ContentPage {
         }
         ConfigSlider {
             buttonIcon: "opacity"
+            textWidth: 200
             text: Translation.tr("Pinned widget opacity")
             value: Config.options.overlay.clickthroughOpacity
             from: 0

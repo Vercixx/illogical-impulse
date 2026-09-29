@@ -52,6 +52,7 @@ ContentPage {
             }
             ConfigSlider {
                 buttonIcon: "opacity"
+                textWidth: 200
                 text: Translation.tr("Hint opacity")
                 value: Config.options.regionSelector.targetRegions.opacity
                 from: 0

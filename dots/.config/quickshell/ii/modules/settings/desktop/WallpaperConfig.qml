@@ -11,24 +11,21 @@ ContentPage {
         icon: "sync_alt"
         title: Translation.tr("Parallax")
 
-        ConfigRow {
-            uniform: true
-            ConfigSwitch {
-                buttonIcon: "unfold_more_double"
-                text: Translation.tr("Vertical")
-                checked: Config.options.background.parallax.vertical
-                onCheckedChanged: {
-                    Config.options.background.parallax.vertical = checked;
-                }
+        ConfigSwitch {
+            buttonIcon: "unfold_more_double"
+            text: Translation.tr("Vertical")
+            checked: Config.options.background.parallax.vertical
+            onCheckedChanged: {
+                Config.options.background.parallax.vertical = checked;
             }
-            ConfigSwitch {
-                enabled: !Config.options.background.parallax.vertical
-                buttonIcon: "screen_rotation"
-                text: Translation.tr("Vertical for tall wallpapers")
-                checked: Config.options.background.parallax.autoVertical
-                onCheckedChanged: {
-                    Config.options.background.parallax.autoVertical = checked;
-                }
+        }
+        ConfigSwitch {
+            enabled: !Config.options.background.parallax.vertical
+            buttonIcon: "screen_rotation"
+            text: Translation.tr("Vertical for tall wallpapers")
+            checked: Config.options.background.parallax.autoVertical
+            onCheckedChanged: {
+                Config.options.background.parallax.autoVertical = checked;
             }
         }
 

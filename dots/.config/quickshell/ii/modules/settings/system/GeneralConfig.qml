@@ -175,54 +175,48 @@ ContentPage {
         icon: "av_timer"
         title: Translation.tr("Pomodoro")
 
-        ConfigRow {
-            uniform: true
-            ConfigSpinBox {
-                icon: "target"
-                text: Translation.tr("Focus (min)")
-                value: Config.options.time.pomodoro.focus / 60
-                from: 1
-                to: 180
-                stepSize: 5
-                onValueChanged: {
-                    Config.options.time.pomodoro.focus = value * 60;
-                }
-            }
-            ConfigSpinBox {
-                icon: "coffee"
-                text: Translation.tr("Break (min)")
-                value: Config.options.time.pomodoro.breakTime / 60
-                from: 1
-                to: 60
-                stepSize: 1
-                onValueChanged: {
-                    Config.options.time.pomodoro.breakTime = value * 60;
-                }
+        ConfigSpinBox {
+            icon: "target"
+            text: Translation.tr("Focus (min)")
+            value: Config.options.time.pomodoro.focus / 60
+            from: 1
+            to: 180
+            stepSize: 5
+            onValueChanged: {
+                Config.options.time.pomodoro.focus = value * 60;
             }
         }
-        ConfigRow {
-            uniform: true
-            ConfigSpinBox {
-                icon: "weekend"
-                text: Translation.tr("Long break (min)")
-                value: Config.options.time.pomodoro.longBreak / 60
-                from: 1
-                to: 120
-                stepSize: 5
-                onValueChanged: {
-                    Config.options.time.pomodoro.longBreak = value * 60;
-                }
+        ConfigSpinBox {
+            icon: "coffee"
+            text: Translation.tr("Break (min)")
+            value: Config.options.time.pomodoro.breakTime / 60
+            from: 1
+            to: 60
+            stepSize: 1
+            onValueChanged: {
+                Config.options.time.pomodoro.breakTime = value * 60;
             }
-            ConfigSpinBox {
-                icon: "repeat"
-                text: Translation.tr("Cycles before long break")
-                value: Config.options.time.pomodoro.cyclesBeforeLongBreak
-                from: 1
-                to: 10
-                stepSize: 1
-                onValueChanged: {
-                    Config.options.time.pomodoro.cyclesBeforeLongBreak = value;
-                }
+        }
+        ConfigSpinBox {
+            icon: "weekend"
+            text: Translation.tr("Long break (min)")
+            value: Config.options.time.pomodoro.longBreak / 60
+            from: 1
+            to: 120
+            stepSize: 5
+            onValueChanged: {
+                Config.options.time.pomodoro.longBreak = value * 60;
+            }
+        }
+        ConfigSpinBox {
+            icon: "repeat"
+            text: Translation.tr("Cycles before long break")
+            value: Config.options.time.pomodoro.cyclesBeforeLongBreak
+            from: 1
+            to: 10
+            stepSize: 1
+            onValueChanged: {
+                Config.options.time.pomodoro.cyclesBeforeLongBreak = value;
             }
         }
     }
