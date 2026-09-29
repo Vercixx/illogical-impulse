@@ -32,6 +32,11 @@ if is_file_exists(HOME .. "/.config/hypr/custom/keybinds.lua") then
     require("custom.keybinds")
 end
 
+-- Settings app --
+if is_file_exists(HOME .. "/.config/hypr/custom/shell.lua") then
+    require("custom.shell")
+end
+
 -- nwg-displays support --
 if is_file_exists(HOME .. "/.config/hypr/workspaces.lua") then
     require("workspaces")

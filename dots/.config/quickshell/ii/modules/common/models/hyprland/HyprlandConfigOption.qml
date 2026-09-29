@@ -12,6 +12,7 @@ NestableObject {
     property alias fetching: fetchProc.running
     property bool set
     property var value
+    readonly property var shownValue: HyprlandConfig.settingsValues[key] ?? value
 
     Component.onCompleted: fetch()
 

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.modules.common
+import qs.modules.common.models.hyprland
 import qs.modules.common.widgets
 
 ContentPage {
@@ -143,6 +144,45 @@ ContentPage {
             }
             StyledToolTip {
                 text: Translation.tr("Scroll deltas at or above this count as mouse wheel, below as touchpad")
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "view_quilt"
+        title: Translation.tr("Compositor")
+
+        ContentSubsection {
+            title: Translation.tr("Window layout")
+            ConfigSelectionArray {
+                currentValue: layoutOption.shownValue
+                onSelected: newValue => HyprlandConfig.setUser("general:layout", newValue)
+                options: [
+                    { "value": "dwindle", "displayName": Translation.tr("Dwindle") },
+                    { "value": "master", "displayName": Translation.tr("Master") }
+                ]
+                HyprlandConfigOption {
+                    id: layoutOption
+                    key: "general:layout"
+                }
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Variable refresh rate")
+            ConfigSelectionArray {
+                currentValue: vrrOption.shownValue
+                onSelected: newValue => HyprlandConfig.setUser("misc:vrr", newValue)
+                options: [
+                    { "value": 0, "displayName": Translation.tr("Off") },
+                    { "value": 1, "displayName": Translation.tr("On") },
+                    { "value": 2, "displayName": Translation.tr("Fullscreen only") },
+                    { "value": 3, "displayName": Translation.tr("Fullscreen games and video") }
+                ]
+                HyprlandConfigOption {
+                    id: vrrOption
+                    key: "misc:vrr"
+                }
             }
         }
     }

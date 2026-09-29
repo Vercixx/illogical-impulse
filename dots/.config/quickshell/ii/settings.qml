@@ -47,6 +47,11 @@ ApplicationWindow {
                     name: Translation.tr("Fonts"),
                     icon: "text_format",
                     component: "modules/settings/appearance/FontsConfig.qml"
+                },
+                {
+                    name: Translation.tr("Windows"),
+                    icon: "select_window_2",
+                    component: "modules/settings/appearance/WindowsConfig.qml"
                 }
             ]
         },
@@ -92,6 +97,11 @@ ApplicationWindow {
                     component: "modules/settings/desktop/DockOverviewConfig.qml"
                 }
             ]
+        },
+        {
+            name: Translation.tr("Monitors"),
+            icon: "monitor",
+            component: "modules/settings/MonitorsConfig.qml"
         },
         {
             name: Translation.tr("Panels"),
@@ -160,6 +170,11 @@ ApplicationWindow {
                     component: "modules/settings/system/PowerSoundConfig.qml"
                 },
                 {
+                    name: Translation.tr("Input devices"),
+                    icon: "mouse",
+                    component: "modules/settings/system/InputConfig.qml"
+                },
+                {
                     name: Translation.tr("Apps"),
                     icon: "apps",
                     component: "modules/settings/system/AppsConfig.qml"
@@ -205,7 +220,15 @@ ApplicationWindow {
 
     Component.onCompleted: {
         MaterialThemeLoader.reapplyTheme()
-        Config.readWriteDelay = 0 // Settings app always only sets one var at a time so delay isn't needed
+        Config.readWriteDelay = 0
+        HyprlandConfig.readSettingsFile()
+    }
+
+    Connections {
+        target: HyprlandConfig
+        function onReloaded() {
+            HyprlandConfig.readSettingsFile()
+        }
     }
 
     minimumWidth: 750
@@ -453,6 +476,50 @@ ApplicationWindow {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    Loader {
+        id: conflictDialogLoader
+        property bool dismissed: false
+        readonly property var conflict: HyprlandConfig.pendingConflicts[0] ?? null
+        anchors.fill: parent
+        active: Config.ready && conflict !== null && !dismissed
+        onLoaded: {
+            item.show = true;
+            item.forceActiveFocus();
+        }
+
+        sourceComponent: WindowDialog {
+            id: conflictDialog
+            readonly property var conflict: conflictDialogLoader.conflict
+            readonly property string fileName: conflict?.file.replace(`${HyprlandConfig.customDir}/`, "custom/") ?? ""
+            backgroundWidth: 450
+            onDismiss: conflictDialogLoader.dismissed = true
+
+            WindowDialogTitle {
+                text: Translation.tr("Hyprland option conflict")
+            }
+            WindowDialogParagraph {
+                Layout.fillWidth: true
+                text: Translation.tr("%1 is set to %2 in Settings and to %3 in %4. The Settings value is used now. Which one do you want to keep?")
+                    .arg(conflictDialog.conflict?.key).arg(conflictDialog.conflict?.shellValue)
+                    .arg(conflictDialog.conflict?.fileValue).arg(conflictDialog.fileName)
+            }
+            WindowDialogButtonRow {
+                Layout.fillWidth: true
+                Item {
+                    Layout.fillWidth: true
+                }
+                DialogButton {
+                    buttonText: Translation.tr("Keep %1").arg(conflictDialog.fileName)
+                    onClicked: HyprlandConfig.keepCustomValue(conflictDialog.conflict)
+                }
+                DialogButton {
+                    buttonText: Translation.tr("Keep Settings")
+                    onClicked: HyprlandConfig.keepSettingsValue(conflictDialog.conflict)
                 }
             }
         }

@@ -34,8 +34,9 @@ SpinBox {
             font.variableAxes: Appearance.font.variableAxes.numbers
             font.pixelSize: Appearance.font.pixelSize.small
             validator: root.validator
-            onTextChanged: {
+            onTextEdited: {
                 root.value = parseFloat(text);
+                root.valueModified();
             }
         }
     }

@@ -598,6 +598,10 @@ Singleton {
                 property int arbitraryRaceConditionDelay: 20 // milliseconds
             }
 
+            property JsonObject hyprland: JsonObject {
+                property list<string> keptSettingsConflicts: [] // exists so settings doesn't show conflict dialog every time u open it up
+            }
+
             property JsonObject workSafety: JsonObject {
                 property JsonObject enable: JsonObject {
                     property bool wallpaper: false

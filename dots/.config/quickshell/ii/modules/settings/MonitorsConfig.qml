@@ -6,7 +6,7 @@ import qs.modules.common.widgets
 Item {
     PagePlaceholder {
         icon: "construction"
-        title: Translation.tr("Hyprland")
-        description: Translation.tr("Compositor settings are coming soon")
+        title: Translation.tr("Monitors")
+        description: Translation.tr("Monitor settings are coming soon")
     }
 }

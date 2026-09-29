@@ -4,6 +4,11 @@ import re
 import os
 import tempfile
 
+NEW_FILE_HEADER = [
+    "-- This file is automatically managed by Settings app.\n",
+    "-- Avoid manually editing it. Put custom options into other .lua files instead.\n",
+]
+
 def format_value(value):
     """Format value: quote strings, leave numbers and booleans as-is"""
     if value in ('true', 'false'):
@@ -32,8 +37,8 @@ def edit_hyprland_config(file_path, set_args, reset_args):
         with open(file_path, 'r') as file:
             lines = file.readlines()
     else:
-        lines = []
-    
+        lines = list(NEW_FILE_HEADER)
+
     set_dict = {k: v for k, v in set_args} if set_args else {}
     reset_set = set(reset_args) if reset_args else set()
     
