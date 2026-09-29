@@ -126,6 +126,106 @@ ContentPage {
                 }
             }
         }
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                enabled: Config.options.bar.cornerStyle === 1
+                buttonIcon: "shadow"
+                text: Translation.tr("Shadow (Float style)")
+                checked: Config.options.bar.floatStyleShadow
+                onCheckedChanged: {
+                    Config.options.bar.floatStyleShadow = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "rectangle"
+                text: Translation.tr("Show background")
+                checked: Config.options.bar.showBackground
+                onCheckedChanged: {
+                    Config.options.bar.showBackground = checked;
+                }
+            }
+        }
+        ConfigSwitch {
+            buttonIcon: "more_horiz"
+            text: Translation.tr("Verbose")
+            checked: Config.options.bar.verbose
+            onCheckedChanged: {
+                Config.options.bar.verbose = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Show date next to the clock and media title in the middle")
+            }
+        }
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Top-left icon (\"distro\" or icon name from assets/icons)")
+            text: Config.options.bar.topLeftIcon
+            wrapMode: TextEdit.NoWrap
+            onTextChanged: {
+                Config.options.bar.topLeftIcon = text;
+            }
+        }
+        ConfigStringList {
+            placeholderText: Translation.tr("Show only on these monitors, comma-separated (empty = all)")
+            value: Config.options.bar.screenList
+            onEdited: list => {
+                Config.options.bar.screenList = list;
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "visibility_off"
+        title: Translation.tr("Auto-hide")
+        enabled: Config.options.bar.autoHide.enable
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "move_down"
+                text: Translation.tr("Push windows")
+                checked: Config.options.bar.autoHide.pushWindows
+                onCheckedChanged: {
+                    Config.options.bar.autoHide.pushWindows = checked;
+                }
+            }
+            ConfigSpinBox {
+                icon: "height"
+                text: Translation.tr("Hover region (px)")
+                value: Config.options.bar.autoHide.hoverRegionWidth
+                from: 1
+                to: 20
+                stepSize: 1
+                onValueChanged: {
+                    Config.options.bar.autoHide.hoverRegionWidth = value;
+                }
+            }
+        }
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "keyboard_command_key"
+                text: Translation.tr("Show when pressing Super")
+                checked: Config.options.bar.autoHide.showWhenPressingSuper.enable
+                onCheckedChanged: {
+                    Config.options.bar.autoHide.showWhenPressingSuper.enable = checked;
+                }
+            }
+            ConfigSpinBox {
+                enabled: Config.options.bar.autoHide.showWhenPressingSuper.enable
+                icon: "timer"
+                text: Translation.tr("Delay (ms)")
+                value: Config.options.bar.autoHide.showWhenPressingSuper.delay
+                from: 0
+                to: 1000
+                stepSize: 20
+                onValueChanged: {
+                    Config.options.bar.autoHide.showWhenPressingSuper.delay = value;
+                }
+            }
+        }
     }
 
     ContentSection {

@@ -82,6 +82,70 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "memory"
+        title: Translation.tr("Resources")
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "planner_review"
+                text: Translation.tr("Always show CPU")
+                checked: Config.options.bar.resources.alwaysShowCpu
+                onCheckedChanged: {
+                    Config.options.bar.resources.alwaysShowCpu = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "swap_horiz"
+                text: Translation.tr("Always show swap")
+                checked: Config.options.bar.resources.alwaysShowSwap
+                onCheckedChanged: {
+                    Config.options.bar.resources.alwaysShowSwap = checked;
+                }
+            }
+        }
+        ContentSubsection {
+            title: Translation.tr("Warning thresholds (%)")
+            ConfigRow {
+                uniform: true
+                ConfigSpinBox {
+                    icon: "memory"
+                    text: Translation.tr("RAM")
+                    value: Config.options.bar.resources.memoryWarningThreshold
+                    from: 0
+                    to: 100
+                    stepSize: 5
+                    onValueChanged: {
+                        Config.options.bar.resources.memoryWarningThreshold = value;
+                    }
+                }
+                ConfigSpinBox {
+                    icon: "swap_horiz"
+                    text: Translation.tr("Swap")
+                    value: Config.options.bar.resources.swapWarningThreshold
+                    from: 0
+                    to: 100
+                    stepSize: 5
+                    onValueChanged: {
+                        Config.options.bar.resources.swapWarningThreshold = value;
+                    }
+                }
+                ConfigSpinBox {
+                    icon: "planner_review"
+                    text: Translation.tr("CPU")
+                    value: Config.options.bar.resources.cpuWarningThreshold
+                    from: 0
+                    to: 100
+                    stepSize: 5
+                    onValueChanged: {
+                        Config.options.bar.resources.cpuWarningThreshold = value;
+                    }
+                }
+            }
+        }
+    }
+
+    ContentSection {
         icon: "cloud"
         title: Translation.tr("Weather")
         ConfigSwitch {
@@ -126,6 +190,24 @@ ContentPage {
             checked: Config.options.tray.monochromeIcons
             onCheckedChanged: {
                 Config.options.tray.monochromeIcons = checked;
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "filter_alt"
+            text: Translation.tr('Hide passive items')
+            checked: Config.options.tray.filterPassive
+            onCheckedChanged: {
+                Config.options.tray.filterPassive = checked;
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "badge"
+            text: Translation.tr('Show item IDs in tooltips')
+            checked: Config.options.tray.showItemId
+            onCheckedChanged: {
+                Config.options.tray.showItemId = checked;
             }
         }
     }

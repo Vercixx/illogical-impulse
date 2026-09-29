@@ -42,6 +42,44 @@ ContentPage {
                     }
                 }
             }
+            ConfigSwitch {
+                buttonIcon: "label"
+                text: Translation.tr("Show labels")
+                checked: Config.options.regionSelector.targetRegions.showLabel
+                onCheckedChanged: {
+                    Config.options.regionSelector.targetRegions.showLabel = checked;
+                }
+            }
+            ConfigSlider {
+                buttonIcon: "opacity"
+                text: Translation.tr("Hint opacity")
+                value: Config.options.regionSelector.targetRegions.opacity
+                from: 0
+                to: 1
+                onValueChanged: {
+                    Config.options.regionSelector.targetRegions.opacity = value;
+                }
+            }
+            ConfigSpinBox {
+                icon: "padding"
+                text: Translation.tr("Selection padding (px)")
+                value: Config.options.regionSelector.targetRegions.selectionPadding
+                from: 0
+                to: 50
+                stepSize: 1
+                onValueChanged: {
+                    Config.options.regionSelector.targetRegions.selectionPadding = value;
+                }
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "draw"
+            text: Translation.tr("Annotate with Satty instead of Swappy")
+            checked: Config.options.regionSelector.annotation.useSatty
+            onCheckedChanged: {
+                Config.options.regionSelector.annotation.useSatty = checked;
+            }
         }
 
         ContentSubsection {
@@ -56,6 +94,15 @@ ContentPage {
                     { icon: "activity_zone", value: "rectangles", displayName: Translation.tr("Rectangular selection") },
                     { icon: "gesture", value: "circle", displayName: Translation.tr("Circle to Search") }
                 ]
+            }
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Image search base URL")
+                text: Config.options.search.imageSearch.imageSearchEngineBaseUrl
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.search.imageSearch.imageSearchEngineBaseUrl = text;
+                }
             }
         }
 

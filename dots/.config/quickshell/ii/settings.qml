@@ -160,9 +160,19 @@ ApplicationWindow {
                     component: "modules/settings/system/PowerSoundConfig.qml"
                 },
                 {
+                    name: Translation.tr("Apps"),
+                    icon: "apps",
+                    component: "modules/settings/system/AppsConfig.qml"
+                },
+                {
                     name: Translation.tr("Privacy"),
                     icon: "shield_person",
                     component: "modules/settings/system/PrivacyConfig.qml"
+                },
+                {
+                    name: Translation.tr("Advanced"),
+                    icon: "construction",
+                    component: "modules/settings/system/AdvancedConfig.qml"
                 }
             ]
         },

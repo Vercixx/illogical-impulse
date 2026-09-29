@@ -98,5 +98,31 @@ ContentPage {
                 Config.options.workSafety.enable.wallpaper = checked;
             }
         }
+
+        ContentSubsection {
+            title: Translation.tr("Trigger keywords")
+            tooltip: Translation.tr("Comma-separated")
+            ConfigStringList {
+                placeholderText: Translation.tr("Network names")
+                value: Config.options.workSafety.triggerCondition.networkNameKeywords
+                onEdited: list => {
+                    Config.options.workSafety.triggerCondition.networkNameKeywords = list;
+                }
+            }
+            ConfigStringList {
+                placeholderText: Translation.tr("File names")
+                value: Config.options.workSafety.triggerCondition.fileKeywords
+                onEdited: list => {
+                    Config.options.workSafety.triggerCondition.fileKeywords = list;
+                }
+            }
+            ConfigStringList {
+                placeholderText: Translation.tr("Links")
+                value: Config.options.workSafety.triggerCondition.linkKeywords
+                onEdited: list => {
+                    Config.options.workSafety.triggerCondition.linkKeywords = list;
+                }
+            }
+        }
     }
 }

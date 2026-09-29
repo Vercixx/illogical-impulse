@@ -144,5 +144,38 @@ ContentPage {
                 Config.options.dock.monochromeIcons = checked;
             }
         }
+        ConfigRow {
+            uniform: true
+            ConfigSpinBox {
+                icon: "height"
+                text: Translation.tr("Height")
+                value: Config.options.dock.height
+                from: 30
+                to: 150
+                stepSize: 2
+                onValueChanged: {
+                    Config.options.dock.height = value;
+                }
+            }
+            ConfigSpinBox {
+                enabled: Config.options.dock.hoverToReveal
+                icon: "highlight_mouse_cursor"
+                text: Translation.tr("Hover region (px)")
+                value: Config.options.dock.hoverRegionHeight
+                from: 1
+                to: 20
+                stepSize: 1
+                onValueChanged: {
+                    Config.options.dock.hoverRegionHeight = value;
+                }
+            }
+        }
+        ConfigStringList {
+            placeholderText: Translation.tr("Ignored app regexes, comma-separated")
+            value: Config.options.dock.ignoredAppRegexes
+            onEdited: list => {
+                Config.options.dock.ignoredAppRegexes = list;
+            }
+        }
     }
 }

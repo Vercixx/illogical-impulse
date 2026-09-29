@@ -71,6 +71,15 @@ ContentPage {
                 }
             }
         }
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Sound theme")
+            text: Config.options.sounds.theme
+            wrapMode: TextEdit.NoWrap
+            onTextChanged: {
+                Config.options.sounds.theme = text;
+            }
+        }
     }
 
     ContentSection {

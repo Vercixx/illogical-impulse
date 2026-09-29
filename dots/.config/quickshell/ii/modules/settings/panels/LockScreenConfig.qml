@@ -115,6 +115,19 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                enabled: Config.options.lock.blur.enable
+                icon: "blur_medium"
+                text: Translation.tr("Blur radius")
+                value: Config.options.lock.blur.radius
+                from: 0
+                to: 200
+                stepSize: 10
+                onValueChanged: {
+                    Config.options.lock.blur.radius = value;
+                }
+            }
+
+            ConfigSpinBox {
                 icon: "loupe"
                 text: Translation.tr("Extra wallpaper zoom (%)")
                 value: Config.options.lock.blur.extraZoom * 100

@@ -125,5 +125,105 @@ ContentPage {
                 ]
             }
         }
+
+        ContentSubsection {
+            title: Translation.tr("Date formats")
+            tooltip: Translation.tr("Uses Qt date format, e.g. ddd, dd/MM")
+            ConfigRow {
+                uniform: true
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Date")
+                    text: Config.options.time.dateFormat
+                    wrapMode: TextEdit.NoWrap
+                    onTextChanged: {
+                        Config.options.time.dateFormat = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Short date")
+                    text: Config.options.time.shortDateFormat
+                    wrapMode: TextEdit.NoWrap
+                    onTextChanged: {
+                        Config.options.time.shortDateFormat = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Date with year")
+                    text: Config.options.time.dateWithYearFormat
+                    wrapMode: TextEdit.NoWrap
+                    onTextChanged: {
+                        Config.options.time.dateWithYearFormat = text;
+                    }
+                }
+            }
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Calendar locale (e.g. en-GB)")
+                text: Config.options.calendar.locale
+                wrapMode: TextEdit.NoWrap
+                onTextChanged: {
+                    Config.options.calendar.locale = text;
+                }
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "av_timer"
+        title: Translation.tr("Pomodoro")
+
+        ConfigRow {
+            uniform: true
+            ConfigSpinBox {
+                icon: "target"
+                text: Translation.tr("Focus (min)")
+                value: Config.options.time.pomodoro.focus / 60
+                from: 1
+                to: 180
+                stepSize: 5
+                onValueChanged: {
+                    Config.options.time.pomodoro.focus = value * 60;
+                }
+            }
+            ConfigSpinBox {
+                icon: "coffee"
+                text: Translation.tr("Break (min)")
+                value: Config.options.time.pomodoro.breakTime / 60
+                from: 1
+                to: 60
+                stepSize: 1
+                onValueChanged: {
+                    Config.options.time.pomodoro.breakTime = value * 60;
+                }
+            }
+        }
+        ConfigRow {
+            uniform: true
+            ConfigSpinBox {
+                icon: "weekend"
+                text: Translation.tr("Long break (min)")
+                value: Config.options.time.pomodoro.longBreak / 60
+                from: 1
+                to: 120
+                stepSize: 5
+                onValueChanged: {
+                    Config.options.time.pomodoro.longBreak = value * 60;
+                }
+            }
+            ConfigSpinBox {
+                icon: "repeat"
+                text: Translation.tr("Cycles before long break")
+                value: Config.options.time.pomodoro.cyclesBeforeLongBreak
+                from: 1
+                to: 10
+                stepSize: 1
+                onValueChanged: {
+                    Config.options.time.pomodoro.cyclesBeforeLongBreak = value;
+                }
+            }
+        }
     }
 }

@@ -89,5 +89,17 @@ ContentPage {
                 ]
             }
         }
+
+        ConfigSwitch {
+            buttonIcon: "font_download"
+            text: Translation.tr("Use Nerd Font for numbers")
+            checked: Config.options.bar.workspaces.useNerdFont
+            onCheckedChanged: {
+                Config.options.bar.workspaces.useNerdFont = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Lets you put Nerd Font icons in the number map in the config file")
+            }
+        }
     }
 }

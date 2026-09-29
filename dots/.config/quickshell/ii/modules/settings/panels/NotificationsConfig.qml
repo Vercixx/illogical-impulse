@@ -65,4 +65,18 @@ ContentPage {
             }
         }
     }
+
+    ContentSection {
+        icon: "keyboard"
+        title: Translation.tr("On-screen keyboard")
+
+        ConfigSwitch {
+            buttonIcon: "keep"
+            text: Translation.tr("Pinned on startup")
+            checked: Config.options.osk.pinnedOnStartup
+            onCheckedChanged: {
+                Config.options.osk.pinnedOnStartup = checked;
+            }
+        }
+    }
 }

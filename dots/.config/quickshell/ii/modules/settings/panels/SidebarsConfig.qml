@@ -23,12 +23,35 @@ ContentPage {
             }
         }
 
+        ConfigRow {
+            ConfigSwitch {
+                buttonIcon: "translate"
+                text: Translation.tr('Enable translator')
+                checked: Config.options.sidebar.translator.enable
+                onCheckedChanged: {
+                    Config.options.sidebar.translator.enable = checked;
+                }
+            }
+            ConfigSpinBox {
+                enabled: Config.options.sidebar.translator.enable
+                icon: "timer"
+                text: Translation.tr("Delay (ms)")
+                value: Config.options.sidebar.translator.delay
+                from: 0
+                to: 2000
+                stepSize: 50
+                onValueChanged: {
+                    Config.options.sidebar.translator.delay = value;
+                }
+            }
+        }
+
         ConfigSwitch {
-            buttonIcon: "translate"
-            text: Translation.tr('Enable translator')
-            checked: Config.options.sidebar.translator.enable
+            buttonIcon: "animation"
+            text: Translation.tr('AI chat: fade in text')
+            checked: Config.options.sidebar.ai.textFadeIn
             onCheckedChanged: {
-                Config.options.sidebar.translator.enable = checked;
+                Config.options.sidebar.ai.textFadeIn = checked;
             }
         }
 
@@ -230,6 +253,57 @@ ContentPage {
                     stepSize: 1
                     onValueChanged: {
                         Config.options.sidebar.cornerOpen.cornerRegionHeight = value;
+                    }
+                }
+            }
+        }
+    }
+
+    Loader {
+        Layout.fillWidth: true
+        active: Config.options.policies.weeb !== 0
+        visible: active
+        sourceComponent: ContentSection {
+            icon: "image"
+            title: Translation.tr("Anime boorus")
+
+            ConfigSwitch {
+                buttonIcon: "explicit"
+                text: Translation.tr("Allow NSFW")
+                checked: Config.options.sidebar.booru.allowNsfw
+                onCheckedChanged: {
+                    Config.options.sidebar.booru.allowNsfw = checked;
+                }
+            }
+            ConfigSpinBox {
+                icon: "format_list_numbered"
+                text: Translation.tr("Images per page")
+                value: Config.options.sidebar.booru.limit
+                from: 1
+                to: 100
+                stepSize: 5
+                onValueChanged: {
+                    Config.options.sidebar.booru.limit = value;
+                }
+            }
+            ConfigRow {
+                uniform: true
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Default provider")
+                    text: Config.options.sidebar.booru.defaultProvider
+                    wrapMode: TextEdit.NoWrap
+                    onTextChanged: {
+                        Config.options.sidebar.booru.defaultProvider = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Zerochan username")
+                    text: Config.options.sidebar.booru.zerochan.username
+                    wrapMode: TextEdit.NoWrap
+                    onTextChanged: {
+                        Config.options.sidebar.booru.zerochan.username = text;
                     }
                 }
             }

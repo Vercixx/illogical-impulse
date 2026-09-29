@@ -22,10 +22,42 @@ ContentPage {
             }
         }
 
+        ConfigSpinBox {
+            icon: "timer"
+            text: Translation.tr("Non-app results delay (ms)")
+            value: Config.options.search.nonAppResultDelay
+            from: 0
+            to: 500
+            stepSize: 10
+            onValueChanged: {
+                Config.options.search.nonAppResultDelay = value;
+            }
+            StyledToolTip {
+                text: Translation.tr("Prevents lag when typing")
+            }
+        }
+
         ContentSubsection {
             title: Translation.tr("Prefixes")
+            ConfigSwitch {
+                buttonIcon: "bolt"
+                text: Translation.tr("Show default actions without prefix")
+                checked: Config.options.search.prefix.showDefaultActionsWithoutPrefix
+                onCheckedChanged: {
+                    Config.options.search.prefix.showDefaultActionsWithoutPrefix = checked;
+                }
+            }
             ConfigRow {
                 uniform: true
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Apps")
+                    text: Config.options.search.prefix.app
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.search.prefix.app = text;
+                    }
+                }
                 MaterialTextArea {
                     Layout.fillWidth: true
                     placeholderText: Translation.tr("Action")
@@ -95,6 +127,13 @@ ContentPage {
                 wrapMode: TextEdit.Wrap
                 onTextChanged: {
                     Config.options.search.engineBaseUrl = text;
+                }
+            }
+            ConfigStringList {
+                placeholderText: Translation.tr("Excluded sites, comma-separated")
+                value: Config.options.search.excludedSites
+                onEdited: list => {
+                    Config.options.search.excludedSites = list;
                 }
             }
         }

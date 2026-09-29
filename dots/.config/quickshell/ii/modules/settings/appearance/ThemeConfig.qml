@@ -33,18 +33,105 @@ ContentPage {
                 ]
             }
         }
+
+        ConfigColorPicker {
+            Layout.fillWidth: true
+            text: Translation.tr("Accent color")
+            value: Config.options.appearance.palette.accentColor
+            onPicked: color => {
+                Config.options.appearance.palette.accentColor = color;
+                regenerateTimer.restart();
+            }
+            Timer {
+                id: regenerateTimer
+                interval: 600
+                onTriggered: Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --noswitch`])
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "format_color_fill"
+            text: Translation.tr("Tint background with accent")
+            checked: Config.options.appearance.extraBackgroundTint
+            onCheckedChanged: {
+                Config.options.appearance.extraBackgroundTint = checked;
+            }
+        }
     }
 
     ContentSection {
         icon: "ev_shadow"
         title: Translation.tr("Transparency")
 
-        ConfigSwitch {
-            buttonIcon: "check"
-            text: Translation.tr("Enable")
-            checked: Config.options.appearance.transparency.enable
-            onCheckedChanged: {
-                Config.options.appearance.transparency.enable = checked;
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.appearance.transparency.enable
+                onCheckedChanged: {
+                    Config.options.appearance.transparency.enable = checked;
+                }
+            }
+            ConfigSwitch {
+                enabled: Config.options.appearance.transparency.enable
+                buttonIcon: "auto_awesome"
+                text: Translation.tr("Automatic")
+                checked: Config.options.appearance.transparency.automatic
+                onCheckedChanged: {
+                    Config.options.appearance.transparency.automatic = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Picks transparency based on the wallpaper")
+                }
+            }
+        }
+        ConfigSlider {
+            enabled: Config.options.appearance.transparency.enable && !Config.options.appearance.transparency.automatic
+            buttonIcon: "texture"
+            text: Translation.tr("Background")
+            value: Config.options.appearance.transparency.backgroundTransparency
+            from: 0
+            to: 1
+            onValueChanged: {
+                Config.options.appearance.transparency.backgroundTransparency = value;
+            }
+        }
+        ConfigSlider {
+            enabled: Config.options.appearance.transparency.enable && !Config.options.appearance.transparency.automatic
+            buttonIcon: "layers"
+            text: Translation.tr("Content areas")
+            value: Config.options.appearance.transparency.contentTransparency
+            from: 0
+            to: 1
+            onValueChanged: {
+                Config.options.appearance.transparency.contentTransparency = value;
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "web_asset"
+        title: Translation.tr("Shell windows")
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "title"
+                text: Translation.tr("Show titlebar")
+                checked: Config.options.windows.showTitlebar
+                onCheckedChanged: {
+                    Config.options.windows.showTitlebar = checked;
+                }
+            }
+            ConfigSwitch {
+                enabled: Config.options.windows.showTitlebar
+                buttonIcon: "format_align_center"
+                text: Translation.tr("Center title")
+                checked: Config.options.windows.centerTitle
+                onCheckedChanged: {
+                    Config.options.windows.centerTitle = checked;
+                }
             }
         }
     }

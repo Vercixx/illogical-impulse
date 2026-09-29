@@ -72,6 +72,111 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "nightlight"
+        title: Translation.tr("Night light")
+
+        ConfigSwitch {
+            buttonIcon: "schedule"
+            text: Translation.tr("Automatic")
+            checked: Config.options.light.night.automatic
+            onCheckedChanged: {
+                Config.options.light.night.automatic = checked;
+            }
+        }
+        ConfigRow {
+            uniform: true
+            enabled: Config.options.light.night.automatic
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("From (HH:mm)")
+                text: Config.options.light.night.from
+                wrapMode: TextEdit.NoWrap
+                onTextChanged: {
+                    Config.options.light.night.from = text;
+                }
+            }
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("To (HH:mm)")
+                text: Config.options.light.night.to
+                wrapMode: TextEdit.NoWrap
+                onTextChanged: {
+                    Config.options.light.night.to = text;
+                }
+            }
+        }
+        ConfigSpinBox {
+            icon: "thermostat"
+            text: Translation.tr("Color temperature (K)")
+            value: Config.options.light.night.colorTemperature
+            from: 1000
+            to: 6500
+            stepSize: 100
+            onValueChanged: {
+                Config.options.light.night.colorTemperature = value;
+            }
+        }
+        ConfigSwitch {
+            buttonIcon: "flash_off"
+            text: Translation.tr("Anti-flashbang: brightness adjustment")
+            checked: Config.options.light.antiFlashbang.enable
+            onCheckedChanged: {
+                Config.options.light.antiFlashbang.enable = checked;
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "translate"
+        title: Translation.tr("Translator")
+
+        ConfigRow {
+            uniform: true
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Engine")
+                text: Config.options.language.translator.engine
+                wrapMode: TextEdit.NoWrap
+                onTextChanged: {
+                    Config.options.language.translator.engine = text;
+                }
+            }
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Source language")
+                text: Config.options.language.translator.sourceLanguage
+                wrapMode: TextEdit.NoWrap
+                onTextChanged: {
+                    Config.options.language.translator.sourceLanguage = text;
+                }
+            }
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Target language")
+                text: Config.options.language.translator.targetLanguage
+                wrapMode: TextEdit.NoWrap
+                onTextChanged: {
+                    Config.options.language.translator.targetLanguage = text;
+                }
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "music_note"
+        title: Translation.tr("Media")
+
+        ConfigSwitch {
+            buttonIcon: "filter_none"
+            text: Translation.tr("Hide duplicate players")
+            checked: Config.options.media.filterDuplicatePlayers
+            onCheckedChanged: {
+                Config.options.media.filterDuplicatePlayers = checked;
+            }
+        }
+    }
+
+    ContentSection {
         icon: "music_cast"
         title: Translation.tr("Music Recognition")
 
@@ -112,6 +217,17 @@ ContentPage {
             stepSize: 100
             onValueChanged: {
                 Config.options.resources.updateInterval = value;
+            }
+        }
+        ConfigSpinBox {
+            icon: "history"
+            text: Translation.tr("History length (points)")
+            value: Config.options.resources.historyLength
+            from: 10
+            to: 600
+            stepSize: 10
+            onValueChanged: {
+                Config.options.resources.historyLength = value;
             }
         }
     }

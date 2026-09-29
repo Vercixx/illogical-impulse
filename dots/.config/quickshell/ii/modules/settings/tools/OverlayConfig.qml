@@ -27,6 +27,16 @@ ContentPage {
                 Config.options.overlay.darkenScreen = checked;
             }
         }
+        ConfigSlider {
+            buttonIcon: "opacity"
+            text: Translation.tr("Pinned widget opacity")
+            value: Config.options.overlay.clickthroughOpacity
+            from: 0
+            to: 1
+            onValueChanged: {
+                Config.options.overlay.clickthroughOpacity = value;
+            }
+        }
     }
 
     ContentSection {
@@ -79,6 +89,17 @@ ContentPage {
             wrapMode: TextEdit.Wrap
             onTextChanged: {
                 Config.options.overlay.floatingImage.imageSource = text;
+            }
+        }
+        ConfigSpinBox {
+            icon: "loupe"
+            text: Translation.tr("Scale (%)")
+            value: Config.options.overlay.floatingImage.scale * 100
+            from: 10
+            to: 500
+            stepSize: 10
+            onValueChanged: {
+                Config.options.overlay.floatingImage.scale = value / 100;
             }
         }
     }
