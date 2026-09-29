@@ -10,6 +10,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
+import Qt.labs.synchronizer
 import Quickshell
 import qs.services
 import qs.modules.common
@@ -47,7 +48,33 @@ ApplicationWindow {
         {
             name: Translation.tr("Interface"),
             icon: "bottom_app_bar",
-            component: "modules/settings/InterfaceConfig.qml"
+            tabs: [
+                {
+                    name: Translation.tr("Sidebars"),
+                    icon: "side_navigation",
+                    component: "modules/settings/interface/SidebarsConfig.qml"
+                },
+                {
+                    name: Translation.tr("Lock screen"),
+                    icon: "lock",
+                    component: "modules/settings/interface/LockScreenConfig.qml"
+                },
+                {
+                    name: Translation.tr("Overlays"),
+                    icon: "select_window",
+                    component: "modules/settings/interface/OverlaysConfig.qml"
+                },
+                {
+                    name: Translation.tr("Desktop"),
+                    icon: "overview_key",
+                    component: "modules/settings/interface/DesktopConfig.qml"
+                },
+                {
+                    name: Translation.tr("Fonts"),
+                    icon: "text_format",
+                    component: "modules/settings/interface/FontsConfig.qml"
+                }
+            ]
         },
         {
             name: Translation.tr("Services"),
@@ -66,6 +93,10 @@ ApplicationWindow {
         }
     ]
     property int currentPage: 0
+    property int currentTab: 0
+    property int shownPage: 0
+    readonly property var shownTabs: pages[shownPage].tabs ?? []
+    readonly property string currentComponent: pages[currentPage].tabs?.[currentTab]?.component ?? pages[currentPage].component ?? ""
 
     visible: true
     onClosing: Qt.quit()
@@ -233,65 +264,109 @@ ApplicationWindow {
                 color: Appearance.m3colors.m3surfaceContainerLow
                 radius: Appearance.rounding.windowRounding - root.contentPadding
 
-                Loader {
-                    id: pageLoader
+                ColumnLayout {
+                    id: pageContent
                     anchors.fill: parent
-                    opacity: 1.0
+                    spacing: 0
 
-                    active: Config.ready
-                    Component.onCompleted: {
-                        source = root.pages[0].component
+                    Loader {
+                        active: root.shownTabs.length > 0
+                        visible: active
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.topMargin: 12
+                        sourceComponent: Toolbar {
+                            enableShadow: false
+                            ToolbarTabBar {
+                                tabButtonList: root.shownTabs
+                                Synchronizer on currentIndex {
+                                    sourceObject: root
+                                    sourceProperty: "currentTab"
+                                }
+                            }
+                        }
                     }
 
-                    Connections {
-                        target: root
-                        function onCurrentPageChanged() {
-                            switchAnim.complete();
-                            switchAnim.start();
-                        }
-                    }
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
 
-                    SequentialAnimation {
-                        id: switchAnim
+                        Loader {
+                            id: pageLoader
+                            anchors.fill: parent
+                            opacity: 1.0
 
-                        NumberAnimation {
-                            target: pageLoader
-                            properties: "opacity"
-                            from: 1
-                            to: 0
-                            duration: 100
-                            easing.type: Appearance.animation.elementMoveExit.type
-                            easing.bezierCurve: Appearance.animationCurves.emphasizedFirstHalf
-                        }
-                        ParallelAnimation {
-                            PropertyAction {
-                                target: pageLoader
-                                property: "source"
-                                value: root.pages[root.currentPage].component
+                            active: Config.ready
+                            Component.onCompleted: {
+                                source = root.currentComponent
                             }
-                            PropertyAction {
-                                target: pageLoader
-                                property: "anchors.topMargin"
-                                value: 20
+
+                            function restartSwitchAnim(animTarget) {
+                                switchAnim.complete();
+                                switchAnim.animTarget = animTarget;
+                                switchAnim.start();
                             }
-                        }
-                        ParallelAnimation {
-                            NumberAnimation {
-                                target: pageLoader
-                                properties: "opacity"
-                                from: 0
-                                to: 1
-                                duration: 200
-                                easing.type: Appearance.animation.elementMoveEnter.type
-                                easing.bezierCurve: Appearance.animationCurves.emphasizedLastHalf
+
+                            function showCurrent() {
+                                if (root.shownPage !== root.currentPage) {
+                                    root.currentTab = 0;
+                                    root.shownPage = root.currentPage;
+                                }
+                                source = root.currentComponent;
                             }
-                            NumberAnimation {
-                                target: pageLoader
-                                properties: "anchors.topMargin"
-                                to: 0
-                                duration: 200
-                                easing.type: Appearance.animation.elementMoveEnter.type
-                                easing.bezierCurve: Appearance.animationCurves.emphasizedLastHalf
+
+                            Connections {
+                                target: root
+                                function onCurrentPageChanged() {
+                                    pageLoader.restartSwitchAnim(pageContent);
+                                }
+                                function onCurrentTabChanged() {
+                                    if (root.shownPage !== root.currentPage) return;
+                                    pageLoader.restartSwitchAnim(pageLoader);
+                                }
+                            }
+
+                            SequentialAnimation {
+                                id: switchAnim
+                                property Item animTarget: pageLoader
+
+                                NumberAnimation {
+                                    target: switchAnim.animTarget
+                                    properties: "opacity"
+                                    from: 1
+                                    to: 0
+                                    duration: 100
+                                    easing.type: Appearance.animation.elementMoveExit.type
+                                    easing.bezierCurve: Appearance.animationCurves.emphasizedFirstHalf
+                                }
+                                ParallelAnimation {
+                                    ScriptAction {
+                                        script: pageLoader.showCurrent()
+                                    }
+                                    PropertyAction {
+                                        target: switchAnim.animTarget
+                                        property: "anchors.topMargin"
+                                        value: 20
+                                    }
+                                }
+                                ParallelAnimation {
+                                    NumberAnimation {
+                                        target: switchAnim.animTarget
+                                        properties: "opacity"
+                                        from: 0
+                                        to: 1
+                                        duration: 200
+                                        easing.type: Appearance.animation.elementMoveEnter.type
+                                        easing.bezierCurve: Appearance.animationCurves.emphasizedLastHalf
+                                    }
+                                    NumberAnimation {
+                                        target: switchAnim.animTarget
+                                        properties: "anchors.topMargin"
+                                        to: 0
+                                        duration: 200
+                                        easing.type: Appearance.animation.elementMoveEnter.type
+                                        easing.bezierCurve: Appearance.animationCurves.emphasizedLastHalf
+                                    }
+                                }
                             }
                         }
                     }
