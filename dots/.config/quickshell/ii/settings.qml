@@ -89,7 +89,18 @@ ApplicationWindow {
         {
             name: Translation.tr("About"),
             icon: "info",
-            component: "modules/settings/About.qml"
+            tabs: [
+                {
+                    name: Translation.tr("System"),
+                    icon: "computer",
+                    component: "modules/settings/about/SystemAbout.qml"
+                },
+                {
+                    name: Translation.tr("Shell"),
+                    icon: "folder_managed",
+                    component: "modules/settings/about/ShellAbout.qml"
+                }
+            ]
         }
     ]
     property int currentPage: 0

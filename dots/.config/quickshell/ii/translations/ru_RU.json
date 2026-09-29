@@ -114,7 +114,7 @@
   "illogical-impulse": "illogical-impulse",
   "Use the system file picker instead\nRight-click to make this the default behavior": "Сист. диалог файлов\nПКМ - сделать поведением по умолчанию",
   "On-screen display": "Экранное отображение",
-  "Dotfiles": "Dotfile",
+  "Dotfiles": "Дотфайлы",
   "Search wallpapers": "Поиск обоев",
   "Mic toggle": "Тоггл микрофона",
   "Input": "Вход",
@@ -780,5 +780,6 @@
   "Overlays": "Оверлеи",
   "Force specific monitor": "Использовать определенный монитор",
   "If you have multiple monitors and want notifications to only show on one of them, enable this and enter the monitor name below (e.g., eDP-1)": "Если у вас есть несколько мониторов и вы хотите отображать уведомления только на одном из них, включите эту опцию и введите имя монитора ниже (например, eDP-1)",
-  "Monitor name to show notifications on (e.g., eDP-1)": "Имя монитора, на котором отображать уведомления (например, eDP-1)"
+  "Monitor name to show notifications on (e.g., eDP-1)": "Имя монитора, на котором отображать уведомления (например, eDP-1)",
+  "Shell": "Оболочка"
 }
