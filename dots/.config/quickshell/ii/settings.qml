@@ -288,7 +288,7 @@ ApplicationWindow {
                 id: navRailWrapper
                 Layout.fillHeight: true
                 Layout.margins: 5
-                implicitWidth: navRail.expanded ? 150 : 56
+                implicitWidth: navRail.expanded ? navRail.implicitWidth : 56
                 Behavior on implicitWidth {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }
@@ -301,8 +301,13 @@ ApplicationWindow {
                     }
                     spacing: 10
                     expanded: root.width > 900
-                    
+
+                    Item {
+                        Layout.fillHeight: true
+                    }
+
                     NavigationRailTabArray {
+                        Layout.topMargin: 0
                         currentIndex: root.currentPage
                         expanded: navRail.expanded
                         Repeater {
