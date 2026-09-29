@@ -325,60 +325,49 @@ ContentPage {
         }
     }
 
-    NoticeBox {
-        Layout.fillWidth: true
-        text: Translation.tr('Not all options are available in this app. You should also check the config file by hitting the "Config file" button on the topleft corner or opening %1 manually.').arg(Directories.shellConfigPath)
+    ContentSection {
+        icon: "more_horiz"
+        title: Translation.tr("More settings")
 
-        Item {
-            Layout.fillWidth: true
-        }
-        RippleButtonWithIcon {
-            id: copyPathButton
-            property bool justCopied: false
-            Layout.fillWidth: false
-            buttonRadius: Appearance.rounding.small
-            materialIcon: justCopied ? "check" : "content_copy"
-            mainText: justCopied ? Translation.tr("Path copied") : Translation.tr("Copy path")
-            onClicked: {
-                copyPathButton.justCopied = true
-                Quickshell.clipboardText = FileUtils.trimFileProtocol(`${Directories.config}/illogical-impulse/config.json`);
-                revertTextTimer.restart();
-            }
-            colBackground: ColorUtils.transparentize(Appearance.colors.colPrimaryContainer)
-            colBackgroundHover: Appearance.colors.colPrimaryContainerHover
-            colRipple: Appearance.colors.colPrimaryContainerActive
-
-            Timer {
-                id: revertTextTimer
-                interval: 1500
-                onTriggered: {
-                    copyPathButton.justCopied = false
-                }
-            }
-        }
-    }
-
-    NoticeBox {
-            Layout.fillWidth: true
-            text: Translation.tr('Looking for deeper system-level settings?')
-    
-            Item {
+        ConfigRow {
+            RippleButtonWithIcon {
                 Layout.fillWidth: true
+                buttonRadius: Appearance.rounding.small
+                materialIcon: "edit"
+                mainText: Translation.tr("Open config file")
+                onClicked: Qt.openUrlExternally(`${Directories.config}/illogical-impulse/config.json`)
             }
             RippleButtonWithIcon {
-                id: openKdeSettingsButton
+                id: copyPathButton
                 property bool justCopied: false
-                Layout.fillWidth: false
+                Layout.fillWidth: true
+                buttonRadius: Appearance.rounding.small
+                materialIcon: justCopied ? "check" : "content_copy"
+                mainText: justCopied ? Translation.tr("Path copied") : Translation.tr("Copy path")
+                onClicked: {
+                    copyPathButton.justCopied = true
+                    Quickshell.clipboardText = FileUtils.trimFileProtocol(`${Directories.config}/illogical-impulse/config.json`);
+                    revertTextTimer.restart();
+                }
+
+                Timer {
+                    id: revertTextTimer
+                    interval: 1500
+                    onTriggered: {
+                        copyPathButton.justCopied = false
+                    }
+                }
+            }
+            RippleButtonWithIcon {
+                Layout.fillWidth: true
                 buttonRadius: Appearance.rounding.small
                 materialIcon: "settings"
-                mainText: Translation.tr("Open KDE System Settings")
+                mainText: Translation.tr("KDE System Settings")
                 onClicked: {
                     Hyprland.dispatch("hl.dsp.exec_cmd('systemsettings')")
                     root.close()
                 }
-                colBackground: ColorUtils.transparentize(Appearance.colors.colPrimaryContainer)
-                colBackgroundHover: Appearance.colors.colPrimaryContainerHover
-                colRipple: Appearance.colors.colPrimaryContainerActive
             }
         }
+    }
 }
