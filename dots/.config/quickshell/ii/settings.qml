@@ -30,61 +30,141 @@ ApplicationWindow {
             component: "modules/settings/QuickConfig.qml"
         },
         {
-            name: Translation.tr("General"),
-            icon: "browse",
-            component: "modules/settings/GeneralConfig.qml"
+            name: Translation.tr("Appearance"),
+            icon: "palette",
+            tabs: [
+                {
+                    name: Translation.tr("Theme"),
+                    icon: "format_paint",
+                    component: "modules/settings/appearance/ThemeConfig.qml"
+                },
+                {
+                    name: Translation.tr("Color generation"),
+                    icon: "colors",
+                    component: "modules/settings/appearance/ColorGenerationConfig.qml"
+                },
+                {
+                    name: Translation.tr("Fonts"),
+                    icon: "text_format",
+                    component: "modules/settings/appearance/FontsConfig.qml"
+                }
+            ]
         },
         {
             name: Translation.tr("Bar"),
             icon: "toast",
             iconRotation: 180,
-            component: "modules/settings/BarConfig.qml"
+            tabs: [
+                {
+                    name: Translation.tr("Layout"),
+                    icon: "spoke",
+                    component: "modules/settings/bar/LayoutConfig.qml"
+                },
+                {
+                    name: Translation.tr("Modules"),
+                    icon: "widgets",
+                    component: "modules/settings/bar/ModulesConfig.qml"
+                },
+                {
+                    name: Translation.tr("Workspaces"),
+                    icon: "workspaces",
+                    component: "modules/settings/bar/WorkspacesConfig.qml"
+                }
+            ]
         },
         {
-            name: Translation.tr("Background"),
-            icon: "texture",
-            component: "modules/settings/BackgroundConfig.qml"
+            name: Translation.tr("Desktop"),
+            icon: "desktop_windows",
+            tabs: [
+                {
+                    name: Translation.tr("Wallpaper"),
+                    icon: "wallpaper",
+                    component: "modules/settings/desktop/WallpaperConfig.qml"
+                },
+                {
+                    name: Translation.tr("Widgets"),
+                    icon: "clock_loader_40",
+                    component: "modules/settings/desktop/WidgetsConfig.qml"
+                },
+                {
+                    name: Translation.tr("Dock & overview"),
+                    icon: "overview_key",
+                    component: "modules/settings/desktop/DockOverviewConfig.qml"
+                }
+            ]
         },
         {
-            name: Translation.tr("Interface"),
-            icon: "bottom_app_bar",
+            name: Translation.tr("Panels"),
+            icon: "side_navigation",
             tabs: [
                 {
                     name: Translation.tr("Sidebars"),
                     icon: "side_navigation",
-                    component: "modules/settings/interface/SidebarsConfig.qml"
+                    component: "modules/settings/panels/SidebarsConfig.qml"
+                },
+                {
+                    name: Translation.tr("Notifications"),
+                    icon: "notifications",
+                    component: "modules/settings/panels/NotificationsConfig.qml"
                 },
                 {
                     name: Translation.tr("Lock screen"),
                     icon: "lock",
-                    component: "modules/settings/interface/LockScreenConfig.qml"
+                    component: "modules/settings/panels/LockScreenConfig.qml"
+                }
+            ]
+        },
+        {
+            name: Translation.tr("Tools"),
+            icon: "handyman",
+            tabs: [
+                {
+                    name: Translation.tr("Search"),
+                    icon: "search",
+                    component: "modules/settings/tools/SearchConfig.qml"
                 },
                 {
-                    name: Translation.tr("Overlays"),
+                    name: Translation.tr("Screen capture"),
+                    icon: "screenshot_frame_2",
+                    component: "modules/settings/tools/ScreenCaptureConfig.qml"
+                },
+                {
+                    name: Translation.tr("Overlay"),
                     icon: "select_window",
-                    component: "modules/settings/interface/OverlaysConfig.qml"
+                    component: "modules/settings/tools/OverlayConfig.qml"
                 },
                 {
-                    name: Translation.tr("Desktop"),
-                    icon: "overview_key",
-                    component: "modules/settings/interface/DesktopConfig.qml"
-                },
-                {
-                    name: Translation.tr("Fonts"),
-                    icon: "text_format",
-                    component: "modules/settings/interface/FontsConfig.qml"
+                    name: Translation.tr("Cheat sheet"),
+                    icon: "keyboard",
+                    component: "modules/settings/tools/CheatsheetConfig.qml"
                 }
             ]
         },
         {
             name: Translation.tr("Services"),
-            icon: "settings",
+            icon: "hub",
             component: "modules/settings/ServicesConfig.qml"
         },
         {
-            name: Translation.tr("Advanced"),
-            icon: "construction",
-            component: "modules/settings/AdvancedConfig.qml"
+            name: Translation.tr("System"),
+            icon: "tune",
+            tabs: [
+                {
+                    name: Translation.tr("General"),
+                    icon: "browse",
+                    component: "modules/settings/system/GeneralConfig.qml"
+                },
+                {
+                    name: Translation.tr("Power & sound"),
+                    icon: "battery_android_full",
+                    component: "modules/settings/system/PowerSoundConfig.qml"
+                },
+                {
+                    name: Translation.tr("Privacy"),
+                    icon: "shield_person",
+                    component: "modules/settings/system/PrivacyConfig.qml"
+                }
+            ]
         },
         {
             name: Translation.tr("About"),
