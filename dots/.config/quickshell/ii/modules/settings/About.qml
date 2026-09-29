@@ -30,6 +30,27 @@ ContentPage {
         ["computer", Translation.tr("Device"), info.product?.startsWith(info.vendor) ? info.product : [info.vendor, info.product].filter(Boolean).join(" ")],
     ].filter(([_, __, value]) => value)
 
+    readonly property var iconShapes: [
+        MaterialShape.Shape.Circle,
+        MaterialShape.Shape.Square,
+        MaterialShape.Shape.Pentagon,
+        MaterialShape.Shape.Gem,
+        MaterialShape.Shape.Sunny,
+        MaterialShape.Shape.VerySunny,
+        MaterialShape.Shape.Cookie4Sided,
+        MaterialShape.Shape.Cookie6Sided,
+        MaterialShape.Shape.Cookie7Sided,
+        MaterialShape.Shape.Cookie9Sided,
+        MaterialShape.Shape.Cookie12Sided,
+        MaterialShape.Shape.Clover4Leaf,
+        MaterialShape.Shape.Clover8Leaf,
+        MaterialShape.Shape.SoftBurst,
+        MaterialShape.Shape.SoftBoom,
+        MaterialShape.Shape.Flower,
+        MaterialShape.Shape.Puffy,
+        MaterialShape.Shape.PuffyDiamond,
+    ].sort(() => Math.random() - 0.5)
+
     function gpuName(vendor, device) {
         const brand = vendor.match(/\[([^\]\/]+)/)?.[1] ?? vendor.split(" ")[0];
         return `${brand} ${device.match(/\[(.+)\]/)?.[1] ?? device}`;
@@ -74,6 +95,7 @@ ContentPage {
     component HardwareCard: Rectangle {
         id: card
         required property var modelData
+        required property int index
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.preferredWidth: 1
@@ -90,6 +112,7 @@ ContentPage {
             spacing: 12
             MaterialShapeWrappedMaterialSymbol {
                 Layout.alignment: Qt.AlignTop
+                shape: root.iconShapes[card.index % root.iconShapes.length]
                 text: card.modelData[0]
                 iconSize: Appearance.font.pixelSize.huge
             }
