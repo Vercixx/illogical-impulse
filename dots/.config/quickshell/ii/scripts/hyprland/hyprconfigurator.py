@@ -28,6 +28,12 @@ def build_nested_structure(key_parts, value):
 
 def generate_config_line(key, value):
     """Generate hl.config line for given key and value"""
+    if key.startswith('monitor:'):
+        fields = [f'output={format_value(key[len("monitor:"):])}']
+        for field in value.split(','):
+            name, field_value = field.split('=', 1)
+            fields.append(f'{name}={format_value(field_value)}')
+        return f'hl.monitor({{{", ".join(fields)}}})\n'
     key_parts = key.split(':')
     nested_structure = build_nested_structure(key_parts, value)
     return f'hl.config({{{nested_structure}}})\n'
@@ -49,10 +55,13 @@ def edit_hyprland_config(file_path, set_args, reset_args):
     for k in list(set_dict.keys()) + list(reset_set):
         key_parts = k.split(':')
         main_key = key_parts[0]
-        if len(key_parts) > 1:
+        if main_key == 'monitor':
+            output = re.escape(k[len('monitor:'):])
+            patterns[k] = re.compile(rf'^\s*hl\.monitor\(\{{\s*output\s*=\s*"{output}"')
+        elif len(key_parts) > 1:
             # Build pattern to match nested structure
             pattern_parts = [rf'\s*{re.escape(part)}\s*=' for part in key_parts]
-            nested_pattern = '\{'.join(pattern_parts)
+            nested_pattern = r'\{'.join(pattern_parts)
             patterns[k] = re.compile(rf'^\s*hl\.config\(\{{\s*{nested_pattern}')
         else:
             patterns[k] = re.compile(rf'^\s*hl\.config\(\{{\s*{re.escape(main_key)}\s*=')
@@ -116,7 +125,8 @@ def edit_hyprland_config(file_path, set_args, reset_args):
         print(f"Updated '{file_path}' with {generate_config_line(key, value).strip()}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Edit a Hyprland config file. Subkeys use colon (:) for nesting.")
+    parser = argparse.ArgumentParser(description="Edit a Hyprland config file. Subkeys use colon (:) for nesting. "
+                                     "Key monitor:NAME with value field=value,... writes an hl.monitor line.")
     parser.add_argument("--file", default="~/.config/hypr/hyprland.conf", help="Path to the Hyprland config file (default: ~/.config/hypr/hyprland.conf).")
     
     parser.add_argument("--set", nargs=2, action="append", metavar=("KEY", "VALUE"), help="Set a configuration key to a value.")

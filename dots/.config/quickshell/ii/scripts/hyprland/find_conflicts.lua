@@ -32,6 +32,15 @@ local function collect(path)
         config = function(tbl)
             if type(tbl) == "table" then flatten(tbl, nil, options) end
         end,
+        monitor = function(spec)
+            if type(spec) ~= "table" or type(spec.output) ~= "string" then return end
+            local fields = {}
+            for k, v in pairs(spec) do
+                if k ~= "output" then fields[#fields + 1] = tostring(k) .. "=" .. serialize(v) end
+            end
+            table.sort(fields)
+            options["monitor:" .. spec.output] = table.concat(fields, ",")
+        end,
     }, { __index = function() return dummy end })
     local env = setmetatable({
         hl = hl,

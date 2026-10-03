@@ -73,6 +73,10 @@ Singleton {
         root.run(root.settingsPath, root.resetArgs(keys))
     }
 
+    function editUser(entries: var, resetKeys: list<string>) {
+        root.run(root.settingsPath, root.setArgs(entries) + root.resetArgs(resetKeys))
+    }
+
     function keepSettingsValue(conflict: var) {
         Config.options.hyprland.keptSettingsConflicts = [...Config.options.hyprland.keptSettingsConflicts, `${conflict.key}=${conflict.fileValue}`]
     }
