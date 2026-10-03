@@ -79,7 +79,7 @@ hl.config({
             xray = true,
             special = false,
             new_optimizations = true,
-            size = 10,
+            size = 5,
             passes = 3,
             brightness = 1,
             noise = 0.05,
@@ -92,7 +92,9 @@ hl.config({
             input_methods_ignorealpha = 0.8
         },
         shadow = {
-            enabled = true,
+        	-- Shadows have too much GPU overhead
+        	-- They're not that visible anyway
+            enabled = false,
             range = 20,
             offset = {0, 2},
             render_power = 10,
