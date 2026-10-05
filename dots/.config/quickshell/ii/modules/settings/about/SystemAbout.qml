@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import Quickshell.Hyprland
 import Quickshell.Widgets
 import qs.services
 import qs.modules.common
@@ -12,6 +13,7 @@ ContentPage {
     forceWidth: true
 
     property var info: ({ gpu: [], disk: [] })
+    Component.onCompleted: Hyprland.refreshMonitors()
 
     readonly property var softwareInfo: [
         [Translation.tr("Kernel"), info.kernel],
@@ -26,7 +28,7 @@ ContentPage {
         ["memory_alt", Translation.tr("Memory"), ResourceUsage.maxAvailableMemoryString],
         ["developer_board", Translation.tr("Graphics"), info.gpu.join("\n")],
         ["hard_drive", Translation.tr("Storage"), info.disk.join("\n")],
-        ["monitor", Translation.tr("Displays"), HyprlandData.monitors.map(m => `${m.model || m.name}: ${m.width}×${m.height} @ ${Math.round(m.refreshRate)} Hz`).join("\n")],
+        ["monitor", Translation.tr("Displays"), Hyprland.monitors.values.map(m => m.lastIpcObject).filter(m => m?.name).map(m => `${m.model || m.name}: ${m.width}×${m.height} @ ${Math.round(m.refreshRate)} Hz`).join("\n")],
         ["computer", Translation.tr("Device"), info.product?.startsWith(info.vendor) ? info.product : [info.vendor, info.product].filter(Boolean).join(" ")],
     ].filter(([_, __, value]) => value)
 
