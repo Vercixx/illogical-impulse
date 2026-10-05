@@ -54,8 +54,10 @@ ContentPage {
         const drafts = {};
         const loadedDrafts = {};
         for (const m of monitors) {
-            drafts[m.name] = draftFor(m);
-            loadedDrafts[m.name] = serialize(drafts[m.name]);
+            const loaded = draftFor(m);
+            const edited = page.drafts[m.name] && serialize(page.drafts[m.name]) !== page.loadedDrafts[m.name];
+            drafts[m.name] = edited ? page.drafts[m.name] : loaded;
+            loadedDrafts[m.name] = serialize(loaded);
         }
         page.drafts = drafts;
         page.loadedDrafts = loadedDrafts;
