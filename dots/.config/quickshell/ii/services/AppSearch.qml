@@ -79,28 +79,35 @@ Singleton {
         entry: a
     }))
 
-    function fuzzyQuery(search: string): var { // Idk why list<DesktopEntry> doesn't work
-        if (root.sloppySearch) {
-            const query = search.toLowerCase();
-            const results = list.map(obj => {
-                const texts = searchTexts(obj);
-                return {
-                    entry: obj,
-                    score: Math.max(...searchFields.map(f => f.weight * Levendist.computeScore(texts[f.key].toLowerCase(), query)))
-                };
-            }).filter(item => item.score > root.scoreThreshold)
-                .sort((a, b) => b.score - a.score)
-            return results
-                .map(item => item.entry)
-        }
-
+    function fuzzyGo(search: string, fields: var): var {
         return Fuzzy.go(search, preppedNames, {
             all: true,
-            keys: searchFields.map(f => f.key),
-            scoreFn: r => Math.max(...searchFields.map((f, i) => f.weight * r[i].score))
-        }).map(r => {
-            return r.obj.entry
-        });
+            keys: fields.map(f => f.key),
+            scoreFn: r => Math.max(...fields.map((f, i) => f.weight * r[i].score))
+        }).map(r => r.obj.entry);
+    }
+
+    function sloppyByName(search: string): var {
+        const query = search.toLowerCase();
+        return list.map(obj => ({
+            entry: obj,
+            score: Levendist.computeScore(obj.name.toLowerCase(), query)
+        })).filter(item => item.score > root.scoreThreshold)
+            .sort((a, b) => b.score - a.score)
+            .map(item => item.entry);
+    }
+
+    function nameQuery(search: string): var {
+        return root.sloppySearch ? sloppyByName(search) : fuzzyGo(search, searchFields.slice(0, 1));
+    }
+
+    function fuzzyQuery(search: string): var { // Idk why list<DesktopEntry> doesn't work
+        if (!root.sloppySearch)
+            return fuzzyGo(search, searchFields);
+        // Levendist is O(len²) per field, too slow for long fields; those use fuzzysort
+        const byName = sloppyByName(search);
+        const seen = new Set(byName);
+        return byName.concat(fuzzyGo(search, searchFields.slice(1)).filter(entry => !seen.has(entry)));
     }
 
     function iconExists(iconName) {
@@ -174,7 +181,7 @@ Singleton {
             if (iconExists(guess)) return guess;
         }
 
-        const nameSearchResults = root.fuzzyQuery(str);
+        const nameSearchResults = root.nameQuery(str);
         if (nameSearchResults.length > 0) {
             const guess = nameSearchResults[0].icon
             if (iconExists(guess)) return guess;
