@@ -945,5 +945,12 @@
   "Hyprland leaves out 1 pixel on the right for interactions": "Hyprland оставляет 1 пиксель справа без взаимодействия",
   "Kill other notification daemons": "Завершать другие демоны уведомлений",
   "Kill other trays": "Завершать другие трей-программы",
-  "Race condition delay (ms)": "Задержка от гонки состояний (мс)"
+  "Race condition delay (ms)": "Задержка от гонки состояний (мс)",
+  "Login screen": "Экран входа",
+  "A greetd frontend styled after illogical-impulse. You'll need to install and enable `greetd` manually": "Экран входа на основе greetd в стиле illogical-impulse. Вам требуется вручную установить и включить `greetd`",
+  "Greeter files not found. Re-run the dotfiles installer.": "Файлы экрана входа не найдены. Перезапустите установщик dotfiles.",
+  "Install greeter": "Установить экран входа",
+  "Update greeter": "Обновить экран входа",
+  "Uninstall greeter": "Удалить экран входа",
+  "Open greeter repo": "Открыть репозиторий"
 }

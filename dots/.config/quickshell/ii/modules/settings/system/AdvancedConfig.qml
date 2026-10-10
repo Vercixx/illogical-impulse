@@ -1,7 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Io
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.models.hyprland
 import qs.modules.common.widgets
 
@@ -227,6 +229,72 @@ ContentPage {
             stepSize: 10
             onValueChanged: {
                 Config.options.hacks.arbitraryRaceConditionDelay = value;
+            }
+        }
+    }
+
+    ContentSection {
+        id: greeterSection
+        icon: "login"
+        title: Translation.tr("Login screen")
+
+        readonly property string installScript: `${FileUtils.trimFileProtocol(Directories.config)}/quickshell/ii-greeter/install.sh`
+        property bool available: false
+        property bool installed: false
+        property string status: ""
+
+        function run(args) {
+            greeterSection.status = "";
+            greeterProc.command = ["pkexec", greeterSection.installScript, ...args];
+            greeterProc.running = true;
+        }
+
+        Process {
+            id: greeterCheckProc
+            running: true
+            command: ["sh", "-c", "test -x \"$1\" && echo available; test -d /usr/local/share/ii-greeter && echo installed", "sh", greeterSection.installScript]
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    greeterSection.available = text.includes("available");
+                    greeterSection.installed = text.includes("installed");
+                }
+            }
+        }
+
+        Process {
+            id: greeterProc
+            stdout: SplitParser {
+                onRead: data => greeterSection.status = data.trim()
+            }
+            stderr: SplitParser {
+                onRead: data => greeterSection.status = data.trim()
+            }
+            onExited: (exitCode, exitStatus) => greeterCheckProc.running = true
+        }
+
+        NoticeBox {
+            Layout.fillWidth: true
+            text: greeterSection.status || (greeterSection.available
+                ? Translation.tr("A greetd frontend styled after illogical-impulse. You'll need to install and enable `greetd` manually")
+                : Translation.tr("Greeter files not found. Re-run the dotfiles installer."))
+
+            RippleButtonWithIcon {
+                enabled: greeterSection.available && !greeterProc.running
+                materialIcon: "download"
+                mainText: greeterSection.installed ? Translation.tr("Update greeter") : Translation.tr("Install greeter")
+                onClicked: greeterSection.run([])
+            }
+            RippleButtonWithIcon {
+                visible: greeterSection.installed
+                enabled: greeterSection.available && !greeterProc.running
+                materialIcon: "delete"
+                mainText: Translation.tr("Uninstall greeter")
+                onClicked: greeterSection.run(["uninstall"])
+            }
+            RippleButtonWithIcon {
+            	materialIcon: "auto_stories"
+            	mainText: Translation.tr("Open greeter repo")
+            	onClicked: Qt.openUrlExternally("https://github.com/Vercixx/ii-greeter")
             }
         }
     }

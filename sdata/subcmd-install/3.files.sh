@@ -228,6 +228,11 @@ if [[ ! "$OS_GROUP_ID" == "fedora" ]]; then
   v install_google_sans_flex
 fi
 
+# Keep an installed greeter in step with the Quickshell shipped by this update
+if [[ -d /usr/local/share/ii-greeter && -x "$XDG_CONFIG_HOME/quickshell/ii-greeter/install.sh" ]]; then
+  v sudo "$XDG_CONFIG_HOME/quickshell/ii-greeter/install.sh"
+fi
+
 #####################################################################################
 
 v gen_firstrun

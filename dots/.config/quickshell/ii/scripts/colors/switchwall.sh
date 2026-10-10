@@ -57,6 +57,11 @@ post_process() {
 
     handle_kde_material_you_colors &
     "$SCRIPT_DIR/code/material-code-set-color.sh" &
+    sync_greeter
+}
+
+sync_greeter() {
+    command -v ii-greeter-sync &>/dev/null && ii-greeter-sync &
 }
 
 check_and_prompt_upscale() {
@@ -289,6 +294,7 @@ switch() {
         enable_apps_shell=$(jq -r '.appearance.wallpaperTheming.enableAppsAndShell' "$SHELL_CONFIG_FILE")
         if [ "$enable_apps_shell" == "false" ]; then
             echo "App and shell theming disabled, skipping matugen and color generation"
+            sync_greeter
             return
         fi
     fi
