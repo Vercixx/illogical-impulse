@@ -153,6 +153,16 @@ ContentPage {
                         }
                     }
                 }
+                RippleButtonWithIcon {
+                    readonly property string defaultWallpaperPath: FileUtils.trimFileProtocol(`${Directories.assetsPath}/images/default_wallpaper.png`)
+                    enabled: Config.options.background.wallpaperPath !== defaultWallpaperPath
+                    Layout.fillWidth: true
+                    materialIcon: "restart_alt"
+                    mainText: Translation.tr("Default wallpaper")
+                    onClicked: {
+                        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, defaultWallpaperPath]);
+                    }
+                }
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.fillWidth: true
