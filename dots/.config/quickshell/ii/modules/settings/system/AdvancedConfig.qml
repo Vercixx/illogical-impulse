@@ -235,6 +235,7 @@ ContentPage {
 
     ContentSection {
         id: greeterSection
+        visible: SystemInfo.distroId !== "eonos" // ii-greeter is a system package there
         icon: "login"
         title: Translation.tr("Login screen")
 

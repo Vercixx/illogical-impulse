@@ -17,8 +17,10 @@ NOTIFICATION_APP_NAME="Shell"
 TARGET_LOCALE="$1"
 MODEL="${2:-${GEMINI_MODEL:-gemini-2.5-flash}}"
 
-# Update the source keys for translation
-"${TRANSLATIONS_DIR}/tools/manage-translations.sh" update -l "$SOURCE_LOCALE" --yes
+# Update the source keys for translation (eonOS installs the shell read-only)
+if ! grep -qx 'ID=eonos' /etc/os-release; then
+    "${TRANSLATIONS_DIR}/tools/manage-translations.sh" update -l "$SOURCE_LOCALE" --yes
+fi
 mkdir -p "$TRANSLATIONS_TARGET_DIR"
 
 # Construct the prompt string
