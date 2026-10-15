@@ -108,9 +108,9 @@ Singleton {
                 property bool extraBackgroundTint: true
                 property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
                 property JsonObject fonts: JsonObject {
-                    property string main: "Google Sans Flex"
-                    property string numbers: "Google Sans Flex"
-                    property string title: "Google Sans Flex"
+                    property string main: "Rubik"
+                    property string numbers: "Rubik"
+                    property string title: "Rubik"
                     property string iconNerd: "JetBrains Mono NF"
                     property string monospace: "JetBrains Mono NF"
                     property string reading: "Readex Pro"
@@ -192,7 +192,7 @@ Singleton {
                             property bool vertical: false
                             property string color: ""
                             property JsonObject font: JsonObject {
-                                property string family: "Google Sans Flex"
+                                property string family: "Rubik"
                                 property real weight: 350
                                 property real width: 100
                                 property real size: 90
