@@ -35,8 +35,9 @@ ContentPage {
                         value: "auto"
                     },
                     ...Translation.allAvailableLanguages.map(lang => {
+                        const name = Translation.languageName(lang);
                         return {
-                            displayName: lang,
+                            displayName: `${name.native} (${name.english})`,
                             value: lang
                         };
                     })]

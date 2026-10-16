@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 
 import qs.modules.common
+import qs.services
 import qs.modules.ii.background
 import qs.modules.ii.bar
 import qs.modules.ii.cheatsheet
@@ -24,24 +25,26 @@ import qs.modules.ii.verticalBar
 import qs.modules.ii.wallpaperSelector
 
 Scope {
-    PanelLoader { extraCondition: !Config.options.bar.vertical; component: Bar {} }
+    readonly property bool barShown: Onboarding.shows("bar") || Onboarding.shows("workspaces")
+
+    PanelLoader { extraCondition: !Config.options.bar.vertical && barShown; component: Bar {} }
     PanelLoader { component: Background {} }
-    PanelLoader { component: Cheatsheet {} }
-    PanelLoader { extraCondition: Config.options.dock.enable; component: Dock {} }
+    PanelLoader { extraCondition: !Onboarding.active; component: Cheatsheet {} }
+    PanelLoader { extraCondition: Config.options.dock.enable && Onboarding.shows("dock"); component: Dock {} }
     PanelLoader { component: Lock {} }
-    PanelLoader { component: MediaControls {} }
-    PanelLoader { component: NotificationPopup {} }
-    PanelLoader { component: OnScreenDisplay {} }
-    PanelLoader { component: OnScreenKeyboard {} }
-    PanelLoader { component: Overlay {} }
-    PanelLoader { component: Overview {} }
+    PanelLoader { extraCondition: !Onboarding.active; component: MediaControls {} }
+    PanelLoader { extraCondition: !Onboarding.active; component: NotificationPopup {} }
+    PanelLoader { extraCondition: !Onboarding.active; component: OnScreenDisplay {} }
+    PanelLoader { extraCondition: !Onboarding.active; component: OnScreenKeyboard {} }
+    PanelLoader { extraCondition: !Onboarding.active; component: Overlay {} }
+    PanelLoader { extraCondition: Onboarding.shows("overview"); component: Overview {} }
     PanelLoader { component: Polkit {} }
-    PanelLoader { component: RegionSelector {} }
+    PanelLoader { extraCondition: Onboarding.shows("screenshot"); component: RegionSelector {} }
     PanelLoader { component: ScreenCorners {} }
-    PanelLoader { component: ScreenTranslator {} }
+    PanelLoader { extraCondition: !Onboarding.active; component: ScreenTranslator {} }
     PanelLoader { component: SessionScreen {} }
-    PanelLoader { component: SidebarLeft {} }
-    PanelLoader { component: SidebarRight {} }
-    PanelLoader { extraCondition: Config.options.bar.vertical; component: VerticalBar {} }
-    PanelLoader { component: WallpaperSelector {} }
+    PanelLoader { extraCondition: Onboarding.shows("sidebars"); component: SidebarLeft {} }
+    PanelLoader { extraCondition: Onboarding.shows("sidebars"); component: SidebarRight {} }
+    PanelLoader { extraCondition: Config.options.bar.vertical && barShown; component: VerticalBar {} }
+    PanelLoader { extraCondition: !Onboarding.active; component: WallpaperSelector {} }
 }

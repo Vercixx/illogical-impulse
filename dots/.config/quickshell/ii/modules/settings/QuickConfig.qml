@@ -10,6 +10,7 @@ import qs.modules.common.widgets
 import qs.modules.common.functions
 
 ContentPage {
+    property bool showMoreSettings: true
     forceWidth: true
 
     Process {
@@ -336,6 +337,7 @@ ContentPage {
     }
 
     ContentSection {
+        visible: showMoreSettings
         icon: "more_horiz"
         title: Translation.tr("More settings")
 

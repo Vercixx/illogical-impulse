@@ -16,6 +16,7 @@ Item { // Bar content region
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
     property real useShortenedForm: (Appearance.sizes.barHellaShortenScreenWidthThreshold >= screen?.width) ? 2 : (Appearance.sizes.barShortenScreenWidthThreshold >= screen?.width) ? 1 : 0
     readonly property int centerSideModuleWidth: (useShortenedForm == 2) ? Appearance.sizes.barCenterSideModuleWidthHellaShortened : (useShortenedForm == 1) ? Appearance.sizes.barCenterSideModuleWidthShortened : Appearance.sizes.barCenterSideModuleWidth
+    readonly property bool workspacesOnly: !Onboarding.shows("bar")
 
     component VerticalBarSeparator: Rectangle {
         Layout.topMargin: Appearance.sizes.baseBarHeight / 3
@@ -49,6 +50,11 @@ Item { // Bar content region
 
     FocusedScrollMouseArea { // Left side | scroll to change brightness
         id: barLeftSideMouseArea
+        opacity: root.workspacesOnly ? 0 : 1
+        enabled: !root.workspacesOnly
+        Behavior on opacity {
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        }
 
         anchors {
             top: parent.top
@@ -123,6 +129,11 @@ Item { // Bar content region
 
         BarGroup {
             id: resourcesGroup
+            opacity: root.workspacesOnly ? 0 : 1
+            enabled: !root.workspacesOnly
+            Behavior on opacity {
+                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+            }
             anchors.verticalCenter: parent.verticalCenter
             forcedWidth: root.useShortenedForm === 2 ? root.centerSideModuleWidth : -1
 
@@ -135,6 +146,11 @@ Item { // Bar content region
         BarGroup {
             id: mediaGroup
             visible: root.useShortenedForm < 2
+            opacity: root.workspacesOnly ? 0 : 1
+            enabled: !root.workspacesOnly
+            Behavior on opacity {
+                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+            }
             anchors.verticalCenter: parent.verticalCenter
             implicitWidth: root.centerSideModuleWidth / 2
 
@@ -175,6 +191,11 @@ Item { // Bar content region
 
         MouseArea {
             id: rightCenterGroup
+            opacity: root.workspacesOnly ? 0 : 1
+            enabled: !root.workspacesOnly
+            Behavior on opacity {
+                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+            }
             anchors.verticalCenter: parent.verticalCenter
             implicitWidth: root.centerSideModuleWidth
             implicitHeight: rightCenterGroupContent.implicitHeight
@@ -208,6 +229,11 @@ Item { // Bar content region
 
     FocusedScrollMouseArea { // Right side | scroll to change volume
         id: barRightSideMouseArea
+        opacity: root.workspacesOnly ? 0 : 1
+        enabled: !root.workspacesOnly
+        Behavior on opacity {
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        }
 
         anchors {
             top: parent.top

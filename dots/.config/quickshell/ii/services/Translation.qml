@@ -75,6 +75,31 @@ Singleton {
         }
     }
 
+    readonly property var englishLanguageNames: ({
+        "de": "German",
+        "en": "English",
+        "es": "Spanish",
+        "fr": "French",
+        "he": "Hebrew",
+        "id": "Indonesian",
+        "it": "Italian",
+        "ja": "Japanese",
+        "pt": "Portuguese",
+        "ru": "Russian",
+        "tr": "Turkish",
+        "uk": "Ukrainian",
+        "vi": "Vietnamese",
+        "zh": "Chinese"
+    })
+
+    function languageName(code) {
+        const nativeName = Qt.locale(code).nativeLanguageName;
+        return {
+            "native": nativeName ? nativeName.charAt(0).toUpperCase() + nativeName.slice(1) : code,
+            "english": root.englishLanguageNames[code.split("_")[0]] ?? code
+        };
+    }
+
     function tr(text) {
         // Special cases
         if (!text) return "";
@@ -103,7 +128,7 @@ Singleton {
             id: languagesCollector
             onStreamFinished: {
                 const output = languagesCollector.text;
-                const files = output.trim().split('\n').map(f => f.trim());
+                const files = output.trim().split('\n').map(f => f.trim()).filter(f => f.length > 0);
                 translationScanner.languagesScanned(files);
             }
         }

@@ -7,6 +7,7 @@
 ////@ pragma Env QT_SCALE_FACTOR=1
 
 import "modules/common"
+import "modules/onboarding"
 import "services"
 import "panelFamilies"
 
@@ -21,11 +22,12 @@ ShellRoot {
 
     // Stuff for every panel family
     ReloadPopup {}
+    OnboardingOverlay {}
 
     Component.onCompleted: {
         MaterialThemeLoader.reapplyTheme()
         Hyprsunset.load()
-        FirstRunExperience.load()
+        Onboarding.load()
         ConflictKiller.load()
         Cliphist.refresh()
         Wallpapers.load()

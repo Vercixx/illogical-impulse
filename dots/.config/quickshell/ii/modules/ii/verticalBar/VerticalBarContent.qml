@@ -15,6 +15,7 @@ Item { // Bar content region
 
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
+    readonly property bool workspacesOnly: !Onboarding.shows("bar")
 
     component HorizontalBarSeparator: Rectangle {
         Layout.leftMargin: Appearance.sizes.baseBarHeight / 3
@@ -48,6 +49,11 @@ Item { // Bar content region
 
     FocusedScrollMouseArea { // Top section | scroll to change brightness
         id: barTopSectionMouseArea
+        opacity: root.workspacesOnly ? 0 : 1
+        enabled: !root.workspacesOnly
+        Behavior on opacity {
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        }
         anchors.top: parent.top
         implicitHeight: topSectionColumnLayout.implicitHeight
         implicitWidth: Appearance.sizes.baseVerticalBarWidth
@@ -88,6 +94,11 @@ Item { // Bar content region
         Bar.BarGroup {
             vertical: true
             padding: 8
+            opacity: root.workspacesOnly ? 0 : 1
+            enabled: !root.workspacesOnly
+            Behavior on opacity {
+                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+            }
             Resources {
                 Layout.fillWidth: true
                 Layout.fillHeight: false
@@ -134,7 +145,12 @@ Item { // Bar content region
         Bar.BarGroup {
             vertical: true
             padding: 8
-            
+            opacity: root.workspacesOnly ? 0 : 1
+            enabled: !root.workspacesOnly
+            Behavior on opacity {
+                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+            }
+
             VerticalClockWidget {
                 Layout.fillWidth: true
                 Layout.fillHeight: false
@@ -155,6 +171,11 @@ Item { // Bar content region
 
     FocusedScrollMouseArea { // Bottom section | scroll to change volume
         id: barBottomSectionMouseArea
+        opacity: root.workspacesOnly ? 0 : 1
+        enabled: !root.workspacesOnly
+        Behavior on opacity {
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        }
 
         anchors {
             left: parent.left
