@@ -82,7 +82,16 @@ class TranslationManager:
                                 
                 except (UnicodeDecodeError, IOError) as e:
                     print(f"Warning: Cannot read file {file_path}: {e}")
-                    
+
+        # Keybind descriptions are shown translated by the cheatsheet
+        hypr_dir = next((p / "hypr" for p in self.source_dir.resolve().parents if (p / "hypr").is_dir()), None)
+        if hypr_dir:
+            for file_path in hypr_dir.rglob('*.lua'):
+                content = file_path.read_text(encoding='utf-8', errors='replace')
+                for text in re.findall(r'description\s*=\s*"((?:[^"\\]|\\.)*)"\s*[,}]', content):
+                    if text.strip():
+                        translatable_texts.add(text.strip())
+
         return translatable_texts
     
     def create_temp_translation_file(self, texts: Set[str]) -> str:

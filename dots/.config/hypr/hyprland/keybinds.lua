@@ -157,7 +157,7 @@ for i = 1, 4 do
     local arrowkey = { "Left", "Right", "Up", "Down" }
     local focusdir = { "l", "r", "u", "d" }
     hl.bind("SUPER + " .. arrowkey[i], hl.dsp.focus({ direction = focusdir[i] }),
-        { description = "Window: Focus " .. arrowkey[i] })
+        { description = "Window: Focus in direction" })
 end
 for i = 1, 2 do
     local arrowkey = { "BracketLeft", "BracketRight" }
@@ -169,7 +169,7 @@ for i = 1, 4 do
     local arrowkey = { "Left", "Right", "Up", "Down" }
     local focusdir = { "l", "r", "u", "d" }
     hl.bind("SUPER + SHIFT + " .. arrowkey[i], hl.dsp.window.move({ direction = focusdir[i] }),
-        { description = "Window: Move " .. arrowkey[i] })
+        { description = "Window: Move in direction" })
 end
 
 hl.bind("ALT + F4",
@@ -199,7 +199,7 @@ hl.bind("SUPER + P", hl.dsp.window.pin(), { description = "Window: Pin" })
 for i = 1, 10 do
     hl.bind("SUPER + ALT + " .. (i % 10), function()
         hl.dispatch(hl.dsp.window.move({ workspace = workspace_in_group(i), follow = false }))
-    end, { description = "Window: Send to workspace " .. i })
+    end, { description = "Window: Send to workspace by number" })
 end
 --# We also use raw keycodes because some keyboard layouts register number keys as different chars. The codes can be verified with `wev`
 -- for i = 1, 10 do
@@ -228,8 +228,7 @@ end
 for i = 1, 2 do
     local keydirs = { "Up", "Down" }
     local prefix = { "r-", "r+" }
-    local descdir = { "left", "right" }
-    hl.bind("SUPER + SHIFT + Page_" .. keydirs[i], hl.dsp.window.move({ workspace = prefix[i] .. "1" }), {description = "Window: Send to workspace " .. descdir[i]})
+    hl.bind("SUPER + SHIFT + Page_" .. keydirs[i], hl.dsp.window.move({ workspace = prefix[i] .. "1" }), {description = "Window: Send to adjacent workspace"})
 end
 for i = 1, 4 do
     local key = { "SUPER + ALT + Page_", "CTRL + SUPER + SHIFT + " }
@@ -248,7 +247,7 @@ hl.bind("CTRL + SUPER + S", hl.dsp.workspace.toggle_special("special"))
 for i = 1, 10 do
     hl.bind("SUPER + " .. (i % 10), function()
         hl.dispatch(hl.dsp.focus({ workspace = workspace_in_group(i) }))
-    end, { description = "Workspace: Focus " .. i })
+    end, { description = "Workspace: Focus by number" })
 end
 --# We also use raw keycodes because some keyboard layouts register number keys as different chars. The codes can be verified with `wev`
 for i = 1, 10 do
@@ -270,8 +269,7 @@ end
 for i = 1, 2 do
     local keys = { "Left", "Right" }
     local prefix = { "r-", "r+" }
-    local descdir = { "left", "right" }
-    hl.bind("CTRL + SUPER + " .. keys[i], hl.dsp.focus({ workspace = prefix[i] .. "1" }), {description = "Workspace: Focus " .. descdir[i]})
+    hl.bind("CTRL + SUPER + " .. keys[i], hl.dsp.focus({ workspace = prefix[i] .. "1" }), {description = "Workspace: Focus adjacent"})
 end
 for i = 1, 2 do
     local keys = { "Left", "Right" }

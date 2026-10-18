@@ -2,177 +2,117 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
-import Qt.labs.synchronizer
-import Qt5Compat.GraphicalEffects
-import Quickshell.Io
 import Quickshell
-import Quickshell.Wayland
+import Quickshell.Io
 import Quickshell.Hyprland
 
-Scope { // Scope
+Scope {
     id: root
-    property var tabButtonList: [
-        {
-            "icon": "keyboard",
-            "name": Translation.tr("Keybinds")
-        },
-        {
-            "icon": "experiment",
-            "name": Translation.tr("Elements")
-        },
-    ]
 
     Loader {
         id: cheatsheetLoader
         active: false
 
-        sourceComponent: PanelWindow { // Window
-            id: cheatsheetRoot
-            visible: cheatsheetLoader.active
+        sourceComponent: FloatingWindow {
+            id: cheatsheetWindow
+            title: "illogical-impulse Keybinds"
+            implicitWidth: 720
+            implicitHeight: 680
+            minimumSize: Qt.size(480, 360)
+            color: Appearance.m3colors.m3background
 
-            anchors {
-                top: true
-                bottom: true
-                left: true
-                right: true
-            }
+            onClosed: cheatsheetLoader.active = false
 
-            function hide() {
-                cheatsheetLoader.active = false;
-            }
-            exclusiveZone: 0
-            implicitWidth: cheatsheetBackground.width + Appearance.sizes.elevationMargin * 2
-            implicitHeight: cheatsheetBackground.height + Appearance.sizes.elevationMargin * 2
-            WlrLayershell.namespace: "quickshell:cheatsheet"
-            // Setting this value makes it take its sweet time to open
-            // WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
-            color: "transparent"
-
-            mask: Region {
-                item: cheatsheetBackground
-            }
-
-            Component.onCompleted: {
-                GlobalFocusGrab.addDismissable(cheatsheetRoot);
-            }
-            Component.onDestruction: {
-                GlobalFocusGrab.removeDismissable(cheatsheetRoot);
-            }
-            Connections {
-                target: GlobalFocusGrab
-                function onDismissed() {
-                    cheatsheetRoot.hide();
+            ColumnLayout {
+                anchors {
+                    fill: parent
+                    margins: 12
                 }
-            }
+                spacing: 12
 
-            // Background
-            StyledRectangularShadow {
-                target: cheatsheetBackground
-            }
-            Rectangle {
-                id: cheatsheetBackground
-                anchors.centerIn: parent
-                color: Appearance.colors.colLayer0
-                border.width: 1
-                border.color: Appearance.colors.colLayer0Border
-                radius: Appearance.rounding.windowRounding
-                property real padding: 20
-                implicitWidth: cheatsheetColumnLayout.implicitWidth + padding * 2
-                implicitHeight: cheatsheetColumnLayout.implicitHeight + padding * 2
-
-                Keys.onPressed: event => { // Esc to close
-                    if (event.key === Qt.Key_Escape) {
-                        cheatsheetRoot.hide();
-                    }
-                    if (event.modifiers === Qt.ControlModifier) {
-                        if (event.key === Qt.Key_PageDown) {
-                            tabBar.incrementCurrentIndex();
-                            event.accepted = true;
-                        } else if (event.key === Qt.Key_PageUp) {
-                            tabBar.decrementCurrentIndex();
-                            event.accepted = true;
-                        } else if (event.key === Qt.Key_Tab) {
-                            tabBar.setCurrentIndex((tabBar.currentIndex + 1) % root.tabButtonList.length);
-                            event.accepted = true;
-                        } else if (event.key === Qt.Key_Backtab) {
-                            tabBar.setCurrentIndex((tabBar.currentIndex - 1 + root.tabButtonList.length) % root.tabButtonList.length);
-                            event.accepted = true;
+                Item {
+                    visible: Config.options?.windows.showTitlebar
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                    implicitHeight: Math.max(titleRow.implicitHeight, windowControlsRow.implicitHeight)
+                    RowLayout {
+                        id: titleRow
+                        anchors {
+                            left: Config.options.windows.centerTitle ? undefined : parent.left
+                            horizontalCenter: Config.options.windows.centerTitle ? parent.horizontalCenter : undefined
+                            verticalCenter: parent.verticalCenter
+                            leftMargin: 12
                         }
-                    }
-                }
-
-                RippleButton { // Close button
-                    id: closeButton
-                    focus: cheatsheetRoot.visible
-                    implicitWidth: 40
-                    implicitHeight: 40
-                    buttonRadius: Appearance.rounding.full
-                    anchors {
-                        top: parent.top
-                        right: parent.right
-                        topMargin: 20
-                        rightMargin: 20
-                    }
-
-                    onClicked: {
-                        cheatsheetRoot.hide();
-                    }
-
-                    contentItem: MaterialSymbol {
-                        anchors.centerIn: parent
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: Appearance.font.pixelSize.title
-                        text: "close"
-                    }
-                }
-
-                ColumnLayout { // Real content
-                    id: cheatsheetColumnLayout
-                    anchors.centerIn: parent
-                    spacing: 10
-
-                    Toolbar {
-                        Layout.alignment: Qt.AlignHCenter
-                        enableShadow: false
-                        ToolbarTabBar {
-                            id: tabBar
-                            tabButtonList: root.tabButtonList
-
-                            Synchronizer on currentIndex {
-                                property alias source: swipeView.currentIndex
+                        spacing: 6
+                        MaterialSymbol {
+                            text: "keyboard"
+                            iconSize: Appearance.font.pixelSize.huge
+                            color: Appearance.colors.colOnLayer0
+                        }
+                        StyledText {
+                            color: Appearance.colors.colOnLayer0
+                            text: Translation.tr("Keybinds")
+                            font {
+                                family: Appearance.font.family.title
+                                pixelSize: Appearance.font.pixelSize.larger
+                                weight: Font.Bold
                             }
                         }
                     }
-
-                    SwipeView { // Content pages
-                        id: swipeView
-                        Layout.topMargin: 5
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        spacing: 10
-                        currentIndex: Persistent.states.cheatsheet.tabIndex
-                        onCurrentIndexChanged: {
-                            Persistent.states.cheatsheet.tabIndex = currentIndex;
-                        }
-
-                        implicitWidth: Math.max.apply(null, contentChildren.map(child => child.implicitWidth || 0))
-                        implicitHeight: Math.max.apply(null, contentChildren.map(child => child.implicitHeight || 0))
-
-                        clip: true
-                        layer.enabled: true
-                        layer.effect: OpacityMask {
-                            maskSource: Rectangle {
-                                width: swipeView.width
-                                height: swipeView.height
-                                radius: Appearance.rounding.small
+                    RowLayout { // Window controls row
+                        id: windowControlsRow
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.right: parent.right
+                        RippleButton {
+                            buttonRadius: Appearance.rounding.full
+                            implicitWidth: 35
+                            implicitHeight: 35
+                            onClicked: cheatsheetLoader.active = false
+                            contentItem: MaterialSymbol {
+                                anchors.centerIn: parent
+                                horizontalAlignment: Text.AlignHCenter
+                                text: "close"
+                                iconSize: 20
                             }
                         }
-
-                        CheatsheetKeybinds {}
-                        CheatsheetPeriodicTable {}
                     }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 48
+                    radius: Appearance.rounding.full
+                    color: Appearance.m3colors.m3surfaceContainerHigh
+
+                    RowLayout {
+                        anchors {
+                            fill: parent
+                            leftMargin: 16
+                            rightMargin: 8
+                        }
+                        spacing: 4
+
+                        MaterialSymbol {
+                            text: "search"
+                            iconSize: Appearance.font.pixelSize.huge
+                            color: Appearance.colors.colSubtext
+                        }
+                        ToolbarTextField {
+                            id: searchField
+                            Layout.fillWidth: true
+                            focus: true
+                            colBackground: "transparent"
+                            placeholderText: Translation.tr("Search keybinds")
+                            Keys.onEscapePressed: cheatsheetLoader.active = false
+                        }
+                    }
+                }
+
+                CheatsheetKeybinds {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    query: searchField.text
                 }
             }
         }

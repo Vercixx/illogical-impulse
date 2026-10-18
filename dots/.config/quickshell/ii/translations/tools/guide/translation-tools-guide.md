@@ -253,6 +253,7 @@ Example:
    - ~~Only supports static strings, not dynamically constructed strings~~
    - Dynamic resources (such as variable concatenation or runtime-generated text) cannot be automatically extracted. You need to manually add them to the translation file and use the `/*keep*/` mark for ignore management.
    - Must use the `Translation.tr()` format
+   - Keybind descriptions (`description = "Category: Action"` in Hyprland's `*.lua` files) are extracted too. Keep the `Category: ` prefix in the translation, e.g. `"Window: Close": "Окно: Закрыть"`; the cheatsheet uses it as the section title.
 
 3. **File encoding**: All files must use UTF-8 encoding
 
