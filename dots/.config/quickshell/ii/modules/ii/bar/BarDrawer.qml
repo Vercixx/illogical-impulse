@@ -148,9 +148,10 @@ Item {
             readonly property real neckLength: root.vertical ? neckRect.height : neckRect.width
             readonly property real innerEdge: root.vertical ? (root.atEnd ? neckRect.x : neckRect.x + neckRect.width) : (root.atEnd ? neckRect.y : neckRect.y + neckRect.height)
             readonly property real layerLength: root.vertical ? root.drawerLayer.height : root.drawerLayer.width
-            readonly property real targetLength: Math.max((root.vertical ? contentColumn.implicitHeight : contentColumn.implicitWidth) + pad * 2, neckLength)
-            readonly property real targetDepth: (root.vertical ? contentColumn.implicitWidth : contentColumn.implicitHeight) + pad * 2
-            readonly property real targetStart: Math.max(edgeMargin, Math.min(neckStart + neckLength / 2 - targetLength / 2, layerLength - targetLength - edgeMargin))
+            // Whole pixels only: a half-pixel card blurs everything inside it
+            readonly property real targetLength: Math.ceil(Math.max((root.vertical ? contentColumn.implicitHeight : contentColumn.implicitWidth) + pad * 2, neckLength))
+            readonly property real targetDepth: Math.ceil((root.vertical ? contentColumn.implicitWidth : contentColumn.implicitHeight) + pad * 2)
+            readonly property real targetStart: Math.round(Math.max(edgeMargin, Math.min(neckStart + neckLength / 2 - targetLength / 2, layerLength - targetLength - edgeMargin)))
 
             property real alongStart: expanded ? targetStart : neckStart
             property real alongLength: expanded ? targetLength : neckLength
@@ -241,8 +242,8 @@ Item {
                     id: contentColumn
                     spacing: 8
                     opacity: card.expanded ? 1 : 0
-                    x: root.vertical ? (root.atEnd ? parent.width - width - card.pad : card.pad) : (parent.width - width) / 2
-                    y: root.vertical ? (parent.height - height) / 2 : (root.atEnd ? parent.height - height - card.pad : card.pad)
+                    x: Math.round(root.vertical ? (root.atEnd ? parent.width - width - card.pad : card.pad) : (parent.width - width) / 2)
+                    y: Math.round(root.vertical ? (parent.height - height) / 2 : (root.atEnd ? parent.height - height - card.pad : card.pad))
 
                     Behavior on opacity {
                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
@@ -251,7 +252,7 @@ Item {
                     Item {
                         id: infoSlot
                         visible: root.infoWhenPinned || !root.pinned
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        x: Math.round((contentColumn.width - width) / 2)
                         implicitWidth: root.contentItem?.implicitWidth ?? 0
                         implicitHeight: root.contentItem?.implicitHeight ?? 0
                         width: implicitWidth
@@ -267,7 +268,7 @@ Item {
                     }
 
                     Loader {
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        x: Math.round((contentColumn.width - width) / 2)
                         active: root.pinned && root.controls !== null
                         visible: active
                         sourceComponent: root.controls

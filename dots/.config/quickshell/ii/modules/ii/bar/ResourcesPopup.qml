@@ -109,6 +109,8 @@ BarDrawer {
                         top: parent.top
                         margins: 6
                     }
+                    width: Math.ceil(implicitWidth)
+                    horizontalAlignment: Text.AlignRight
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     color: Appearance.colors.colOnSecondaryContainer
                     text: `${Math.round(graphTile.value * 100)}%`

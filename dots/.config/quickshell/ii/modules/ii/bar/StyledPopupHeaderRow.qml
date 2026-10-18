@@ -10,6 +10,7 @@ Row {
     spacing: 5
 
     MaterialSymbol {
+        width: Math.ceil(implicitWidth)
         anchors.verticalCenter: parent.verticalCenter
         fill: 0
         font.weight: Font.DemiBold

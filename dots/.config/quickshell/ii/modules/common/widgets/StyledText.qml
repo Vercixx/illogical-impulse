@@ -21,6 +21,24 @@ Text {
     color: Appearance?.m3colors.m3onBackground ?? "black"
     linkColor: Appearance?.m3colors.m3primary
 
+    // Centered or right-aligned lines land on fractional x, which blurs native glyphs; nudge them onto whole pixels.
+    // Leaves text with its own padding alone.
+    function snapAlignment() {
+        if (Math.abs(leftPadding + rightPadding) > 0.001 || Math.abs(leftPadding) > 0.5)
+            return;
+        const free = width - contentWidth;
+        const offset = effectiveHorizontalAlignment === Text.AlignHCenter ? free / 2 : effectiveHorizontalAlignment === Text.AlignRight ? free : 0;
+        const nudge = Math.round(offset) - offset;
+        if (Math.abs(nudge - leftPadding) > 0.001) {
+            leftPadding = nudge;
+            rightPadding = -nudge;
+        }
+    }
+    // Deferred so implicit-width bindings in parents never see a loop
+    onWidthChanged: Qt.callLater(snapAlignment)
+    onContentWidthChanged: Qt.callLater(snapAlignment)
+    onEffectiveHorizontalAlignmentChanged: Qt.callLater(snapAlignment)
+
     component Anim: NumberAnimation {
         target: root
         duration: 300 / 2
