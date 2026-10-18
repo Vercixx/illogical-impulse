@@ -9,6 +9,8 @@ Item {
     required property double percentage
     property int warningThreshold: 100
     property bool shown: true
+    property color colText: Appearance.colors.colOnLayer1
+    property color colAccent: Appearance.colors.colOnSecondaryContainer
     clip: true
     visible: width > 0 && height > 0
     implicitWidth: resourceRowLayout.x < 0 ? 0 : resourceRowLayout.implicitWidth
@@ -29,7 +31,7 @@ Item {
             lineWidth: Appearance.rounding.unsharpen
             value: percentage
             implicitSize: 20
-            colPrimary: root.warning ? Appearance.colors.colError : Appearance.colors.colOnSecondaryContainer
+            colPrimary: root.warning ? Appearance.colors.colError : root.colAccent
             accountForLightBleeding: !root.warning
             enableAnimation: false
 
@@ -63,7 +65,7 @@ Item {
             StyledText {
                 id: percentageText
                 anchors.centerIn: parent
-                color: Appearance.colors.colOnLayer1
+                color: root.colText
                 font.pixelSize: Appearance.font.pixelSize.small
                 text: `${Math.round(percentage * 100).toString()}`
             }

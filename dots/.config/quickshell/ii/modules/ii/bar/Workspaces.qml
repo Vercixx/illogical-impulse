@@ -13,6 +13,7 @@ import Quickshell.Hyprland
 
 ButtonMouseArea {
     id: root
+    property var host: null
 
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(root.QsWindow.window?.screen)
     WorkspaceModel {

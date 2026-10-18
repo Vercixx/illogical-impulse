@@ -71,102 +71,11 @@ ContentPage {
             }
         }
 
-        ConfigRow {
-
-            ContentSubsection {
-                title: Translation.tr("Corner style")
-                Layout.fillWidth: true
-
-                ConfigSelectionArray {
-                    currentValue: Config.options.bar.cornerStyle
-                    onSelected: newValue => {
-                        Config.options.bar.cornerStyle = newValue; // Update local copy
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("Hug"),
-                            icon: "line_curve",
-                            value: 0
-                        },
-                        {
-                            displayName: Translation.tr("Float"),
-                            icon: "page_header",
-                            value: 1
-                        },
-                        {
-                            displayName: Translation.tr("Rect"),
-                            icon: "toolbar",
-                            value: 2
-                        }
-                    ]
-                }
-            }
-
-            ContentSubsection {
-                title: Translation.tr("Group style")
-                Layout.fillWidth: false
-
-                ConfigSelectionArray {
-                    currentValue: Config.options.bar.borderless
-                    onSelected: newValue => {
-                        Config.options.bar.borderless = newValue; // Update local copy
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("Pills"),
-                            icon: "location_chip",
-                            value: false
-                        },
-                        {
-                            displayName: Translation.tr("Line-separated"),
-                            icon: "split_scene",
-                            value: true
-                        }
-                    ]
-                }
-            }
+        ContentSubsection {
+            title: Translation.tr("Bar style")
+            BarStyleSelector {}
         }
 
-        ConfigRow {
-            uniform: true
-            ConfigSwitch {
-                enabled: Config.options.bar.cornerStyle === 1
-                buttonIcon: "shadow"
-                text: Translation.tr("Shadow (Float style)")
-                checked: Config.options.bar.floatStyleShadow
-                onCheckedChanged: {
-                    Config.options.bar.floatStyleShadow = checked;
-                }
-            }
-            ConfigSwitch {
-                buttonIcon: "rectangle"
-                text: Translation.tr("Show background")
-                checked: Config.options.bar.showBackground
-                onCheckedChanged: {
-                    Config.options.bar.showBackground = checked;
-                }
-            }
-        }
-        ConfigSwitch {
-            buttonIcon: "more_horiz"
-            text: Translation.tr("Verbose")
-            checked: Config.options.bar.verbose
-            onCheckedChanged: {
-                Config.options.bar.verbose = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Show date next to the clock and media title in the middle")
-            }
-        }
-        MaterialTextArea {
-            Layout.fillWidth: true
-            placeholderText: Translation.tr("Top-left icon (\"distro\" or icon name from assets/icons)")
-            text: Config.options.bar.topLeftIcon
-            wrapMode: TextEdit.NoWrap
-            onTextChanged: {
-                Config.options.bar.topLeftIcon = text;
-            }
-        }
         ConfigStringList {
             placeholderText: Translation.tr("Show only on these monitors, comma-separated (empty = all)")
             value: Config.options.bar.screenList
@@ -174,6 +83,20 @@ ContentPage {
                 Config.options.bar.screenList = list;
             }
         }
+    }
+
+    ContentSection {
+        icon: "widgets"
+        title: Translation.tr("Modules")
+
+        StyledText {
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            color: Appearance.colors.colSubtext
+            font.pixelSize: Appearance.font.pixelSize.small
+            text: Translation.tr("Drag modules to reorder them or move them between groups. Modules in one group share a background. Click a module to change its options.")
+        }
+        BarLayoutEditor {}
     }
 
     ContentSection {

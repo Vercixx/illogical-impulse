@@ -100,7 +100,7 @@ Singleton {
                         "properties": {
                             "key": {
                                 "type": "string",
-                                "description": "The key to set, e.g. `bar.borderless`. MUST NOT BE GUESSED, use `get_shell_config` to see what keys are available before setting.",
+                                "description": "The key to set, e.g. `bar.style`. MUST NOT BE GUESSED, use `get_shell_config` to see what keys are available before setting.",
                             },
                             "value": {
                                 "type": "string",
@@ -150,7 +150,7 @@ Singleton {
                             "properties": {
                                 "key": {
                                     "type": "string",
-                                    "description": "The key to set, e.g. `bar.borderless`. MUST NOT BE GUESSED, use `get_shell_config` to see what keys are available before setting.",
+                                    "description": "The key to set, e.g. `bar.style`. MUST NOT BE GUESSED, use `get_shell_config` to see what keys are available before setting.",
                                 },
                                 "value": {
                                     "type": "string",
@@ -202,7 +202,7 @@ Singleton {
                             "properties": {
                                 "key": {
                                     "type": "string",
-                                    "description": "The key to set, e.g. `bar.borderless`. MUST NOT BE GUESSED, use `get_shell_config` to see what keys are available before setting.",
+                                    "description": "The key to set, e.g. `bar.style`. MUST NOT BE GUESSED, use `get_shell_config` to see what keys are available before setting.",
                                 },
                                 "value": {
                                     "type": "string",

@@ -7,7 +7,8 @@ import qs.modules.ii.bar as Bar
 
 MouseArea {
     id: root
-    property bool borderless: Config.options.bar.borderless
+    property var host: null
+    readonly property bool available: Battery.available
     readonly property var chargeState: Battery.chargeState
     readonly property bool isCharging: Battery.isCharging
     readonly property bool isPluggedIn: Battery.isPluggedIn
@@ -16,6 +17,7 @@ MouseArea {
 
     implicitHeight: batteryProgress.implicitHeight
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
+    onClicked: batteryPopup.toggle()
 
     ClippedProgressBar {
         id: batteryProgress
@@ -25,7 +27,7 @@ MouseArea {
         valueBarHeight: 36
         value: percentage
         // value: 1
-        highlightColor: (isLow && !isCharging) ? Appearance.m3colors.m3error : Appearance.colors.colOnSecondaryContainer
+        highlightColor: (isLow && !isCharging) ? Appearance.m3colors.m3error : (root.host?.colAccent ?? Appearance.colors.colOnSecondaryContainer)
 
         font {
             pixelSize: 13

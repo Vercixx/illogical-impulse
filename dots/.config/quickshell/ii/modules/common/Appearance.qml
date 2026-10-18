@@ -34,6 +34,18 @@ Singleton {
     property real backgroundTransparency: Config?.options.appearance.transparency.enable ? Config?.options.appearance.transparency.automatic ? autoBackgroundTransparency : Config?.options.appearance.transparency.backgroundTransparency : 0
     property real contentTransparency: Config?.options.appearance.transparency.automatic ? autoContentTransparency : Config?.options.appearance.transparency.contentTransparency
 
+    readonly property var barStyles: ({
+        "hug": { strip: true, floating: false, hugCorners: true, groups: "pills", sections: "none" },
+        "float": { strip: true, floating: true, hugCorners: false, groups: "pills", sections: "none" },
+        "rect": { strip: true, floating: false, hugCorners: false, groups: "pills", sections: "none" },
+        "minimal": { strip: true, floating: false, hugCorners: true, groups: "line", sections: "none" },
+        "connected": { strip: true, floating: false, hugCorners: true, groups: "connected", sections: "none" },
+        "islands": { strip: false, floating: false, hugCorners: false, groups: "pills", sections: "none" },
+        "tonal": { strip: false, floating: true, hugCorners: false, groups: "tonal", sections: "round" },
+        "tabs": { strip: false, floating: false, hugCorners: false, groups: "pills", sections: "tabs" }
+    })
+    readonly property var barStyle: barStyles[Config.options?.bar.style] ?? barStyles.hug
+
     m3colors: QtObject {
         property bool darkmode: true
         property bool transparent: false
@@ -386,9 +398,8 @@ Singleton {
 
     sizes: QtObject {
         property real baseBarHeight: 40
-        property real barHeight: Config.options.bar.cornerStyle === 1 ? 
-            (baseBarHeight + root.sizes.hyprlandGapsOut * 2) : baseBarHeight
-        property real barCenterSideModuleWidth: Config.options?.bar.verbose ? 360 : 140
+        property real barHeight: root.barStyle.floating ? (baseBarHeight + root.sizes.hyprlandGapsOut * 2) : baseBarHeight
+        property real barCenterSideModuleWidth: 360
         property real barCenterSideModuleWidthShortened: 280
         property real barCenterSideModuleWidthHellaShortened: 190
         property real barShortenScreenWidthThreshold: 1200 // Shorten if screen width is at most this value
@@ -406,8 +417,7 @@ Singleton {
         property real sidebarWidth: 460
         property real sidebarWidthExtended: 750
         property real baseVerticalBarWidth: 46
-        property real verticalBarWidth: Config.options.bar.cornerStyle === 1 ? 
-            (baseVerticalBarWidth + root.sizes.hyprlandGapsOut * 2) : baseVerticalBarWidth
+        property real verticalBarWidth: root.barStyle.floating ? (baseVerticalBarWidth + root.sizes.hyprlandGapsOut * 2) : baseVerticalBarWidth
         property real wallpaperSelectorWidth: 1200
         property real wallpaperSelectorHeight: 690
         property real wallpaperSelectorItemMargins: 8

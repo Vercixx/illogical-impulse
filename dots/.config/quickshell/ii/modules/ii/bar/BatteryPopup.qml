@@ -3,10 +3,24 @@ import qs.modules.common.widgets
 import qs.services
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.UPower
 
-StyledPopup {
+BarDrawer {
     id: root
-    
+
+    controls: Component {
+        ConfigSelectionArray {
+            width: 300
+            currentValue: PowerProfiles.profile
+            onSelected: newValue => PowerProfiles.profile = newValue
+            options: [
+                { displayName: Translation.tr("Power saver"), icon: "energy_savings_leaf", value: PowerProfile.PowerSaver },
+                { displayName: Translation.tr("Balanced"), icon: "airwave", value: PowerProfile.Balanced },
+                ...(PowerProfiles.hasPerformanceProfile ? [{ displayName: Translation.tr("Performance"), icon: "local_fire_department", value: PowerProfile.Performance }] : [])
+            ]
+        }
+    }
+
     ColumnLayout {
         id: columnLayout
         anchors.centerIn: parent

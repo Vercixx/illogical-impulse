@@ -21,13 +21,12 @@ import qs.modules.ii.sessionScreen
 import qs.modules.ii.sidebarLeft
 import qs.modules.ii.sidebarRight
 import qs.modules.ii.overlay
-import qs.modules.ii.verticalBar
 import qs.modules.ii.wallpaperSelector
 
 Scope {
     readonly property bool barShown: Onboarding.shows("bar") || Onboarding.shows("workspaces")
 
-    PanelLoader { extraCondition: !Config.options.bar.vertical && barShown; component: Bar {} }
+    PanelLoader { extraCondition: barShown; component: Bar {} }
     PanelLoader { component: Background {} }
     PanelLoader { extraCondition: !Onboarding.active; component: Cheatsheet {} }
     PanelLoader { extraCondition: Config.options.dock.enable && Onboarding.shows("dock"); component: Dock {} }
@@ -45,6 +44,5 @@ Scope {
     PanelLoader { component: SessionScreen {} }
     PanelLoader { extraCondition: Onboarding.shows("sidebars"); component: SidebarLeft {} }
     PanelLoader { extraCondition: Onboarding.shows("sidebars"); component: SidebarRight {} }
-    PanelLoader { extraCondition: Config.options.bar.vertical && barShown; component: VerticalBar {} }
     PanelLoader { extraCondition: !Onboarding.active; component: WallpaperSelector {} }
 }

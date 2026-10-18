@@ -9,6 +9,9 @@ import Quickshell.Hyprland
 
 Item {
     id: root
+    property var host: null
+    readonly property bool available: !Config.options.bar.vertical && (host?.shortenLevel ?? 0) === 0
+    readonly property bool fillsSpace: true
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(root.QsWindow.window?.screen)
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
 
@@ -40,7 +43,7 @@ Item {
         StyledText {
             Layout.fillWidth: true
             font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer0
+            color: root.host?.colForeground ?? Appearance.colors.colOnLayer0
             elide: Text.ElideRight
             text: root.focusingThisMonitor && root.activeWindow?.activated && root.biggestWindow ? 
                 root.activeWindow?.title :

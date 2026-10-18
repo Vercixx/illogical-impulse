@@ -6,7 +6,8 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
-    property bool borderless: Config.options.bar.borderless
+    property var host: null
+    readonly property bool available: Battery.available && (host?.shortenLevel ?? 0) < 2
     readonly property var chargeState: Battery.chargeState
     readonly property bool isCharging: Battery.isCharging
     readonly property bool isPluggedIn: Battery.isPluggedIn
@@ -17,12 +18,13 @@ MouseArea {
     implicitHeight: Appearance.sizes.barHeight
 
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
+    onClicked: batteryPopup.toggle()
 
     ClippedProgressBar {
         id: batteryProgress
         anchors.centerIn: parent
         value: percentage
-        highlightColor: (isLow && !isCharging) ? Appearance.m3colors.m3error : Appearance.colors.colOnSecondaryContainer
+        highlightColor: (isLow && !isCharging) ? Appearance.m3colors.m3error : (root.host?.colAccent ?? Appearance.colors.colOnSecondaryContainer)
 
         Item {
             anchors.centerIn: parent

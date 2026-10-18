@@ -9,12 +9,14 @@ import qs.modules.common.widgets
 
 Item {
     id: root
+    property var host: null
+    readonly property bool available: (host?.shortenLevel ?? 0) === 0 && (pinnedItems.length > 0 || (showOverflowMenu && unpinnedItems.length > 0))
     implicitWidth: gridLayout.implicitWidth
     implicitHeight: gridLayout.implicitHeight
-    property bool vertical: false
-    property bool invertSide: false
+    property bool vertical: host ? Config.options.bar.vertical : false
+    property bool invertSide: host ? Config.options.bar.bottom : false
     property bool trayOverflowOpen: false
-    property bool showSeparator: true
+    property bool showSeparator: false
     property bool showOverflowMenu: true
     property var activeMenu: null
 
@@ -55,7 +57,7 @@ Item {
     HyprlandFocusGrab {
         id: focusGrab
         active: false
-        windows: [trayOverflowLayout.QsWindow?.window, root.activeMenu]
+        windows: [root.QsWindow?.window, root.activeMenu]
         onCleared: {
             root.trayOverflowOpen = false;
             if (root.activeMenu) {
@@ -94,17 +96,19 @@ Item {
                 iconSize: Appearance.font.pixelSize.larger
                 text: "expand_more"
                 horizontalAlignment: Text.AlignHCenter
-                color: root.trayOverflowOpen ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer2
+                color: root.trayOverflowOpen ? Appearance.colors.colOnSecondaryContainer : (root.host?.colForeground ?? Appearance.colors.colOnLayer2)
                 rotation: (root.trayOverflowOpen ? 180 : 0) - (90 * root.vertical) + (180 * root.invertSide)
                 Behavior on rotation {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }
             }
 
-            StyledPopup {
+            BarDrawer {
                 id: overflowPopup
-                hoverTarget: trayOverflowButton
-                active: root.trayOverflowOpen && root.unpinnedItems.length > 0
+                hoverEnabled: false
+                grabFocus: false
+                forceOpen: root.trayOverflowOpen && root.unpinnedItems.length > 0
+                onDismissed: root.trayOverflowOpen = false
 
                 GridLayout {
                     id: trayOverflowLayout

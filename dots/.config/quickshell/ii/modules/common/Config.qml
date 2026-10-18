@@ -235,13 +235,20 @@ Singleton {
                     }
                 }
                 property bool bottom: false // Instead of top
-                property int cornerStyle: 0 // 0: Hug | 1: Float | 2: Plain rectangle
-                property bool floatStyleShadow: true // Show shadow behind bar when cornerStyle == 1 (Float)
-                property bool borderless: false // true for no grouping of items
+                property string style: "hug" // hug | float | rect | minimal | connected | islands | tonal | tabs
+                property JsonObject layout: JsonObject { // Sections of groups of module ids; left/right are top/bottom when vertical
+                    property list<var> left: [["leftSidebarButton"], ["activeWindow"]]
+                    property list<var> center: [["resources"], ["media"], ["workspaces"], ["clock", "utilButtons", "battery"]]
+                    property list<var> right: [["sysTray"], ["systemIndicators"]]
+                }
                 property string topLeftIcon: "spark" // Options: "distro" or any icon name in ~/.config/quickshell/ii/assets/icons
-                property bool showBackground: true
-                property bool verbose: true
                 property bool vertical: false
+                property JsonObject clock: JsonObject {
+                    property bool showDate: true
+                }
+                property JsonObject media: JsonObject {
+                    property bool showTitle: true
+                }
                 property JsonObject resources: JsonObject {
                     property bool alwaysShowSwap: true
                     property bool alwaysShowCpu: true
@@ -269,7 +276,6 @@ Singleton {
                     property bool useNerdFont: false
                 }
                 property JsonObject weather: JsonObject {
-                    property bool enable: false
                     property bool enableGPS: true // gps based location
                     property string city: "" // When 'enableGPS' is false
                     property bool useUSCS: false // Instead of metric (SI) units

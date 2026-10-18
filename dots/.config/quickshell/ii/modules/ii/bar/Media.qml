@@ -11,12 +11,14 @@ import Quickshell.Hyprland
 
 Item {
     id: root
-    property bool borderless: Config.options.bar.borderless
+    property var host: null
+    readonly property bool available: (host?.shortenLevel ?? 0) < 2
+    readonly property color colForeground: host?.colForeground ?? Appearance.colors.colOnLayer1
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || Translation.tr("No media")
 
-    Layout.fillHeight: true
-    implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
+    readonly property bool showTitle: Config.options.bar.media.showTitle
+    implicitWidth: showTitle ? ((host?.shortenLevel ?? 0) === 1 ? Appearance.sizes.barCenterSideModuleWidthShortened : Appearance.sizes.barCenterSideModuleWidth) / 2 - 20 : mediaCircProg.implicitSize
     implicitHeight: Appearance.sizes.barHeight
 
     Timer {
@@ -27,7 +29,9 @@ Item {
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
+        hoverEnabled: !Config.options.bar.tooltips.clickToShow
         acceptedButtons: Qt.MiddleButton | Qt.BackButton | Qt.ForwardButton | Qt.RightButton | Qt.LeftButton
         onPressed: (event) => {
             if (event.button === Qt.MiddleButton) {
@@ -37,8 +41,13 @@ Item {
             } else if (event.button === Qt.ForwardButton || event.button === Qt.RightButton) {
                 activePlayer.next();
             } else if (event.button === Qt.LeftButton) {
-                GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen
+                mediaPopup.toggle();
             }
+        }
+
+        MediaPopup {
+            id: mediaPopup
+            hoverTarget: mouseArea
         }
     }
 
@@ -54,7 +63,7 @@ Item {
             lineWidth: Appearance.rounding.unsharpen
             value: activePlayer?.position / activePlayer?.length
             implicitSize: 20
-            colPrimary: Appearance.colors.colOnSecondaryContainer
+            colPrimary: root.host?.colAccent ?? Appearance.colors.colOnSecondaryContainer
             enableAnimation: false
 
             Item {
@@ -73,14 +82,14 @@ Item {
         }
 
         StyledText {
-            visible: Config.options.bar.verbose
+            visible: root.showTitle
             width: rowLayout.width - (CircularProgress.size + rowLayout.spacing * 2)
             Layout.alignment: Qt.AlignVCenter
             Layout.fillWidth: true // Ensures the text takes up available space
             Layout.rightMargin: rowLayout.spacing
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight // Truncates the text on the right
-            color: Appearance.colors.colOnLayer1
+            color: root.colForeground
             text: `${cleanedTitle}${activePlayer?.trackArtist ? ' • ' + activePlayer.trackArtist : ''}`
         }
 

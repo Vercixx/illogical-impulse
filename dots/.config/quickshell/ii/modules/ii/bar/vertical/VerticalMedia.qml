@@ -12,7 +12,7 @@ import qs.modules.ii.bar as Bar
 
 MouseArea {
     id: root
-    property bool borderless: Config.options.bar.borderless
+    property var host: null
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || Translation.tr("No media")
 
@@ -37,7 +37,7 @@ MouseArea {
         } else if (event.button === Qt.ForwardButton || event.button === Qt.RightButton) {
             activePlayer.next();
         } else if (event.button === Qt.LeftButton) {
-            GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen
+            mediaPopup.toggle();
         }
     }
 
@@ -48,7 +48,7 @@ MouseArea {
 
         lineWidth: Appearance.rounding.unsharpen
         value: activePlayer?.position / activePlayer?.length
-        colPrimary: Appearance.colors.colOnSecondaryContainer
+        colPrimary: root.host?.colAccent ?? Appearance.colors.colOnSecondaryContainer
         enableAnimation: false
 
         Item {
@@ -66,24 +66,8 @@ MouseArea {
         }
     }
 
-    Bar.StyledPopup {
+    Bar.MediaPopup {
+        id: mediaPopup
         hoverTarget: root
-        active: GlobalStates.mediaControlsOpen ? false : root.containsMouse
-
-        Column {
-            anchors.centerIn: parent
-            spacing: 4
-
-            Bar.StyledPopupHeaderRow {
-                icon: "music_note"
-                label: Translation.tr("Media")
-            }
-
-            StyledText {
-                color: Appearance.colors.colOnSurfaceVariant
-                text: `${cleanedTitle}${activePlayer?.trackArtist ? '\n' + activePlayer.trackArtist : ''}`
-            }
-        }
     }
-
 }

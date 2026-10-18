@@ -6,8 +6,16 @@ import QtQuick
 import QtQuick.Layouts
 import qs.modules.ii.bar
 
-StyledPopup {
+BarDrawer {
     id: root
+
+    controls: Component {
+        RippleButtonWithIcon {
+            materialIcon: "refresh"
+            mainText: Translation.tr("Refresh")
+            onClicked: Weather.getData()
+        }
+    }
 
     ColumnLayout {
         id: columnLayout

@@ -5,24 +5,27 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
-    property bool borderless: Config.options.bar.borderless
-    property bool alwaysShowAllResources: false
-    implicitWidth: rowLayout.implicitWidth + rowLayout.anchors.leftMargin + rowLayout.anchors.rightMargin
+    property var host: null
+    property bool alwaysShowAllResources: (host?.shortenLevel ?? 0) === 2
+    readonly property color colText: host?.colForeground ?? Appearance.colors.colOnLayer1
+    readonly property color colAccent: host?.colAccent ?? Appearance.colors.colOnSecondaryContainer
+    implicitWidth: rowLayout.implicitWidth
     implicitHeight: Appearance.sizes.barHeight
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
+    onClicked: resourcesPopup.toggle()
 
     RowLayout {
         id: rowLayout
 
         spacing: 0
         anchors.fill: parent
-        anchors.leftMargin: 4
-        anchors.rightMargin: 4
 
         Resource {
             iconName: "memory"
             percentage: ResourceUsage.memoryUsedPercentage
             warningThreshold: Config.options.bar.resources.memoryWarningThreshold
+            colText: root.colText
+            colAccent: root.colAccent
         }
 
         Resource {
@@ -33,6 +36,8 @@ MouseArea {
                 root.alwaysShowAllResources
             Layout.leftMargin: shown ? 6 : 0
             warningThreshold: Config.options.bar.resources.swapWarningThreshold
+            colText: root.colText
+            colAccent: root.colAccent
         }
 
         Resource {
@@ -43,11 +48,14 @@ MouseArea {
                 root.alwaysShowAllResources
             Layout.leftMargin: shown ? 6 : 0
             warningThreshold: Config.options.bar.resources.cpuWarningThreshold
+            colText: root.colText
+            colAccent: root.colAccent
         }
 
     }
 
     ResourcesPopup {
+        id: resourcesPopup
         hoverTarget: root
     }
 }

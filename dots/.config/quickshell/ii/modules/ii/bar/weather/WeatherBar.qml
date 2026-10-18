@@ -9,15 +9,20 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
+    property var host: null
+    readonly property bool vertical: Config.options.bar.vertical
+    readonly property color colForeground: host?.colForeground ?? Appearance.colors.colOnLayer1
     property bool hovered: false
-    implicitWidth: rowLayout.implicitWidth + 10 * 2
-    implicitHeight: Appearance.sizes.barHeight
+    implicitWidth: vertical ? Appearance.sizes.baseVerticalBarWidth : rowLayout.implicitWidth
+    implicitHeight: vertical ? rowLayout.implicitHeight : Appearance.sizes.barHeight
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
 
     onPressed: {
-        if (mouse.button === Qt.RightButton) {
+        if (mouse.button === Qt.LeftButton) {
+            weatherPopup.toggle();
+        } else if (mouse.button === Qt.RightButton) {
             Weather.getData();
             Quickshell.execDetached(["notify-send", 
                 Translation.tr("Weather"), 
@@ -28,24 +33,25 @@ MouseArea {
         }
     }
 
-    RowLayout {
+    BoxLayout {
         id: rowLayout
+        vertical: root.vertical
+        spacing: root.vertical ? 0 : 5
         anchors.centerIn: parent
 
         MaterialSymbol {
             fill: 0
             text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
             iconSize: Appearance.font.pixelSize.large
-            color: Appearance.colors.colOnLayer1
-            Layout.alignment: Qt.AlignVCenter
+            color: root.colForeground
+            Layout.alignment: Qt.AlignCenter
         }
 
         StyledText {
-            visible: true
-            font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer1
+            font.pixelSize: root.vertical ? Appearance.font.pixelSize.smaller : Appearance.font.pixelSize.small
+            color: root.colForeground
             text: Weather.data?.temp ?? "--°"
-            Layout.alignment: Qt.AlignVCenter
+            Layout.alignment: Qt.AlignCenter
         }
     }
 

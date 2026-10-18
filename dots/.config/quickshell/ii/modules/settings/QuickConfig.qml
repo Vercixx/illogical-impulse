@@ -8,6 +8,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
+import qs.modules.settings.bar
 
 ContentPage {
     property bool showMoreSettings: true
@@ -275,33 +276,11 @@ ContentPage {
                     ]
                 }
             }
-            ContentSubsection {
-                title: Translation.tr("Bar style")
+        }
 
-                ConfigSelectionArray {
-                    currentValue: Config.options.bar.cornerStyle
-                    onSelected: newValue => {
-                        Config.options.bar.cornerStyle = newValue; // Update local copy
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("Hug"),
-                            icon: "line_curve",
-                            value: 0
-                        },
-                        {
-                            displayName: Translation.tr("Float"),
-                            icon: "page_header",
-                            value: 1
-                        },
-                        {
-                            displayName: Translation.tr("Rect"),
-                            icon: "toolbar",
-                            value: 2
-                        }
-                    ]
-                }
-            }
+        ContentSubsection {
+            title: Translation.tr("Bar style")
+            BarStyleSelector {}
         }
 
         ConfigRow {

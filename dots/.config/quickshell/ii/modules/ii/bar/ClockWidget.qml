@@ -6,8 +6,9 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    property bool borderless: Config.options.bar.borderless
-    property bool showDate: Config.options.bar.verbose
+    property var host: null
+    readonly property color colForeground: host?.colForeground ?? Appearance.colors.colOnLayer1
+    property bool showDate: Config.options.bar.clock.showDate && (host?.shortenLevel ?? 0) < 2
     implicitWidth: rowLayout.implicitWidth
     implicitHeight: Appearance.sizes.barHeight
 
@@ -18,21 +19,21 @@ Item {
 
         StyledText {
             font.pixelSize: Appearance.font.pixelSize.large
-            color: Appearance.colors.colOnLayer1
+            color: root.colForeground
             text: DateTime.time
         }
 
         StyledText {
             visible: root.showDate
             font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer1
+            color: root.colForeground
             text: "•"
         }
 
         StyledText {
             visible: root.showDate
             font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer1
+            color: root.colForeground
             text: DateTime.longDate
         }
     }
@@ -41,8 +42,10 @@ Item {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: !Config.options.bar.tooltips.clickToShow
+        onClicked: popup.toggle()
 
         ClockWidgetPopup {
+            id: popup
             hoverTarget: mouseArea
         }
     }

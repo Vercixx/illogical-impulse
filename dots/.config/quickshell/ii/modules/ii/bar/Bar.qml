@@ -12,7 +12,22 @@ import qs.modules.common.widgets
 
 Scope {
     id: bar
-    property bool showBarBackground: Config.options.bar.showBackground
+    property bool repositioning: false
+
+    // Anchor swaps on a live layer surface leave stale sizes, so rebuild the window instead
+    Connections {
+        target: Config.options.bar
+        function onVerticalChanged() {
+            bar.reposition();
+        }
+        function onBottomChanged() {
+            bar.reposition();
+        }
+    }
+    function reposition() {
+        bar.repositioning = true;
+        Qt.callLater(() => bar.repositioning = false);
+    }
 
     Variants {
         // For each monitor
@@ -25,11 +40,23 @@ Scope {
         }
         LazyLoader {
             id: barLoader
-            active: GlobalStates.barOpen && !GlobalStates.screenLocked
+            active: GlobalStates.barOpen && !GlobalStates.screenLocked && !bar.repositioning
             required property ShellScreen modelData
             component: PanelWindow { // Bar window
                 id: barRoot
                 screen: barLoader.modelData
+
+                readonly property bool vertical: Config.options.bar.vertical
+                readonly property bool atEnd: Config.options.bar.bottom // Bottom or right
+                readonly property real thickness: vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
+                readonly property real baseThickness: vertical ? Appearance.sizes.baseVerticalBarWidth : Appearance.sizes.baseBarHeight
+                readonly property int deadPixel: Config.options.interactions.deadPixelWorkaround.enable ? 1 : 0
+                property bool superShow: false
+                property bool mustShow: hoverRegion.containsMouse || superShow || activeDrawer !== null
+                property Item activeDrawer: null
+                readonly property Item drawerLayer: drawerLayerItem
+                readonly property var drawerWindow: drawerWindow
+                readonly property bool hidden: Config.options.bar.autoHide.enable && !mustShow
 
                 Timer {
                     id: showBarTimer
@@ -50,29 +77,63 @@ Scope {
                         }
                     }
                 }
-                property bool superShow: false
-                property bool mustShow: hoverRegion.containsMouse || superShow
+
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows)) ? 0 :
-                    Appearance.sizes.baseBarHeight + (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0)
+                    baseThickness + (Appearance.barStyle.floating ? Appearance.sizes.hyprlandGapsOut : 0)
                 WlrLayershell.namespace: "quickshell:bar"
-                implicitHeight: Appearance.sizes.barHeight + Appearance.rounding.screenRounding
+                implicitWidth: thickness + Appearance.rounding.screenRounding
+                implicitHeight: thickness + Appearance.rounding.screenRounding
                 mask: Region {
                     item: hoverMaskRegion
                 }
                 color: "transparent"
 
-                // Positioning
                 anchors {
-                    top: !Config.options.bar.bottom
-                    bottom: Config.options.bar.bottom
-                    left: true
-                    right: true
+                    top: barRoot.vertical || !barRoot.atEnd
+                    bottom: barRoot.vertical || barRoot.atEnd
+                    left: !barRoot.vertical || !barRoot.atEnd
+                    right: !barRoot.vertical || barRoot.atEnd
                 }
 
                 margins {
-                    right: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.right) * -1
-                    bottom: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.bottom) * -1
+                    right: -barRoot.deadPixel * barRoot.anchors.right
+                    bottom: -barRoot.deadPixel * barRoot.anchors.bottom
+                }
+
+                // Drawers live on their own fixed-size surface: resizing the bar window makes it jump for a frame
+                PanelWindow {
+                    id: drawerWindow
+                    screen: barRoot.screen
+                    visible: barRoot.activeDrawer !== null
+                    color: "transparent"
+                    exclusionMode: ExclusionMode.Ignore
+                    exclusiveZone: 0
+                    WlrLayershell.namespace: "quickshell:barDrawer"
+                    readonly property real depth: Math.round((barRoot.vertical ? screen.width : screen.height) * 0.75)
+                    implicitWidth: depth
+                    implicitHeight: depth
+                    anchors {
+                        top: barRoot.anchors.top
+                        bottom: barRoot.anchors.bottom
+                        left: barRoot.anchors.left
+                        right: barRoot.anchors.right
+                    }
+                    margins {
+                        right: barRoot.margins.right
+                        bottom: barRoot.margins.bottom
+                    }
+                    mask: Region {
+                        item: barRoot.activeDrawer?.cardItem ?? null
+                    }
+
+                    Item { // Same origin and size as the bar window, so bar window coordinates work here
+                        id: drawerLayerItem
+                        x: barRoot.vertical && barRoot.atEnd ? drawerWindow.width - barRoot.width : 0
+                        y: !barRoot.vertical && barRoot.atEnd ? drawerWindow.height - barRoot.height : 0
+                        width: barRoot.width
+                        height: barRoot.height
+                    }
                 }
 
                 // Include in focus grab
@@ -88,125 +149,82 @@ Scope {
                     hoverEnabled: true
                     anchors {
                         fill: parent
-                        rightMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.right) * 1
-                        bottomMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.bottom) * 1
+                        rightMargin: barRoot.deadPixel * barRoot.anchors.right
+                        bottomMargin: barRoot.deadPixel * barRoot.anchors.bottom
                     }
 
                     Item {
                         id: hoverMaskRegion
+                        readonly property real extra: Config.options.bar.autoHide.hoverRegionWidth
                         anchors {
                             fill: barContent
-                            topMargin: -Config.options.bar.autoHide.hoverRegionWidth
-                            bottomMargin: -Config.options.bar.autoHide.hoverRegionWidth
+                            topMargin: barRoot.vertical ? 0 : -extra
+                            bottomMargin: barRoot.vertical ? 0 : -extra
+                            leftMargin: barRoot.vertical ? -extra : 0
+                            rightMargin: barRoot.vertical ? -extra : 0
                         }
                     }
 
                     BarContent {
                         id: barContent
-                        
+                        z: 1
+                        readonly property real hideOffset: barRoot.hidden ? -barRoot.thickness : 0
+
+                        implicitWidth: Appearance.sizes.verticalBarWidth
                         implicitHeight: Appearance.sizes.barHeight
                         anchors {
-                            right: parent.right
-                            left: parent.left
-                            top: parent.top
-                            bottom: undefined
-                            topMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.barHeight : 0
-                            bottomMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.bottom) * -1
-                            rightMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.right) * -1
+                            left: (!barRoot.vertical || !barRoot.atEnd) ? parent.left : undefined
+                            right: (!barRoot.vertical || barRoot.atEnd) ? parent.right : undefined
+                            top: (barRoot.vertical || !barRoot.atEnd) ? parent.top : undefined
+                            bottom: (barRoot.vertical || barRoot.atEnd) ? parent.bottom : undefined
+                            leftMargin: (barRoot.vertical && !barRoot.atEnd) ? hideOffset : 0
+                            topMargin: (!barRoot.vertical && !barRoot.atEnd) ? hideOffset : 0
+                            rightMargin: (barRoot.vertical && barRoot.atEnd) ? hideOffset : -barRoot.deadPixel * barRoot.anchors.right
+                            bottomMargin: (!barRoot.vertical && barRoot.atEnd) ? hideOffset : -barRoot.deadPixel * barRoot.anchors.bottom
+                        }
+                        Behavior on anchors.leftMargin {
+                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                         }
                         Behavior on anchors.topMargin {
                             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                         }
-                        Behavior on anchors.bottomMargin {
+                        Behavior on anchors.rightMargin {
                             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                         }
-
-                        states: State {
-                            name: "bottom"
-                            when: Config.options.bar.bottom
-                            AnchorChanges {
-                                target: barContent
-                                anchors {
-                                    right: parent.right
-                                    left: parent.left
-                                    top: undefined
-                                    bottom: parent.bottom
-                                }
-                            }
-                            PropertyChanges {
-                                target: barContent
-                                anchors.topMargin: 0
-                                anchors.bottomMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.barHeight : 0
-                            }
+                        Behavior on anchors.bottomMargin {
+                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                         }
                     }
 
                     // Round decorators
                     Loader {
                         id: roundDecorators
+                        active: Appearance.barStyle.strip && Appearance.barStyle.hugCorners
                         anchors {
-                            left: parent.left
-                            right: parent.right
-                            top: barContent.bottom
-                            bottom: undefined
+                            left: barRoot.vertical ? (barRoot.atEnd ? undefined : barContent.right) : parent.left
+                            right: barRoot.vertical ? (barRoot.atEnd ? barContent.left : undefined) : parent.right
+                            top: barRoot.vertical ? parent.top : (barRoot.atEnd ? undefined : barContent.bottom)
+                            bottom: barRoot.vertical ? parent.bottom : (barRoot.atEnd ? barContent.top : undefined)
                         }
+                        width: Appearance.rounding.screenRounding
                         height: Appearance.rounding.screenRounding
-                        active: showBarBackground && Config.options.bar.cornerStyle === 0 // Hug
-
-                        states: State {
-                            name: "bottom"
-                            when: Config.options.bar.bottom
-                            AnchorChanges {
-                                target: roundDecorators
-                                anchors {
-                                    right: parent.right
-                                    left: parent.left
-                                    top: undefined
-                                    bottom: barContent.top
-                                }
-                            }
-                        }
 
                         sourceComponent: Item {
-                            implicitHeight: Appearance.rounding.screenRounding
                             RoundCorner {
-                                id: leftCorner
-                                anchors {
-                                    top: parent.top
-                                    bottom: parent.bottom
-                                    left: parent.left
-                                }
-
                                 implicitSize: Appearance.rounding.screenRounding
-                                color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
-
-                                corner: RoundCorner.CornerEnum.TopLeft
-                                states: State {
-                                    name: "bottom"
-                                    when: Config.options.bar.bottom
-                                    PropertyChanges {
-                                        leftCorner.corner: RoundCorner.CornerEnum.BottomLeft
-                                    }
-                                }
+                                color: Appearance.colors.colLayer0Base
+                                corner: barRoot.vertical
+                                    ? (barRoot.atEnd ? RoundCorner.CornerEnum.TopRight : RoundCorner.CornerEnum.TopLeft)
+                                    : (barRoot.atEnd ? RoundCorner.CornerEnum.BottomLeft : RoundCorner.CornerEnum.TopLeft)
                             }
                             RoundCorner {
-                                id: rightCorner
-                                anchors {
-                                    right: parent.right
-                                    top: !Config.options.bar.bottom ? parent.top : undefined
-                                    bottom: Config.options.bar.bottom ? parent.bottom : undefined
-                                }
                                 implicitSize: Appearance.rounding.screenRounding
-                                color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
-
-                                corner: RoundCorner.CornerEnum.TopRight
-                                states: State {
-                                    name: "bottom"
-                                    when: Config.options.bar.bottom
-                                    PropertyChanges {
-                                        rightCorner.corner: RoundCorner.CornerEnum.BottomRight
-                                    }
-                                }
+                                color: Appearance.colors.colLayer0Base
+                                x: barRoot.vertical ? 0 : parent.width - implicitSize
+                                y: barRoot.vertical ? parent.height - implicitSize : 0
+                                corner: barRoot.vertical
+                                    ? (barRoot.atEnd ? RoundCorner.CornerEnum.BottomRight : RoundCorner.CornerEnum.BottomLeft)
+                                    : (barRoot.atEnd ? RoundCorner.CornerEnum.BottomRight : RoundCorner.CornerEnum.TopRight)
                             }
                         }
                     }

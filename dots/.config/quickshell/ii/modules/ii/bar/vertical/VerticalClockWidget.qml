@@ -7,7 +7,8 @@ import qs.modules.ii.bar as Bar
 
 Item {
     id: root
-    property bool borderless: Config.options.bar.borderless
+    property var host: null
+    readonly property color colForeground: host?.colForeground ?? Appearance.colors.colOnLayer1
     implicitHeight: column.implicitHeight
     implicitWidth: Appearance.sizes.verticalBarWidth
 
@@ -35,15 +36,16 @@ Item {
                             // Smaller "am"/"pm" text
                             return Appearance.font.pixelSize.large;
                     }
-                    color: Appearance.colors.colOnLayer1
+                    color: root.colForeground
                     text: modelData.padStart(2, "0")
                 }
             }
         }
         StyledText {
+            visible: Config.options.bar.clock.showDate
             anchors.horizontalCenter: parent.horizontalCenter
             font.pixelSize: Appearance.font.pixelSize.smallest
-            color: Appearance.colors.colOnLayer1
+            color: root.colForeground
             text: DateTime.shortDate
         }
     }
@@ -52,8 +54,10 @@ Item {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: !Config.options.bar.tooltips.clickToShow
+        onClicked: popup.toggle()
 
         Bar.ClockWidgetPopup {
+            id: popup
             hoverTarget: mouseArea
         }
     }

@@ -15,6 +15,7 @@ import Quickshell
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.settings.bar as BarSettings // Registers the dir so URL-loaded pages resolve its types
 
 ApplicationWindow {
     id: root
@@ -55,23 +56,7 @@ ApplicationWindow {
             name: Translation.tr("Bar"),
             icon: "toast",
             iconRotation: 180,
-            tabs: [
-                {
-                    name: Translation.tr("Layout"),
-                    icon: "spoke",
-                    component: "modules/settings/bar/LayoutConfig.qml"
-                },
-                {
-                    name: Translation.tr("Modules"),
-                    icon: "widgets",
-                    component: "modules/settings/bar/ModulesConfig.qml"
-                },
-                {
-                    name: Translation.tr("Workspaces"),
-                    icon: "workspaces",
-                    component: "modules/settings/bar/WorkspacesConfig.qml"
-                }
-            ]
+            component: "modules/settings/bar/LayoutConfig.qml"
         },
         {
             name: Translation.tr("Desktop"),

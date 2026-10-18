@@ -3,8 +3,9 @@ import qs.modules.common.widgets
 import qs.services
 import QtQuick
 import QtQuick.Layouts
+import qs.modules.ii.sidebarRight.calendar
 
-StyledPopup {
+BarDrawer {
     id: root
     property string formattedDate: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM dd, yyyy")
     property string formattedTime: DateTime.time
@@ -30,6 +31,10 @@ StyledPopup {
         }
 
         return todoText;
+    }
+
+    controls: Component {
+        CalendarWidget {}
     }
 
     ColumnLayout {

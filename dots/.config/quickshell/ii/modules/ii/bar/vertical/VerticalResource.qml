@@ -8,6 +8,7 @@ Item {
     required property string iconName
     required property double percentage
     property int warningThreshold: 100
+    property color colAccent: Appearance.colors.colOnSecondaryContainer
     implicitHeight: resourceProgress.implicitHeight
     implicitWidth: Appearance.sizes.verticalBarWidth
 
@@ -18,7 +19,7 @@ Item {
         anchors.centerIn: parent
         value: percentage
         enableAnimation: false
-        colPrimary: root.warning ? Appearance.colors.colError : Appearance.colors.colOnSecondaryContainer
+        colPrimary: root.warning ? Appearance.colors.colError : root.colAccent
         accountForLightBleeding: !root.warning
 
         MaterialSymbol {
