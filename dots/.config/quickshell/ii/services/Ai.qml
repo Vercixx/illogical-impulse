@@ -582,6 +582,7 @@ Singleton {
         property list<string> baseCommand: ["bash"]
         property AiMessageData message
         property ApiStrategy currentStrategy
+        property string errorOutput
 
         function markDone() {
             requester.message.done = true;
@@ -601,6 +602,7 @@ Singleton {
             
             requester.currentStrategy = root.currentApiStrategy;
             requester.currentStrategy.reset(); // Reset strategy state
+            requester.errorOutput = "";
 
             /* Put API key in environment variable */
             if (model.requires_key) requester.environment[`${root.apiKeyEnvVarName}`] = root.apiKeys ? (root.apiKeys[model.key_id] ?? "") : ""
@@ -654,7 +656,7 @@ Singleton {
 
             /* Create command string */
             let scriptRequestContent = ""
-            scriptRequestContent += `curl --no-buffer "${endpoint}"`
+            scriptRequestContent += `curl --no-buffer -sS --fail-with-body "${endpoint}"`
                 + ` ${headerString}`
                 + (authHeader ? ` ${authHeader}` : "")
                 + ` --data '${CF.StringUtils.shellSingleQuoteEscape(JSON.stringify(data))}'`
@@ -701,9 +703,22 @@ Singleton {
             }
         }
 
+        stderr: SplitParser {
+            onRead: data => requester.errorOutput += data + "\n"
+        }
+
         onExited: (exitCode, exitStatus) => {
             const result = requester.currentStrategy.onRequestFinished(requester.message);
-            
+
+            if (exitCode !== 0) {
+                const error = requester.errorOutput.trim() || `curl exited with code ${exitCode}`;
+                console.warn("[AI] Request failed:", error);
+                const errorMsg = `${requester.message.content.length > 0 ? "\n\n" : ""}**Error**: ${error}`;
+                requester.message.thinking = false;
+                requester.message.rawContent += errorMsg;
+                requester.message.content += errorMsg;
+            }
+
             if (result.finished) {
                 requester.markDone();
             } else if (!requester.message.done) {
