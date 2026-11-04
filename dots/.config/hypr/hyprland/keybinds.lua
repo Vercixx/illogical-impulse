@@ -9,6 +9,16 @@ local hyprScripts = "$HOME/.config/hypr/hyprland/scripts"
 local qsIpcCall = "qs -c $qsConfig ipc call"
 local qsIsAlive = qsIpcCall .. " TEST_ALIVE"
 
+-- Global shortcuts receive release events even after another keybind fires.
+-- Cancel the bare-Super action when another key is pressed while Super is held.
+hl.on("input.keyboard.key", function(keycode, _, state)
+    -- The event uses XKB keycodes (evdev + 8): 133/134 are left/right Super.
+    if state ~= 1 or keycode == 133 or keycode == 134 then return end
+    if hl.is_key_down("Super_L") or hl.is_key_down("Super_R") then
+        hl.dispatch(hl.dsp.global("quickshell:searchToggleReleaseInterrupt"))
+    end
+end)
+
 hl.bind("SUPER + SUPER_L", hl.dsp.global("quickshell:searchToggleRelease"), { description = "Shell: Toggle search" })
 hl.bind("SUPER + SUPER_R", hl.dsp.global("quickshell:searchToggleRelease"))
 hl.bind("SUPER + SUPER_L", hl.dsp.exec_cmd(qsIsAlive .. " || pkill fuzzel || fuzzel"))
