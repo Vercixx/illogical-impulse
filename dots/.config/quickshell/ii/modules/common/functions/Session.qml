@@ -1,10 +1,14 @@
 pragma Singleton
 import Quickshell
+import Quickshell.Io
 import qs.services
 import qs.modules.common
 
 Singleton {
     id: root
+
+    property string windowsBootEntryId: ""
+    readonly property bool windowsBootEntryAvailable: windowsBootEntryId !== ""
 
     function closeAllWindows() {
         HyprlandData.windowList.map(w => w.pid).forEach(pid => {
@@ -50,5 +54,38 @@ Singleton {
     function rebootToFirmware() {
         closeAllWindows();
         Quickshell.execDetached(["bash", "-c", `systemctl reboot --firmware-setup || loginctl reboot --firmware-setup`]);
+    }
+
+    function refreshWindowsBootEntry() {
+        windowsBootEntryProc.running = false;
+        windowsBootEntryProc.running = true;
+    }
+
+    function rebootToWindows() {
+        if (!windowsBootEntryAvailable) return;
+        setWindowsBootEntryProc.running = false;
+        setWindowsBootEntryProc.running = true;
+    }
+
+    Process {
+        id: windowsBootEntryProc
+        running: true // also check at shell reload
+        command: ["bash", "-c", "command -v efibootmgr >/dev/null 2>&1 && efibootmgr 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const enabledEntry = text.match(/^Boot([0-9A-Fa-f]{4})\*\s+Windows Boot Manager/mi);
+                const disabledEntry = text.match(/^Boot([0-9A-Fa-f]{4})\s+Windows Boot Manager/mi);
+                root.windowsBootEntryId = enabledEntry ? enabledEntry[1] : (disabledEntry ? disabledEntry[1] : "");
+            }
+        }
+    }
+
+    Process {
+        id: setWindowsBootEntryProc
+        command: ["bash", "-c", `pkexec efibootmgr --bootnext ${root.windowsBootEntryId}`]
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) return;
+            root.reboot();
+        }
     }
 }

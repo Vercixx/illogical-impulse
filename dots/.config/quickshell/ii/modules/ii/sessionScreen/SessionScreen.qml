@@ -5,6 +5,7 @@ import qs.modules.common.widgets
 import qs.modules.common.functions
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
@@ -19,8 +20,10 @@ Scope {
         id: sessionLoader
         active: GlobalStates.sessionOpen
         onActiveChanged: {
-            if (sessionLoader.active)
+            if (sessionLoader.active) {
                 SessionWarnings.refresh();
+                Session.refreshWindowsBootEntry();
+            }
         }
 
         Connections {
@@ -36,9 +39,16 @@ Scope {
             id: sessionRoot
             visible: sessionLoader.active
             property string subtitle
+            property bool rebootChoiceOpen: false
 
             function hide() {
                 GlobalStates.sessionOpen = false;
+            }
+
+            function closeRebootChoice() {
+                if (!rebootChoiceOpen) return;
+                rebootChoiceOpen = false;
+                sessionReboot.forceActiveFocus();
             }
 
             exclusionMode: ExclusionMode.Ignore
@@ -71,164 +81,192 @@ Scope {
 
                 Keys.onPressed: event => {
                     if (event.key === Qt.Key_Escape) {
-                        sessionRoot.hide();
+                        if (sessionRoot.rebootChoiceOpen)
+                            sessionRoot.closeRebootChoice();
+                        else
+                            sessionRoot.hide();
                     }
                 }
 
-                ColumnLayout {
+                ColumnLayout { // Blurrable menu content
+                    id: menuContent
                     Layout.alignment: Qt.AlignHCenter
-                    spacing: 0
-                    StyledText {
-                        // Title
+                    spacing: 15
+                    property real menuBlurAmount: sessionRoot.rebootChoiceOpen ? 1 : 0
+                    layer.enabled: menuBlurAmount > 0
+                    layer.effect: MultiEffect {
+                        blurEnabled: true
+                        blur: menuContent.menuBlurAmount
+                        blurMax: 32
+                    }
+
+                    Behavior on menuBlurAmount {
+                        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                    }
+
+                    ColumnLayout {
                         Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        font {
-                            family: Appearance.font.family.title
-                            pixelSize: Appearance.font.pixelSize.title
-                            variableAxes: Appearance.font.variableAxes.title
+                        spacing: 0
+                        StyledText {
+                            // Title
+                            Layout.alignment: Qt.AlignHCenter
+                            horizontalAlignment: Text.AlignHCenter
+                            font {
+                                family: Appearance.font.family.title
+                                pixelSize: Appearance.font.pixelSize.title
+                                variableAxes: Appearance.font.variableAxes.title
+                            }
+                            text: Translation.tr("Session")
                         }
-                        text: Translation.tr("Session")
+
+                        StyledText {
+                            // Small instruction
+                            Layout.alignment: Qt.AlignHCenter
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            text: Translation.tr("Arrow keys to navigate, Enter to select\nEsc or click anywhere to cancel")
+                        }
                     }
 
-                    StyledText {
-                        // Small instruction
-                        Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: Appearance.font.pixelSize.normal
-                        text: Translation.tr("Arrow keys to navigate, Enter to select\nEsc or click anywhere to cancel")
-                    }
-                }
+                    GridLayout {
+                        columns: 4
+                        columnSpacing: 15
+                        rowSpacing: 15
 
-                GridLayout {
-                    columns: 4
-                    columnSpacing: 15
-                    rowSpacing: 15
+                        SessionActionButton {
+                            id: sessionLock
+                            focus: sessionRoot.visible
+                            buttonIcon: "lock"
+                            buttonText: Translation.tr("Lock")
+                            onClicked: {
+                                Session.lock();
+                                sessionRoot.hide();
+                            }
+                            onFocusChanged: {
+                                if (focus)
+                                    sessionRoot.subtitle = buttonText;
+                            }
+                            KeyNavigation.right: sessionSleep
+                            KeyNavigation.down: sessionHibernate
+                        }
+                        SessionActionButton {
+                            id: sessionSleep
+                            buttonIcon: "dark_mode"
+                            buttonText: Translation.tr("Sleep")
+                            onClicked: {
+                                Session.suspend();
+                                sessionRoot.hide();
+                            }
+                            onFocusChanged: {
+                                if (focus)
+                                    sessionRoot.subtitle = buttonText;
+                            }
+                            KeyNavigation.left: sessionLock
+                            KeyNavigation.right: sessionLogout
+                            KeyNavigation.down: sessionShutdown
+                        }
+                        SessionActionButton {
+                            id: sessionLogout
+                            buttonIcon: "logout"
+                            buttonText: Translation.tr("Logout")
+                            onClicked: {
+                                Session.logout();
+                                sessionRoot.hide();
+                            }
+                            onFocusChanged: {
+                                if (focus)
+                                    sessionRoot.subtitle = buttonText;
+                            }
+                            KeyNavigation.left: sessionSleep
+                            KeyNavigation.right: sessionTaskManager
+                            KeyNavigation.down: sessionReboot
+                        }
+                        SessionActionButton {
+                            id: sessionTaskManager
+                            buttonIcon: "browse_activity"
+                            buttonText: Translation.tr("Task Manager")
+                            onClicked: {
+                                Session.launchTaskManager();
+                                sessionRoot.hide();
+                            }
+                            onFocusChanged: {
+                                if (focus)
+                                    sessionRoot.subtitle = buttonText;
+                            }
+                            KeyNavigation.left: sessionLogout
+                            KeyNavigation.down: sessionFirmwareReboot
+                        }
 
-                    SessionActionButton {
-                        id: sessionLock
-                        focus: sessionRoot.visible
-                        buttonIcon: "lock"
-                        buttonText: Translation.tr("Lock")
-                        onClicked: {
-                            Session.lock();
-                            sessionRoot.hide();
+                        SessionActionButton {
+                            id: sessionHibernate
+                            buttonIcon: "downloading"
+                            buttonText: Translation.tr("Hibernate")
+                            onClicked: {
+                                Session.hibernate();
+                                sessionRoot.hide();
+                            }
+                            onFocusChanged: {
+                                if (focus)
+                                    sessionRoot.subtitle = buttonText;
+                            }
+                            KeyNavigation.up: sessionLock
+                            KeyNavigation.right: sessionShutdown
                         }
-                        onFocusChanged: {
-                            if (focus)
-                                sessionRoot.subtitle = buttonText;
+                        SessionActionButton {
+                            id: sessionShutdown
+                            buttonIcon: "power_settings_new"
+                            buttonText: Translation.tr("Shutdown")
+                            onClicked: {
+                                Session.poweroff();
+                                sessionRoot.hide();
+                            }
+                            onFocusChanged: {
+                                if (focus)
+                                    sessionRoot.subtitle = buttonText;
+                            }
+                            KeyNavigation.left: sessionHibernate
+                            KeyNavigation.right: sessionReboot
+                            KeyNavigation.up: sessionSleep
                         }
-                        KeyNavigation.right: sessionSleep
-                        KeyNavigation.down: sessionHibernate
-                    }
-                    SessionActionButton {
-                        id: sessionSleep
-                        buttonIcon: "dark_mode"
-                        buttonText: Translation.tr("Sleep")
-                        onClicked: {
-                            Session.suspend();
-                            sessionRoot.hide();
+                        SessionActionButton {
+                            id: sessionReboot
+                            buttonIcon: "restart_alt"
+                            buttonText: Translation.tr("Reboot")
+                            tooltipExtraText: Session.windowsBootEntryAvailable ? Translation.tr("Direct reboot into Windows is available") : ""
+                            tooltipEnabled: !sessionRoot.rebootChoiceOpen
+                            onClicked: {
+                                if (Session.windowsBootEntryAvailable) {
+                                    sessionRoot.rebootChoiceOpen = true;
+                                } else {
+                                    Session.reboot();
+                                    sessionRoot.hide();
+                                }
+                            }
+                            onFocusChanged: {
+                                if (focus)
+                                    sessionRoot.subtitle = tooltipExtraText
+                                        ? `${buttonText}\n${tooltipExtraText}`
+                                        : buttonText;
+                            }
+                            KeyNavigation.left: sessionShutdown
+                            KeyNavigation.right: sessionFirmwareReboot
+                            KeyNavigation.up: sessionLogout
                         }
-                        onFocusChanged: {
-                            if (focus)
-                                sessionRoot.subtitle = buttonText;
+                        SessionActionButton {
+                            id: sessionFirmwareReboot
+                            buttonIcon: "settings_applications"
+                            buttonText: Translation.tr("Reboot to firmware settings")
+                            onClicked: {
+                                Session.rebootToFirmware();
+                                sessionRoot.hide();
+                            }
+                            onFocusChanged: {
+                                if (focus)
+                                    sessionRoot.subtitle = buttonText;
+                            }
+                            KeyNavigation.up: sessionTaskManager
+                            KeyNavigation.left: sessionReboot
                         }
-                        KeyNavigation.left: sessionLock
-                        KeyNavigation.right: sessionLogout
-                        KeyNavigation.down: sessionShutdown
-                    }
-                    SessionActionButton {
-                        id: sessionLogout
-                        buttonIcon: "logout"
-                        buttonText: Translation.tr("Logout")
-                        onClicked: {
-                            Session.logout();
-                            sessionRoot.hide();
-                        }
-                        onFocusChanged: {
-                            if (focus)
-                                sessionRoot.subtitle = buttonText;
-                        }
-                        KeyNavigation.left: sessionSleep
-                        KeyNavigation.right: sessionTaskManager
-                        KeyNavigation.down: sessionReboot
-                    }
-                    SessionActionButton {
-                        id: sessionTaskManager
-                        buttonIcon: "browse_activity"
-                        buttonText: Translation.tr("Task Manager")
-                        onClicked: {
-                            Session.launchTaskManager();
-                            sessionRoot.hide();
-                        }
-                        onFocusChanged: {
-                            if (focus)
-                                sessionRoot.subtitle = buttonText;
-                        }
-                        KeyNavigation.left: sessionLogout
-                        KeyNavigation.down: sessionFirmwareReboot
-                    }
-
-                    SessionActionButton {
-                        id: sessionHibernate
-                        buttonIcon: "downloading"
-                        buttonText: Translation.tr("Hibernate")
-                        onClicked: {
-                            Session.hibernate();
-                            sessionRoot.hide();
-                        }
-                        onFocusChanged: {
-                            if (focus)
-                                sessionRoot.subtitle = buttonText;
-                        }
-                        KeyNavigation.up: sessionLock
-                        KeyNavigation.right: sessionShutdown
-                    }
-                    SessionActionButton {
-                        id: sessionShutdown
-                        buttonIcon: "power_settings_new"
-                        buttonText: Translation.tr("Shutdown")
-                        onClicked: {
-                            Session.poweroff();
-                            sessionRoot.hide();
-                        }
-                        onFocusChanged: {
-                            if (focus)
-                                sessionRoot.subtitle = buttonText;
-                        }
-                        KeyNavigation.left: sessionHibernate
-                        KeyNavigation.right: sessionReboot
-                        KeyNavigation.up: sessionSleep
-                    }
-                    SessionActionButton {
-                        id: sessionReboot
-                        buttonIcon: "restart_alt"
-                        buttonText: Translation.tr("Reboot")
-                        onClicked: {
-                            Session.reboot();
-                            sessionRoot.hide();
-                        }
-                        onFocusChanged: {
-                            if (focus)
-                                sessionRoot.subtitle = buttonText;
-                        }
-                        KeyNavigation.left: sessionShutdown
-                        KeyNavigation.right: sessionFirmwareReboot
-                        KeyNavigation.up: sessionLogout
-                    }
-                    SessionActionButton {
-                        id: sessionFirmwareReboot
-                        buttonIcon: "settings_applications"
-                        buttonText: Translation.tr("Reboot to firmware settings")
-                        onClicked: {
-                            Session.rebootToFirmware();
-                            sessionRoot.hide();
-                        }
-                        onFocusChanged: {
-                            if (focus)
-                                sessionRoot.subtitle = buttonText;
-                        }
-                        KeyNavigation.up: sessionTaskManager
-                        KeyNavigation.left: sessionReboot
                     }
                 }
 
@@ -268,6 +306,69 @@ Scope {
                     }
                 }
             }
+
+            MouseArea { // Block interaction with the blurred menu while choosing a reboot type
+                anchors.fill: parent
+                visible: sessionRoot.rebootChoiceOpen
+                hoverEnabled: true
+                onClicked: sessionRoot.closeRebootChoice()
+            }
+
+            RowLayout { // Reboot type choice
+                id: rebootChoiceRow
+                anchors.centerIn: parent
+                spacing: 15
+                opacity: sessionRoot.rebootChoiceOpen ? 1 : 0
+                scale: sessionRoot.rebootChoiceOpen ? 1 : 0.95
+                visible: opacity > 0
+
+                Behavior on opacity {
+                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                }
+                Behavior on scale {
+                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                }
+
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Escape) {
+                        sessionRoot.closeRebootChoice();
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab) {
+                        event.accepted = true;
+                    }
+                }
+
+                SessionActionButton {
+                    id: normalRebootButton
+                    focus: sessionRoot.rebootChoiceOpen
+                    buttonIcon: "restart_alt"
+                    buttonText: Translation.tr("Normal reboot")
+                    onClicked: {
+                        Session.reboot();
+                        sessionRoot.hide();
+                    }
+                    onFocusChanged: {
+                        if (focus)
+                            sessionRoot.subtitle = buttonText;
+                    }
+                    KeyNavigation.right: windowsRebootButton
+                }
+
+                SessionActionButton {
+                    id: windowsRebootButton
+                    iconSource: "microsoft-symbolic.svg"
+                    buttonText: Translation.tr("Reboot into Windows")
+                    onClicked: {
+                        Session.rebootToWindows();
+                        sessionRoot.hide();
+                    }
+                    onFocusChanged: {
+                        if (focus)
+                            sessionRoot.subtitle = buttonText;
+                    }
+                    KeyNavigation.left: normalRebootButton
+                }
+            }
         }
     }
 
@@ -282,6 +383,9 @@ Scope {
         implicitWidth: descriptionLabelText.implicitWidth + 15 * 2
 
         Behavior on implicitWidth {
+            animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
+        }
+        Behavior on implicitHeight {
             animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
         }
 

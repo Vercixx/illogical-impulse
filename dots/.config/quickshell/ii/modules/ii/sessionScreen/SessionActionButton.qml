@@ -8,6 +8,9 @@ RippleButton {
 
     property string buttonIcon
     property string buttonText
+    property string iconSource: ""
+    property string tooltipExtraText: ""
+    property bool tooltipEnabled: true
     property bool keyboardDown: false
     property real size: 120
 
@@ -28,6 +31,11 @@ RippleButton {
         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
     }
 
+    onActiveFocusChanged: {
+        if (!activeFocus)
+            keyboardDown = false;
+    }
+
     Keys.onPressed: (event) => {
         if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
             keyboardDown = true
@@ -42,17 +50,40 @@ RippleButton {
         }
     }
 
-    contentItem: MaterialSymbol {
-        id: icon
-        anchors.fill: parent
-        color: button.colText
-        horizontalAlignment: Text.AlignHCenter
-        iconSize: 45
-        text: buttonIcon
+    contentItem: Item {
+        implicitWidth: squareIcon.implicitWidth
+        implicitHeight: squareIcon.implicitHeight
+
+        MaterialSymbol {
+            id: squareIcon
+            visible: button.iconSource === ""
+            anchors.fill: parent
+            color: button.colText
+            horizontalAlignment: Text.AlignHCenter
+            iconSize: 45
+            text: button.buttonIcon
+        }
+
+        Loader {
+            active: button.iconSource !== ""
+            anchors.centerIn: parent
+            width: 36
+            height: 36
+            sourceComponent: CustomIcon {
+                width: 36
+                height: 36
+                colorize: true
+                color: button.colText
+                source: button.iconSource
+            }
+        }
     }
 
     StyledToolTip {
-        text: buttonText
+        text: button.tooltipExtraText
+            ? `${button.buttonText}\n${button.tooltipExtraText}`
+            : button.buttonText
+        extraVisibleCondition: button.tooltipEnabled
     }
 
 }
