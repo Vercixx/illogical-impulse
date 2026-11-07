@@ -234,6 +234,23 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "bug_report"
+        title: Translation.tr("Debugging")
+
+        ConfigSwitch {
+            buttonIcon: "description"
+            text: Translation.tr("Detailed logging")
+            checked: Config.options.debug.logging
+            onCheckedChanged: {
+                Config.options.debug.logging = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Saves shell logs to ~/.local/state/quickshell/user/logs.\nIf the shell freezes for 30 seconds, it gets restarted with a crash report.")
+            }
+        }
+    }
+
+    ContentSection {
         id: greeterSection
         visible: SystemInfo.distroId !== "eonos" // ii-greeter is a system package there
         icon: "login"

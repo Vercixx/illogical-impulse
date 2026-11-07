@@ -32,6 +32,7 @@ ShellRoot {
         Cliphist.refresh()
         Wallpapers.load()
         Updates.load()
+        DebugLog.load()
     }
 
 
