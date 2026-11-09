@@ -153,26 +153,13 @@ hl.curve("stall", {
     type = "bezier",
     points = {{1, -0.1}, {0.7, 0.85}}
 })
-hl.curve("responsiveSpring", {
-    type = "spring",
-    mass = 1,
-    stiffness = 240,
-    dampening = 25
-})
-hl.curve("snappySpring", {
-    type = "spring",
-    mass = 1,
-    stiffness = 300,
-    dampening = 26
-})
 -- Configs
 -- windows
 hl.animation({
     leaf = "windowsIn",
     enabled = true,
     speed = 3,
-    -- bezier = "emphasizedDecel",
-    spring = "snappySpring",
+    bezier = "emphasizedDecel",
     style = "popin 80%"
 })
 hl.animation({
@@ -185,7 +172,7 @@ hl.animation({
     leaf = "windowsOut",
     enabled = true,
     speed = 2,
-    spring = "snappySpring",
+    bezier = "emphasizedDecel",
     style = "popin 90%"
 })
 hl.animation({
@@ -198,13 +185,13 @@ hl.animation({
     leaf = "windowsMove",
     enabled = true,
     speed = 3,
-    spring = "responsiveSpring",
+    bezier = "emphasizedDecel",
     style = "slide"
 })
 hl.animation({
     leaf = "border",
     enabled = true,
-    speed = 3,
+    speed = 10,
     bezier = "emphasizedDecel"
 })
 
@@ -241,26 +228,23 @@ hl.animation({
     leaf = "workspaces",
     enabled = true,
     speed = 7,
-    -- bezier = "menu_decel",
-    spring = "responsiveSpring",
-    style = "slidevert"
+    bezier = "menu_decel",
+    style = "slide"
 })
 -- specialWorkspace
 hl.animation({
     leaf = "specialWorkspaceIn",
     enabled = true,
     speed = 2.8,
-    -- bezier = "emphasizedDecel",
-    spring = "responsiveSpring",
-    style = "slidevert 50%"
+    bezier = "emphasizedDecel",
+    style = "slidevert"
 })
 hl.animation({
     leaf = "specialWorkspaceOut",
     enabled = true,
     speed = 1.2,
-    -- bezier = "emphasizedAccel",
-    spring = "snappySpring",
-    style = "slidevert 50%"
+    bezier = "emphasizedAccel",
+    style = "slidevert"
 })
 -- zoom
 hl.animation({
