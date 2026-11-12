@@ -22,7 +22,7 @@ ContentPage {
 
         ContentSubsection {
             title: Translation.tr("Interface Language")
-            tooltip: Translation.tr("Select the language for the user interface.\n\"Auto\" will use your system's locale.")
+            tooltip: Translation.tr("Select the language for the user interface. This only affects illogical-impulse shell.\nYou might want to check KDE System Settings for system-wide language options")
 
             StyledComboBox {
                 id: languageSelector

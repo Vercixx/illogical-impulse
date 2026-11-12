@@ -67,7 +67,7 @@
   "Color picker": "Пипетка",
   "Interface": "Интерфейс",
   "Tint app icons": "Тонировать иконки",
-  "Select the language for the user interface.\n\"Auto\" will use your system's locale.": "Выбор языка интерфейса.\n«Авто» - системная локаль.",
+  "Select the language for the user interface. This only affects illogical-impulse shell.\nYou might want to check KDE System Settings for system-wide language options": "Выбор языка интерфейса. Эта настройка влияет только на оболочку illogical-impulse.\nВам стоит проверить Параметры Системы KDE для изменения системного языка.",
   "Local Ollama model | %1": "Локальная модель Ollama | %1",
   "Usage: <tt>%1superpaste NUM_OF_ENTRIES[i]</tt>\nSupply <tt>i</tt> when you want images\nExamples:\n<tt>%1superpaste 4i</tt> for the last 4 images\n<tt>%1superpaste 7</tt> for the last 7 entries": "Исп: <tt>%1superpaste КОЛИЧЕСТВО[i]</tt>\nДобавьте <tt>i</tt> для изображений\nПримеры:\n<tt>%1superpaste 4i</tt> - последние 4 изображения\n<tt>%1superpaste 7</tt> - последние 7 записей",
   "Audio": "Звук",
