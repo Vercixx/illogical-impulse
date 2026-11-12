@@ -94,7 +94,7 @@ ContentPage {
             wrapMode: Text.Wrap
             color: Appearance.colors.colSubtext
             font.pixelSize: Appearance.font.pixelSize.small
-            text: Translation.tr("Drag modules to reorder them or move them between groups. Modules in one group share a background. Click a module to change its options.")
+            text: Translation.tr("Drag modules to reorder them or move them between groups. Drag a group by its handle to move all of it. Modules in one group share a background. Click a module to change its options. The centering button in the Center section picks what stays in the middle of the bar.")
         }
         BarLayoutEditor {}
     }

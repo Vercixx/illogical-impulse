@@ -42,6 +42,18 @@ Item {
         return false;
     }
     readonly property bool dimmed: bar.workspacesOnly && !modules.includes("workspaces")
+    readonly property int anchorIndex: section.anchorModule === "" ? -1 : modules.indexOf(section.anchorModule)
+    readonly property real anchorCenter: {
+        if (anchorIndex < 0)
+            return -1;
+        if (section.anchorWholeGroup)
+            return (vertical ? height : width) / 2;
+        repeater.count;
+        const host = repeater.itemAt(anchorIndex);
+        if (!host?.visible)
+            return -1;
+        return vertical ? layout.y + host.y + host.height / 2 : layout.x + host.x + host.width / 2;
+    }
 
     visible: shown
     opacity: dimmed ? 0 : 1

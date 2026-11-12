@@ -10,6 +10,8 @@ Item {
     required property var bar
     property bool sideHovered: false
     property real maximumLength: Infinity
+    property string anchorModule: ""
+    property bool anchorWholeGroup: false
 
     readonly property var traits: Appearance.barStyle
     readonly property bool vertical: Config.options.bar.vertical
@@ -31,6 +33,18 @@ Item {
         for (let i = 0; i < repeater.count; i++) {
             if (repeater.itemAt(i)?.shown)
                 return i;
+        }
+        return -1;
+    }
+
+    // Main-axis position of the anchor module's (or group's) center, -1 when it isn't shown
+    readonly property real anchorCenter: {
+        repeater.count;
+        for (let i = 0; i < repeater.count; i++) {
+            const slot = repeater.itemAt(i);
+            if (!slot?.shown || slot.barGroup.anchorCenter < 0)
+                continue;
+            return (vertical ? layout.y + slot.y + slot.barGroup.y : layout.x + slot.x + slot.barGroup.x) + slot.barGroup.anchorCenter;
         }
         return -1;
     }
@@ -115,6 +129,7 @@ Item {
                 required property var modelData
                 required property int index
                 readonly property bool shown: group.shown
+                readonly property Item barGroup: group
                 visible: shown
                 vertical: root.vertical
                 spacing: 4

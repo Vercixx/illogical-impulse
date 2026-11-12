@@ -82,7 +82,16 @@ Item { // Bar content region
         groups: Config.options.bar.layout.center
         bar: root
         maximumLength: root.vertical ? root.height : root.width
-        anchors.centerIn: parent
+        anchorModule: Config.options.bar.layout.centerAnchor
+        anchorWholeGroup: Config.options.bar.layout.centerAnchorGroup
+
+        readonly property real barLength: root.vertical ? root.height : root.width
+        readonly property real start: {
+            const middle = anchorCenter < 0 ? length / 2 : anchorCenter;
+            return Math.round(Math.max(0, Math.min(barLength - length, barLength / 2 - middle)));
+        }
+        x: root.vertical ? Math.round((root.width - width) / 2) : start
+        y: root.vertical ? start : Math.round((root.height - height) / 2)
     }
 
     FocusedScrollMouseArea { // End side | scroll to change volume

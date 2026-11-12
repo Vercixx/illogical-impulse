@@ -240,6 +240,8 @@ Singleton {
                     property list<var> left: [["leftSidebarButton"], ["activeWindow"]]
                     property list<var> center: [["resources"], ["media"], ["workspaces"], ["clock", "utilButtons", "battery"]]
                     property list<var> right: [["sysTray"], ["systemIndicators"]]
+                    property string centerAnchor: "workspaces" // Center module kept in the middle of the bar; "" centers the whole section
+                    property bool centerAnchorGroup: false // Keep the anchor's whole group in the middle instead
                 }
                 property string topLeftIcon: "spark" // Options: "distro" or any icon name in ~/.config/quickshell/ii/assets/icons
                 property bool vertical: false
