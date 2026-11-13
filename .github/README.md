@@ -17,11 +17,19 @@
 
 <div align="center">
 
-| **AI, settings app** | **Some widgets** |
+<img width="2560" height="1440" alt="Desktop with the floating bar, clock and weather widgets, media controls and a notification" src="assets/screenshots/desktop.webp" />
+
+| **AI chat and sidebars** | **Overview** |
 |:--:|:--:|
-| <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5d4e7d07-d0b4-4406-a4c9-ed7ba90e3fe4" /> | <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6a32395f-9437-4192-8faf-2951a9e84cbe" /> |
-| **Window management** | **wow look its orange** |
-| <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c51bed8b-3670-4d4c-9074-873be224fb8e" /> | <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/98703a66-0743-439f-a721-cef7afa6ab95" /> |
+| <img width="2560" height="1440" alt="Both sidebars open: AI chat on the left, quick toggles, notifications and calendar on the right" src="assets/screenshots/sidebars.webp" /> | <img width="2560" height="1440" alt="Workspace overview with live window previews" src="assets/screenshots/overview.webp" /> |
+| **Drift, the not-tiling layout** | **Bar styles and layout editor** |
+| <img width="2560" height="1440" alt="Windows placed freely on the Drift canvas" src="assets/screenshots/drift.webp" /> | <img width="2560" height="1440" alt="Settings app on the Bar page with style presets and the module layout editor" src="assets/screenshots/settings.webp" /> |
+| **Light mode with a vertical bar** | **Keybind cheatsheet with search** |
+| <img width="2560" height="1440" alt="Light theme with a vertical bar, dock, digital clock and the wallpaper picker" src="assets/screenshots/light.webp" /> | <img width="2560" height="1440" alt="Keybind cheatsheet filtered by a search" src="assets/screenshots/cheatsheet.webp" /> |
+| **Onboarding** | **Reboot straight into Windows** |
+| <img width="2560" height="1440" alt="Onboarding page for wallpaper, colors and bar style" src="assets/screenshots/onboarding.webp" /> | <img width="2560" height="1440" alt="Session menu offering a normal reboot or a reboot into Windows" src="assets/screenshots/session.webp" /> |
+
+<sub>Wallpapers from Unsplash by [Leonie Zettl](https://unsplash.com/photos/swGD6c8XYHM), [Jussi Hellsten](https://unsplash.com/photos/1uwLmA5LFfg), [Zetong Li](https://unsplash.com/photos/HEf0fKgJA1Q), [Jonatan Pie](https://unsplash.com/photos/e2MnKlEFcTg), [Roberto Shumski](https://unsplash.com/photos/oYEGPZebzGw), [Reinis Birznieks](https://unsplash.com/photos/lu5uhEAy2lI), [Sudhanshu Chaurasia](https://unsplash.com/photos/uljyiw752gc) and [Parsing Eye](https://unsplash.com/photos/mPFjvk44pIE).</sub>
 </div>
 
 ---
