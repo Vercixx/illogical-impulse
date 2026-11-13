@@ -96,8 +96,19 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 active: GlobalStates.overviewOpen && (Config?.options.overview.enable ?? true)
                 visible: (panelWindow.searchingText == "")
-                sourceComponent: OverviewWidget {
-                    screen: panelWindow.screen
+                sourceComponent: Drift.activeOn(panelWindow.monitor?.activeWorkspace?.id ?? -1) ? driftOverview : workspaceOverview
+
+                Component {
+                    id: workspaceOverview
+                    OverviewWidget {
+                        screen: panelWindow.screen
+                    }
+                }
+                Component {
+                    id: driftOverview
+                    DriftOverviewWidget {
+                        screen: panelWindow.screen
+                    }
                 }
             }
         }

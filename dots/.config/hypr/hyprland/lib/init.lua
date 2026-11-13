@@ -19,6 +19,28 @@ function create_if_not_exists(path)
    return false
 end
 
+function drift_active()
+    local ws = hl.get_active_workspace()
+    return ws ~= nil and ws.tiled_layout == "lua:drift"
+end
+
+function unless_drift(action)
+    return function()
+        if drift_active() then return end
+        if type(action) == "function" then action() else hl.dispatch(action) end
+    end
+end
+
+function drift_or(msg, fallback)
+    return function()
+        if drift_active() then
+            hl.dispatch(hl.dsp.layout(msg))
+        elseif fallback then
+            hl.dispatch(fallback)
+        end
+    end
+end
+
 function workspace_in_group(i)
     local curr = hl.get_active_workspace().id
     local newVal = math.floor((curr - 1) / workspaceGroupSize) * workspaceGroupSize + i

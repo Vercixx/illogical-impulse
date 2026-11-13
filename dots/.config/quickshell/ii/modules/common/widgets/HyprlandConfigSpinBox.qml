@@ -6,9 +6,10 @@ import qs.modules.common.widgets
 ConfigSpinBox {
     id: root
     required property string key
+    property int defaultValue: 0
 
     Binding on value {
-        value: typeof option.shownValue === "string" ? root.parseCss(option.shownValue) : (option.shownValue ?? 0)
+        value: typeof option.shownValue === "string" ? root.parseCss(option.shownValue) : (option.shownValue ?? root.defaultValue)
     }
     onValueModified: writeTimer.restart()
 

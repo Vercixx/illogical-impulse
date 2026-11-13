@@ -58,6 +58,30 @@ Variants {
         property real parallaxTotalPixelsX: Math.max(0, scaledWallpaperWidth - screen.width)
         property real parallaxTotalPixelsY: Math.max(0, scaledWallpaperHeight - screen.height)
         readonly property bool verticalParallax: (Config.options.background.parallax.autoVertical && wallpaperHeight > wallpaperWidth) || Config.options.background.parallax.vertical
+
+        readonly property bool driftCanvas: Drift.activeOn(monitor?.activeWorkspace?.id ?? -1)
+        readonly property bool driftActive: driftCanvas && !GlobalStates.screenLocked
+        readonly property real driftWallpaperFactor: 0.15 // Mb make it configurable later
+        property real driftCamX: driftCanvas ? Drift.cameraFor(monitor.activeWorkspace.id).x : 0
+        property real driftCamY: driftCanvas ? Drift.cameraFor(monitor.activeWorkspace.id).y : 0
+        function wrap(value: real, period: real): real {
+            return ((value % period) + period) % period;
+        }
+        // Make sure it matches general.lua, or panning looks weird
+        Behavior on driftCamX {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.animationCurves.emphasizedDecel
+            }
+        }
+        Behavior on driftCamY {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.animationCurves.emphasizedDecel
+            }
+        }
         // Colors
         property bool shouldBlur: (GlobalStates.screenLocked && Config.options.lock.blur.enable)
         property color dominantColor: Appearance.colors.colPrimary // Default, to be changed
@@ -130,7 +154,7 @@ Variants {
             // Wallpaper
             StyledImage {
                 id: wallpaper
-                visible: opacity > 0 && !blurLoader.active
+                visible: opacity > 0 && !blurLoader.active && !bgRoot.driftActive
                 opacity: (status === Image.Ready && !bgRoot.wallpaperIsVideo) ? 1 : 0
                 cache: false
                 smooth: false
@@ -199,6 +223,72 @@ Variants {
             }
 
             Loader {
+                active: bgRoot.driftActive && !bgRoot.wallpaperSafetyTriggered && !bgRoot.wallpaperIsVideo
+                sourceComponent: Item {
+                    id: canvasWallpaper
+                    // Mirrored 3x3 tiles. An offset wrapped to two tiles always keeps the screen covered
+                    readonly property real tileWidth: bgRoot.scaledWallpaperWidth
+                    readonly property real tileHeight: bgRoot.scaledWallpaperHeight
+                    readonly property string defaultImagesPath: CF.FileUtils.trimFileProtocol(`${Directories.assetsPath}/images`)
+                    // Default wallpaper has a seamless version for Drift
+                    readonly property bool seamless: bgRoot.wallpaperPath === `${defaultImagesPath}/default_wallpaper.png`
+
+                    x: -bgRoot.wrap((tileWidth - bgRoot.screen.width) / 2 + bgRoot.driftCamX * bgRoot.driftWallpaperFactor, tileWidth * 2)
+                    y: -bgRoot.wrap((tileHeight - bgRoot.screen.height) / 2 + bgRoot.driftCamY * bgRoot.driftWallpaperFactor, tileHeight * 2)
+
+                    Repeater {
+                        model: 9
+                        Image {
+                            required property int index
+                            readonly property int column: index % 3
+                            readonly property int row: Math.floor(index / 3)
+                            x: column * canvasWallpaper.tileWidth
+                            y: row * canvasWallpaper.tileHeight
+                            width: canvasWallpaper.tileWidth
+                            height: canvasWallpaper.tileHeight
+                            sourceSize: Qt.size(width, height)
+                            source: canvasWallpaper.seamless ? `${canvasWallpaper.defaultImagesPath}/default_wallpaper_drift.png` : bgRoot.wallpaperPath
+                            fillMode: Image.PreserveAspectCrop
+                            mirror: !canvasWallpaper.seamless && column % 2 === 1
+                            mirrorVertically: !canvasWallpaper.seamless && row % 2 === 1
+                            asynchronous: true
+                        }
+                    }
+                }
+            }
+
+            Loader {
+                active: bgRoot.driftActive && bgRoot.wallpaperIsVideo && Config.options.background.driftDots
+                sourceComponent: Canvas {
+                    id: driftDots
+                    readonly property real spacing: 64
+                    readonly property color dotColor: CF.ColorUtils.transparentize(bgRoot.colText, 0.6)
+
+                    x: -bgRoot.wrap(bgRoot.driftCamX, spacing)
+                    y: -bgRoot.wrap(bgRoot.driftCamY, spacing)
+                    width: bgRoot.screen.width + spacing
+                    height: bgRoot.screen.height + spacing
+
+                    onDotColorChanged: requestPaint()
+                    onWidthChanged: requestPaint()
+                    onHeightChanged: requestPaint()
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        ctx.clearRect(0, 0, width, height);
+                        ctx.fillStyle = driftDots.dotColor;
+                        ctx.beginPath();
+                        for (let x = driftDots.spacing / 2; x < width; x += driftDots.spacing) {
+                            for (let y = driftDots.spacing / 2; y < height; y += driftDots.spacing) {
+                                ctx.moveTo(x, y);
+                                ctx.arc(x, y, 2, 0, 2 * Math.PI);
+                            }
+                        }
+                        ctx.fill();
+                    }
+                }
+            }
+
+            Loader {
                 id: blurLoader
                 active: Config.options.lock.blur.enable && (GlobalStates.screenLocked || scaleAnim.running)
                 anchors.fill: wallpaper
@@ -224,6 +314,24 @@ Variants {
                 }
             }
 
+            Loader {
+                active: bgRoot.driftActive
+                x: -bgRoot.driftCamX
+                y: -bgRoot.driftCamY
+                sourceComponent: Item {
+                    Repeater {
+                        model: Drift.bookmarksFor(bgRoot.monitor.activeWorkspace.id)
+                        delegate: DriftBookmarkPin {
+                            required property var modelData
+                            slot: modelData.slot
+                            x: Math.round(modelData.x - bgRoot.monitor.x - width / 2)
+                            y: Math.round(modelData.y - bgRoot.monitor.y - height / 2)
+                            opacity: 0.85
+                        }
+                    }
+                }
+            }
+
             WidgetCanvas {
                 id: widgetCanvas
                 width: parent.width
@@ -237,8 +345,8 @@ Variants {
                 readonly property real wallpaperTotalOffsetX: wallpaper.x - baseWallpaperOffsetX
                 readonly property real wallpaperTotalOffsetY: wallpaper.y - baseWallpaperOffsetY
                 readonly property bool locked: GlobalStates.screenLocked
-                x: wallpaperTotalOffsetX * parallaxFactor * !locked
-                y: wallpaperTotalOffsetY * parallaxFactor * !locked
+                x: bgRoot.driftActive ? -bgRoot.driftCamX : wallpaperTotalOffsetX * parallaxFactor * !locked
+                y: bgRoot.driftActive ? -bgRoot.driftCamY : wallpaperTotalOffsetY * parallaxFactor * !locked
 
                 transitions: Transition {
                     PropertyAnimation {

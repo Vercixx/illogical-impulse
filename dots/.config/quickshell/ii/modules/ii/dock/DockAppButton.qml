@@ -68,6 +68,7 @@ DockButton {
         }
         lastFocused = (lastFocused + 1) % appToplevel.toplevels.length
         appToplevel.toplevels[lastFocused].activate()
+        Drift.reveal(appToplevel.toplevels[lastFocused])
     }
 
     middleClickAction: () => {

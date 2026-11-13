@@ -155,22 +155,6 @@ ContentPage {
         title: Translation.tr("Compositor")
 
         ContentSubsection {
-            title: Translation.tr("Window layout")
-            ConfigSelectionArray {
-                currentValue: layoutOption.shownValue
-                onSelected: newValue => HyprlandConfig.setUser("general:layout", newValue)
-                options: [
-                    { "value": "dwindle", "displayName": Translation.tr("Dwindle") },
-                    { "value": "master", "displayName": Translation.tr("Master") }
-                ]
-                HyprlandConfigOption {
-                    id: layoutOption
-                    key: "general:layout"
-                }
-            }
-        }
-
-        ContentSubsection {
             title: Translation.tr("Variable refresh rate")
             ConfigSelectionArray {
                 currentValue: vrrOption.shownValue

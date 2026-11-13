@@ -41,7 +41,7 @@ NestableObject {
         property list<string> baseCommand: ["hyprctl", "getoption", "-j"]
         stdout: StdioCollector {
             onStreamFinished: {
-                if (text == "no such option")
+                if (text.trim() == "no such option")
                     return;
                 try {
                     const obj = JSON.parse(text);

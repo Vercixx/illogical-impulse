@@ -34,6 +34,8 @@ def generate_config_line(key, value):
             name, field_value = field.split('=', 1)
             fields.append(f'{name}={format_value(field_value)}')
         return f'hl.monitor({{{", ".join(fields)}}})\n'
+    if key.startswith('drift:'):
+        return f'drift({{{key[len("drift:"):]}={format_value(value)}}})\n'
     key_parts = key.split(':')
     nested_structure = build_nested_structure(key_parts, value)
     return f'hl.config({{{nested_structure}}})\n'
@@ -58,6 +60,8 @@ def edit_hyprland_config(file_path, set_args, reset_args):
         if main_key == 'monitor':
             output = re.escape(k[len('monitor:'):])
             patterns[k] = re.compile(rf'^\s*hl\.monitor\(\{{\s*output\s*=\s*"{output}"')
+        elif main_key == 'drift':
+            patterns[k] = re.compile(rf'^\s*drift\(\{{\s*{re.escape(k[len("drift:"):])}\s*=')
         elif len(key_parts) > 1:
             # Build pattern to match nested structure
             pattern_parts = [rf'\s*{re.escape(part)}\s*=' for part in key_parts]
@@ -126,7 +130,8 @@ def edit_hyprland_config(file_path, set_args, reset_args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Edit a Hyprland config file. Subkeys use colon (:) for nesting. "
-                                     "Key monitor:NAME with value field=value,... writes an hl.monitor line.")
+                                     "Key monitor:NAME with value field=value,... writes an hl.monitor line. "
+                                     "Key drift:NAME writes a drift({NAME=value}) line.")
     parser.add_argument("--file", default="~/.config/hypr/hyprland.conf", help="Path to the Hyprland config file (default: ~/.config/hypr/hyprland.conf).")
     
     parser.add_argument("--set", nargs=2, action="append", metavar=("KEY", "VALUE"), help="Set a configuration key to a value.")

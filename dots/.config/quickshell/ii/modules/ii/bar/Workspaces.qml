@@ -14,6 +14,7 @@ import Quickshell.Hyprland
 ButtonMouseArea {
     id: root
     property var host: null
+    readonly property bool available: !Drift.activeOn(root.monitor?.activeWorkspace?.id ?? -1)
 
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(root.QsWindow.window?.screen)
     WorkspaceModel {

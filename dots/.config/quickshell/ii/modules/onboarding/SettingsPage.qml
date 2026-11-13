@@ -53,6 +53,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 showMoreSettings: false
+                showLayoutSettings: false
                 bottomContentPadding: 20
             }
             RowLayout {

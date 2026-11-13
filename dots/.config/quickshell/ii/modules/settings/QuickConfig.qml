@@ -8,10 +8,12 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
+import qs.modules.common.models.hyprland
 import qs.modules.settings.bar
 
 ContentPage {
     property bool showMoreSettings: true
+    property bool showLayoutSettings: true
     forceWidth: true
 
     Process {
@@ -183,6 +185,19 @@ ContentPage {
             }
         }
 
+        ConfigSwitch {
+            visible: /\.(mp4|webm|mkv|avi|mov)$/.test(Config.options.background.wallpaperPath) && layoutOption.shownValue === "lua:drift"
+            buttonIcon: "grain"
+            text: Translation.tr("Show moving dots on Drift canvas")
+            checked: Config.options.background.driftDots
+            onCheckedChanged: {
+                Config.options.background.driftDots = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Helps fight disorientation, since video wallpapers don't move when panning")
+            }
+        }
+
         ConfigSelectionArray {
             currentValue: Config.options.appearance.palette.type
             onSelected: newValue => {
@@ -311,7 +326,293 @@ ContentPage {
                     ]
                 }
             }
-            
+
+        }
+    }
+
+    ContentSection {
+        id: layoutSection
+        property bool settingsExpanded: false
+        visible: showLayoutSettings
+
+        icon: "view_quilt"
+        title: Translation.tr("Window layout")
+
+        ConfigSelectionArray {
+            currentValue: layoutOption.shownValue
+            onSelected: newValue => HyprlandConfig.setUser("general:layout", newValue)
+            options: [
+                { "value": "dwindle", "displayName": Translation.tr("Dwindle"), "tooltip": Translation.tr("Uses binary space partitioning to recursively divide your workspace between windows") },
+                { "value": "master", "displayName": Translation.tr("Master"), "tooltip": Translation.tr("Dedicates one half of your screen to one window while keeping other ones stacked beside it") },
+                { "value": "scrolling", "displayName": Translation.tr("Scrolling"), "tooltip": Translation.tr("Stacks your windows in columns on an infinitely growing tape") },
+                { "value": "monocle", "displayName": Translation.tr("Monocle"), "tooltip": Translation.tr("Displays one window at a time, maximizing your available workspace") },
+                { "value": "lua:drift", "displayName": Translation.tr("Drift"), "tooltip": Translation.tr("Gets rid of tiling in favor of an infinite 2D canvas your windows can use") }
+            ]
+            HyprlandConfigOption {
+                id: layoutOption
+                key: "general:layout"
+            }
+        }
+
+        RippleButton {
+            id: layoutSettingsHeader
+            visible: layoutSettingsLoader.sourceComponent !== null
+            Layout.fillWidth: true
+            implicitHeight: layoutSettingsHeaderRow.implicitHeight + 8 * 2
+            font.pixelSize: Appearance.font.pixelSize.small
+            onClicked: layoutSection.settingsExpanded = !layoutSection.settingsExpanded
+
+            contentItem: RowLayout {
+                id: layoutSettingsHeaderRow
+                spacing: 10
+
+                OptionalMaterialSymbol {
+                    icon: "tune"
+                    iconSize: Appearance.font.pixelSize.larger
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    text: Translation.tr("Layout settings")
+                    font: layoutSettingsHeader.font
+                    color: Appearance.colors.colOnSecondaryContainer
+                }
+                MaterialSymbol {
+                    text: "expand_more"
+                    iconSize: Appearance.font.pixelSize.larger
+                    color: Appearance.colors.colOnSecondaryContainer
+                    rotation: layoutSection.settingsExpanded ? 180 : 0
+
+                    Behavior on rotation {
+                        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                    }
+                }
+            }
+        }
+
+        Revealer {
+            Layout.fillWidth: true
+            vertical: true
+            reveal: layoutSection.settingsExpanded && layoutSettingsLoader.sourceComponent !== null
+
+            Loader {
+                id: layoutSettingsLoader
+                width: parent.width
+                sourceComponent: ({
+                        "dwindle": dwindleSettings,
+                        "master": masterSettings,
+                        "scrolling": scrollingSettings,
+                        "lua:drift": driftSettings
+                    })[layoutOption.shownValue] ?? null
+            }
+        }
+
+        Component {
+            id: dwindleSettings
+
+            ColumnLayout {
+                spacing: 4
+
+                HyprlandConfigSwitch {
+                    key: "dwindle:preserve_split"
+                    buttonIcon: "splitscreen"
+                    text: Translation.tr("Keep split direction")
+                }
+                HyprlandConfigSwitch {
+                    key: "dwindle:smart_split"
+                    buttonIcon: "ads_click"
+                    text: Translation.tr("Split by cursor position")
+                }
+                ContentSubsection {
+                    title: Translation.tr("New window side")
+                    ConfigSelectionArray {
+                        currentValue: forceSplitOption.shownValue
+                        onSelected: newValue => HyprlandConfig.setUser("dwindle:force_split", newValue)
+                        options: [
+                            { "value": 0, "displayName": Translation.tr("Follow cursor") },
+                            { "value": 1, "displayName": Translation.tr("Left or top") },
+                            { "value": 2, "displayName": Translation.tr("Right or bottom") }
+                        ]
+                        HyprlandConfigOption {
+                            id: forceSplitOption
+                            key: "dwindle:force_split"
+                        }
+                    }
+                }
+            }
+        }
+
+        Component {
+            id: masterSettings
+
+            ColumnLayout {
+                spacing: 4
+
+                HyprlandConfigSlider {
+                    key: "master:mfact"
+                    buttonIcon: "width"
+                    text: Translation.tr("Master size")
+                    textWidth: 200
+                    from: 0.1
+                    to: 0.9
+                }
+                ContentSubsection {
+                    title: Translation.tr("Master position")
+                    ConfigSelectionArray {
+                        currentValue: orientationOption.shownValue
+                        onSelected: newValue => HyprlandConfig.setUser("master:orientation", newValue)
+                        options: [
+                            { "value": "left", "displayName": Translation.tr("Left") },
+                            { "value": "right", "displayName": Translation.tr("Right") },
+                            { "value": "top", "displayName": Translation.tr("Top") },
+                            { "value": "bottom", "displayName": Translation.tr("Bottom") },
+                            { "value": "center", "displayName": Translation.tr("Center") }
+                        ]
+                        HyprlandConfigOption {
+                            id: orientationOption
+                            key: "master:orientation"
+                        }
+                    }
+                }
+                ContentSubsection {
+                    title: Translation.tr("New windows open as")
+                    ConfigSelectionArray {
+                        currentValue: newStatusOption.shownValue
+                        onSelected: newValue => HyprlandConfig.setUser("master:new_status", newValue)
+                        options: [
+                            { "value": "master", "displayName": Translation.tr("Master") },
+                            { "value": "slave", "displayName": Translation.tr("Stack") },
+                            { "value": "inherit", "displayName": Translation.tr("Same as focused") }
+                        ]
+                        HyprlandConfigOption {
+                            id: newStatusOption
+                            key: "master:new_status"
+                        }
+                    }
+                }
+                HyprlandConfigSwitch {
+                    key: "master:new_on_top"
+                    buttonIcon: "vertical_align_top"
+                    text: Translation.tr("New windows at top of stack")
+                }
+            }
+        }
+
+        Component {
+            id: scrollingSettings
+
+            ColumnLayout {
+                spacing: 4
+
+                HyprlandConfigSlider {
+                    key: "scrolling:column_width"
+                    buttonIcon: "view_column"
+                    text: Translation.tr("Column width")
+                    textWidth: 200
+                    from: 0.1
+                    to: 1
+                }
+                ContentSubsection {
+                    title: Translation.tr("Scroll direction")
+                    ConfigSelectionArray {
+                        currentValue: directionOption.shownValue
+                        onSelected: newValue => HyprlandConfig.setUser("scrolling:direction", newValue)
+                        options: [
+                            { "value": "right", "displayName": Translation.tr("Right") },
+                            { "value": "left", "displayName": Translation.tr("Left") },
+                            { "value": "down", "displayName": Translation.tr("Down") },
+                            { "value": "up", "displayName": Translation.tr("Up") }
+                        ]
+                        HyprlandConfigOption {
+                            id: directionOption
+                            key: "scrolling:direction"
+                        }
+                    }
+                }
+                ContentSubsection {
+                    title: Translation.tr("Bring focused column into view")
+                    ConfigSelectionArray {
+                        currentValue: fitMethodOption.shownValue
+                        onSelected: newValue => HyprlandConfig.setUser("scrolling:focus_fit_method", newValue)
+                        options: [
+                            { "value": 0, "displayName": Translation.tr("Center") },
+                            { "value": 1, "displayName": Translation.tr("Fit") }
+                        ]
+                        HyprlandConfigOption {
+                            id: fitMethodOption
+                            key: "scrolling:focus_fit_method"
+                        }
+                    }
+                }
+                HyprlandConfigSwitch {
+                    key: "scrolling:fullscreen_on_one_column"
+                    buttonIcon: "fit_screen"
+                    text: Translation.tr("Single column fills screen")
+                }
+            }
+        }
+
+        Component {
+            id: driftSettings
+
+            ColumnLayout {
+                spacing: 4
+
+                HyprlandConfigSpinBox {
+                    key: "drift:new_width"
+                    defaultValue: 60
+                    icon: "width"
+                    text: Translation.tr("New window width (% of screen)")
+                    from: 10
+                    to: 100
+                }
+                HyprlandConfigSpinBox {
+                    key: "drift:new_height"
+                    defaultValue: 70
+                    icon: "height"
+                    text: Translation.tr("New window height (% of screen)")
+                    from: 10
+                    to: 100
+                }
+                HyprlandConfigSpinBox {
+                    key: "drift:recenter_delay"
+                    defaultValue: 60
+                    icon: "center_focus_strong"
+                    text: Translation.tr("Recenter after idle (seconds, 0 = off)")
+                    from: 0
+                    to: 3600
+                    stepSize: 10
+                    StyledToolTip {
+                        text: Translation.tr("Windows and camera will move closer to the center of the canvas after a set amount of time")
+                    }
+                }
+                HyprlandConfigSpinBox {
+                    key: "drift:pan_step"
+                    defaultValue: 100
+                    icon: "pan_tool"
+                    text: Translation.tr("Keyboard pan step (px)")
+                    from: 10
+                    to: 2000
+                    stepSize: 10
+                }
+                HyprlandConfigSpinBox {
+                    key: "drift:nudge_step"
+                    defaultValue: 20
+                    icon: "open_with"
+                    text: Translation.tr("Keyboard move step (px)")
+                    from: 1
+                    to: 500
+                    stepSize: 5
+                }
+                HyprlandConfigSpinBox {
+                    key: "drift:resize_step"
+                    defaultValue: 20
+                    icon: "open_in_full"
+                    text: Translation.tr("Keyboard resize step (px)")
+                    from: 1
+                    to: 500
+                    stepSize: 5
+                }
+            }
         }
     }
 

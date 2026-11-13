@@ -62,8 +62,13 @@ Item {
         "mouse_down": "Scroll ↑",  // trust me bro
         "mouse:272": "LMB",
         "mouse:273": "RMB",
+        "mouse:274": "MMB",
         "mouse:275": "MouseBack",
         "Slash": "/",
+        "Semicolon": ";",
+        "Apostrophe": "'",
+        "BracketLeft": "[",
+        "BracketRight": "]",
         "Hash": "#",
         "Return": "Enter",
         "Left": "←",
@@ -96,25 +101,48 @@ Item {
         return list;
     }
 
+    // A row lists every function bound to its first combo, then every other combo with those functions
     readonly property var categories: {
-        const groups = [];
+        const entries = [];
         for (const bind of HyprlandKeybinds.keybinds) {
             if (!bind.description) continue;
-            const separator = bind.description.indexOf(":");
-            const name = separator > 0 ? bind.description.substring(0, separator).trim() : "";
+            const id = `${bind.description}|${bind.modmask}|${bind.submap}|${bind.mouse}`;
+            let entry = entries.find(entry => entry.id === id);
+            if (!entry) {
+                entry = { id: id, description: bind.description, modmask: bind.modmask, submap: bind.submap, keys: [] };
+                entries.push(entry);
+            }
+            if (!root.keyBlacklist.includes(bind.key) && !entry.keys.includes(bind.key))
+                entry.keys.push(bind.key);
+        }
+
+        const slots = [];
+        for (const entry of entries) {
+            const combo = entry.keys.length > 0 ? `${entry.modmask}|${entry.submap}|${entry.keys.slice().sort().join(" ")}` : entry.id;
+            let slot = slots.find(slot => slot.combo === combo);
+            if (!slot) {
+                slot = { combo: combo, modmask: entry.modmask, keys: entry.keys, descriptions: [] };
+                slots.push(slot);
+            }
+            slot.descriptions.push(entry.description);
+        }
+
+        const groups = [];
+        for (const slot of slots) {
+            const separator = slot.descriptions[0].indexOf(":");
+            const name = separator > 0 ? slot.descriptions[0].substring(0, separator).trim() : "";
             let group = groups.find(group => group.name === name);
             if (!group) {
                 group = { name: name, rows: [] };
                 groups.push(group);
             }
-            const id = `${bind.description}|${bind.modmask}|${bind.submap}`;
+            const id = slot.descriptions.join("|");
             let row = group.rows.find(row => row.id === id);
             if (!row) {
-                row = { id: id, description: bind.description, modmask: bind.modmask, keys: [] };
+                row = { id: id, descriptions: slot.descriptions, combos: [] };
                 group.rows.push(row);
             }
-            if (!root.keyBlacklist.includes(bind.key) && !row.keys.includes(bind.key))
-                row.keys.push(bind.key);
+            row.combos.push({ modmask: slot.modmask, keys: slot.keys });
         }
         return groups.filter(group => group.name).concat(groups.filter(group => !group.name));
     }
@@ -124,8 +152,8 @@ Item {
     }
 
     // Translations keep the "Category: " prefix, so keys can't collide with other UI strings
-    function translatedParts(row) {
-        const text = Translation.tr(row.description);
+    function translatedParts(description) {
+        const text = Translation.tr(description);
         const separator = text.indexOf(":");
         if (separator < 0) return { category: "", action: text };
         return { category: text.substring(0, separator).trim(), action: text.substring(separator + 1).trim() };
@@ -133,13 +161,13 @@ Item {
 
     function categoryTitle(category) {
         if (!category.name) return Translation.tr("Other");
-        const translated = category.rows.map(row => root.translatedParts(row).category).find(name => name && name !== category.name);
+        const translated = category.rows.map(row => root.translatedParts(row.descriptions[0]).category).find(name => name && name !== category.name);
         return translated ?? category.name;
     }
 
-    function comboParts(row) {
-        const mods = root.modMaskToStringList(row.modmask).map(mod => root.keyLabel(mod));
-        const keys = row.keys.map(key => root.keyLabel(key));
+    function comboParts(combo) {
+        const mods = root.modMaskToStringList(combo.modmask).map(mod => root.keyLabel(mod));
+        const keys = combo.keys.map(key => root.keyLabel(key));
         const parts = Config.options.cheatsheet.splitButtons || mods.length === 0 ? mods : [mods.join(" ")];
         if (keys.length > 0) parts.push(keys.length > 4 ? `${keys[0]}…${keys[keys.length - 1]}` : keys.join("/"));
         return parts;
@@ -147,7 +175,9 @@ Item {
 
     function matches(row) {
         if (root.queryTokens.length === 0) return true;
-        const haystack = [Translation.tr(row.description), row.description, ...root.modMaskToStringList(row.modmask), ...row.keys, ...root.comboParts(row)].join(" ").toLowerCase();
+        const texts = row.descriptions.map(description => `${Translation.tr(description)} ${description}`);
+        const combos = row.combos.map(combo => [...root.modMaskToStringList(combo.modmask), ...combo.keys, ...root.comboParts(combo)].join(" "));
+        const haystack = texts.concat(combos).join(" ").toLowerCase();
         return root.queryTokens.every(token => haystack.includes(token));
     }
 
@@ -251,31 +281,69 @@ Item {
                             leftMargin: 16
                             rightMargin: 12
                         }
-                        spacing: 3
+                        spacing: 12
 
-                        StyledText {
+                        ColumnLayout {
                             Layout.fillWidth: true
-                            Layout.rightMargin: 9
-                            wrapMode: Text.Wrap
-                            color: Appearance.colors.colOnLayer1
-                            font.pixelSize: Config.options.cheatsheet.fontSize.comment || Appearance.font.pixelSize.small
-                            text: root.translatedParts(keybindRow.modelData).action
-                        }
-                        Repeater {
-                            model: root.comboParts(keybindRow.modelData)
-                            delegate: RowLayout {
-                                id: keyPart
-                                required property string modelData
-                                required property int index
-                                spacing: 3
+                            spacing: 2
 
-                                StyledText {
-                                    visible: keyPart.index > 0
-                                    text: "+"
+                            Repeater {
+                                model: keybindRow.modelData.descriptions
+                                delegate: RowLayout {
+                                    id: actionLine
+                                    required property string modelData
+                                    required property int index
+                                    Layout.fillWidth: true
+                                    spacing: 6
+
+                                    OrLabel {
+                                        visible: actionLine.index > 0
+                                    }
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        wrapMode: Text.Wrap
+                                        color: Appearance.colors.colOnLayer1
+                                        font.pixelSize: Config.options.cheatsheet.fontSize.comment || Appearance.font.pixelSize.small
+                                        text: root.translatedParts(actionLine.modelData).action
+                                    }
                                 }
-                                KeyboardKey {
-                                    key: keyPart.modelData
-                                    pixelSize: Config.options.cheatsheet.fontSize.key
+                            }
+                        }
+                        ColumnLayout {
+                            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                            spacing: 4
+
+                            Repeater {
+                                model: keybindRow.modelData.combos
+                                delegate: RowLayout {
+                                    id: comboLine
+                                    required property var modelData
+                                    required property int index
+                                    Layout.alignment: Qt.AlignRight
+                                    spacing: 3
+
+                                    OrLabel {
+                                        visible: comboLine.index > 0
+                                        Layout.rightMargin: 3
+                                    }
+                                    Repeater {
+                                        model: root.comboParts(comboLine.modelData)
+                                        delegate: RowLayout {
+                                            id: keyPart
+                                            required property string modelData
+                                            required property int index
+                                            spacing: 3
+
+                                            StyledText {
+                                                visible: keyPart.index > 0
+                                                text: "+"
+                                            }
+                                            KeyboardKey {
+                                                key: keyPart.modelData
+                                                pixelSize: Config.options.cheatsheet.fontSize.key
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -283,6 +351,12 @@ Item {
                 }
             }
         }
+    }
+
+    component OrLabel: StyledText {
+        color: Appearance.colors.colSubtext
+        font.pixelSize: Appearance.font.pixelSize.smaller
+        text: Translation.tr("or")
     }
 
     component Collapsible: Item {

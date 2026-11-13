@@ -214,6 +214,7 @@ Singleton {
                 property string wallpaperPath: ""
                 property string thumbnailPath: ""
                 property bool hideWhenFullscreen: true
+                property bool driftDots: true // Dot grid that pans with the Drift canvas over video wallpapers
                 property JsonObject parallax: JsonObject {
                     property bool vertical: false
                     property bool autoVertical: false

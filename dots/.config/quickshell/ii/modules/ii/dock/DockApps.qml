@@ -163,6 +163,7 @@ Item {
                             }
                             onClicked: {
                                 windowButton.modelData?.activate();
+                                Drift.reveal(windowButton.modelData);
                             }
                             contentItem: ColumnLayout {
                                 implicitWidth: screencopyView.implicitWidth

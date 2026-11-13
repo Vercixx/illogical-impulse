@@ -18,11 +18,12 @@ PanelWindow {
         ...(root.isEonOS ? [] : [{ "kind": "cover", "component": languagePage }]),
         { "kind": "cover", "component": welcomePage },
         { "kind": "preview", "component": settingsPage, "panels": ["bar", "dock"] },
-        { "kind": "cover", "component": askPage },
         { "kind": "cover", "component": tilingPage },
+        { "kind": "cover", "component": layoutPage },
+        { "kind": "cover", "component": askPage },
         { "kind": "lesson", "component": appsLesson },
         { "kind": "lesson", "component": windowsLesson },
-        { "kind": "lesson", "component": workspacesLesson, "panels": ["workspaces"] },
+        ...(Drift.active ? [] : [{ "kind": "lesson", "component": workspacesLesson, "panels": ["workspaces"] }]),
         { "kind": "lesson", "component": scratchpadLesson, "panels": ["workspaces"] },
         { "kind": "lesson", "component": floatingLesson },
         { "kind": "lesson", "component": fullscreenLesson },
@@ -244,6 +245,14 @@ PanelWindow {
     Component {
         id: tilingPage
         TilingPage {
+            onNext: root.next()
+            onBack: root.back()
+        }
+    }
+
+    Component {
+        id: layoutPage
+        LayoutPage {
             onNext: root.next()
             onBack: root.back()
         }

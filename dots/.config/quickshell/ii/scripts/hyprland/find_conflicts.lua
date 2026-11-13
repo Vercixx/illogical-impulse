@@ -44,6 +44,9 @@ local function collect(path)
     }, { __index = function() return dummy end })
     local env = setmetatable({
         hl = hl,
+        drift = function(tbl)
+            if type(tbl) == "table" then flatten(tbl, "drift", options) end
+        end,
         HOME = os.getenv("HOME"),
         os = setmetatable({ getenv = os.getenv, time = os.time, date = os.date, clock = os.clock },
             { __index = function() return dummy end }),
