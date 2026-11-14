@@ -27,25 +27,49 @@ Item { // Player instance
     property real radius
 
     property string displayedArtFilePath: root.downloaded ? Qt.resolvedUrl(artFilePath) : ""
+    readonly property string appIconName: AppSearch.guessIcon(player?.desktopEntry || player?.identity)
+    readonly property color scrimColor: ColorUtils.mix(Appearance.colors.colLayer0, root.artDominantColor, 0.75)
+    readonly property color contentColor: ColorUtils.mix(Appearance.colors.colOnLayer0, root.artDominantColor, 0.85)
 
-    component TrackChangeButton: RippleButton {
-        implicitWidth: 24
-        implicitHeight: 24
+    function cycleOutputDevice() {
+        const devices = Audio.outputDevices;
+        const current = devices.findIndex(node => node.id === Audio.sink?.id);
+        Audio.setDefaultSink(devices[(current + 1) % devices.length]);
+    }
 
-        property var iconName
-        colBackground: ColorUtils.transparentize(blendedColors.colSecondaryContainer, 1)
-        colBackgroundHover: blendedColors.colSecondaryContainerHover
-        colRipple: blendedColors.colSecondaryContainerActive
+    function cycleLoopState() {
+        if (root.player.loopState === MprisLoopState.None)
+            root.player.loopState = MprisLoopState.Playlist;
+        else if (root.player.loopState === MprisLoopState.Playlist)
+            root.player.loopState = MprisLoopState.Track;
+        else
+            root.player.loopState = MprisLoopState.None;
+    }
+
+    component ControlButton: RippleButton {
+        id: controlButton
+        property string iconName
+        property bool dimmed: false
+
+        implicitWidth: 36
+        implicitHeight: 36
+        buttonRadius: Appearance.rounding.full
+        colBackground: ColorUtils.transparentize(root.contentColor, 1)
+        colBackgroundHover: ColorUtils.transparentize(root.contentColor, 0.88)
+        colRipple: ColorUtils.transparentize(root.contentColor, 0.75)
 
         contentItem: MaterialSymbol {
-            iconSize: Appearance.font.pixelSize.huge
-            fill: 1
+            iconSize: 26
             horizontalAlignment: Text.AlignHCenter
-            color: blendedColors.colOnSecondaryContainer
-            text: iconName
+            color: root.contentColor
+            opacity: controlButton.dimmed ? 0.45 : 1
+            text: controlButton.iconName
 
             Behavior on color {
                 animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+            }
+            Behavior on opacity {
+                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
             }
         }
     }
@@ -66,7 +90,7 @@ Item { // Player instance
         }
 
         // Binding does not work in Process
-        coverArtDownloader.targetFile = root.artUrl 
+        coverArtDownloader.targetFile = root.artUrl
         coverArtDownloader.artFilePath = root.artFilePath
         // Download
         root.downloaded = false
@@ -101,7 +125,7 @@ Item { // Player instance
         id: background
         anchors.fill: parent
         anchors.margins: Appearance.sizes.elevationMargin
-        color: ColorUtils.applyAlpha(blendedColors.colLayer0, 1)
+        color: blendedColors.colLayer0
         radius: root.radius
 
         layer.enabled: true
@@ -114,7 +138,7 @@ Item { // Player instance
         }
 
         StyledImage {
-            id: blurredArt
+            id: art
             anchors.fill: parent
             source: root.displayedArtFilePath
             fillMode: Image.PreserveAspectCrop
@@ -123,14 +147,25 @@ Item { // Player instance
             asynchronous: true
 
             layer.enabled: true
-            layer.effect: StyledBlurEffect {
-                source: blurredArt
+            layer.effect: MultiEffect {
+                colorization: 1
+                colorizationColor: blendedColors.colPrimary
+                brightness: Appearance.m3colors.darkmode ? -0.3 : 0.3
             }
+        }
 
-            Rectangle {
-                anchors.fill: parent
-                color: ColorUtils.transparentize(blendedColors.colLayer0, 0.3)
-                radius: root.radius
+        Rectangle { // Scrim
+            anchors.fill: parent
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop {
+                    position: 0
+                    color: ColorUtils.transparentize(root.scrimColor, 0.15)
+                }
+                GradientStop {
+                    position: 1
+                    color: ColorUtils.transparentize(root.scrimColor, 0.45)
+                }
             }
         }
 
@@ -144,166 +179,195 @@ Item { // Player instance
             color: blendedColors.colPrimary
         }
 
-        RowLayout {
+        ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 13
-            spacing: 15
+            anchors.margins: 16
+            spacing: 0
 
-            Rectangle { // Art background
-                id: artBackground
-                Layout.fillHeight: true
-                implicitWidth: height
-                radius: Appearance.rounding.verysmall
-                color: ColorUtils.transparentize(blendedColors.colLayer1, 0.5)
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
 
-                layer.enabled: true
-                layer.effect: OpacityMask {
-                    maskSource: Rectangle {
-                        width: artBackground.width
-                        height: artBackground.height
-                        radius: artBackground.radius
+                Item {
+                    implicitWidth: 28
+                    implicitHeight: 28
+
+                    AppIcon {
+                        anchors.fill: parent
+                        visible: AppSearch.iconExists(root.appIconName)
+                        source: Quickshell.iconPath(root.appIconName)
+                        implicitSize: 28
+                    }
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        visible: !AppSearch.iconExists(root.appIconName)
+                        iconSize: Appearance.font.pixelSize.hugeass
+                        fill: 1
+                        color: root.contentColor
+                        text: "music_note"
                     }
                 }
 
-                StyledImage { // Art image
-                    id: mediaArt
-                    property int size: parent.height
-                    anchors.fill: parent
+                Item {
+                    Layout.fillWidth: true
+                }
 
-                    source: root.displayedArtFilePath
-                    fillMode: Image.PreserveAspectCrop
-                    cache: false
-                    antialiasing: true
+                RippleButton {
+                    id: outputChip
+                    Layout.maximumWidth: 200
+                    implicitHeight: 32
+                    horizontalPadding: 12
+                    enabled: Audio.outputDevices.length > 1
+                    buttonRadius: Appearance.rounding.full
+                    colBackground: blendedColors.colPrimary
+                    colBackgroundHover: blendedColors.colPrimaryHover
+                    colRipple: blendedColors.colPrimaryActive
+                    releaseAction: () => root.cycleOutputDevice()
 
-                    width: size
-                    height: size
+                    contentItem: RowLayout {
+                        spacing: 6
+
+                        MaterialSymbol {
+                            iconSize: Appearance.font.pixelSize.larger
+                            color: blendedColors.colOnPrimary
+                            text: "media_output"
+                        }
+                        StyledText {
+                            Layout.fillWidth: true
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: blendedColors.colOnPrimary
+                            elide: Text.ElideRight
+                            text: Audio.sink ? Audio.friendlyDeviceName(Audio.sink) : Translation.tr("Unknown")
+                            animateChange: true
+                        }
+                    }
                 }
             }
 
-            ColumnLayout { // Info & controls
+            Item {
                 Layout.fillHeight: true
-                spacing: 2
+            }
 
-                StyledText {
-                    id: trackTitle
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 12
+
+                ColumnLayout {
                     Layout.fillWidth: true
-                    font.pixelSize: Appearance.font.pixelSize.large
-                    color: blendedColors.colOnLayer0
-                    elide: Text.ElideRight
-                    text: StringUtils.cleanMusicTitle(root.player?.trackTitle) || "Untitled"
-                    animateChange: true
-                    animationDistanceX: 6
-                    animationDistanceY: 0
-                }
-                StyledText {
-                    id: trackArtist
-                    Layout.fillWidth: true
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: blendedColors.colSubtext
-                    elide: Text.ElideRight
-                    text: root.player?.trackArtist
-                    animateChange: true
-                    animationDistanceX: 6
-                    animationDistanceY: 0
-                }
-                Item { Layout.fillHeight: true }
-                Item {
-                    Layout.fillWidth: true
-                    implicitHeight: trackTime.implicitHeight + sliderRow.implicitHeight
+                    Layout.alignment: Qt.AlignBottom
+                    spacing: 0
 
                     StyledText {
-                        id: trackTime
-                        anchors.bottom: sliderRow.top
-                        anchors.bottomMargin: 5
-                        anchors.left: parent.left
+                        Layout.fillWidth: true
+                        font.pixelSize: Appearance.font.pixelSize.larger
+                        color: root.contentColor
+                        elide: Text.ElideRight
+                        text: StringUtils.cleanMusicTitle(root.player?.trackTitle) || "Untitled"
+                        animateChange: true
+                        animationDistanceX: 6
+                        animationDistanceY: 0
+                    }
+                    StyledText {
+                        Layout.fillWidth: true
                         font.pixelSize: Appearance.font.pixelSize.small
                         color: blendedColors.colSubtext
                         elide: Text.ElideRight
-                        text: `${StringUtils.friendlyTimeForSeconds(root.player?.position)} / ${StringUtils.friendlyTimeForSeconds(root.player?.length)}`
+                        text: root.player?.trackArtist ?? ""
+                        animateChange: true
+                        animationDistanceX: 6
+                        animationDistanceY: 0
                     }
-                    RowLayout {
-                        id: sliderRow
+                }
+
+                RippleButton {
+                    id: playPauseButton
+                    property real size: 56
+                    implicitWidth: size
+                    implicitHeight: size
+                    downAction: () => root.player.togglePlaying();
+
+                    buttonRadius: root.player?.isPlaying ? Appearance?.rounding.large : size / 2
+                    colBackground: blendedColors.colPrimary
+                    colBackgroundHover: blendedColors.colPrimaryHover
+                    colRipple: blendedColors.colPrimaryActive
+
+                    contentItem: MaterialSymbol {
+                        iconSize: Appearance.font.pixelSize.hugeass
+                        fill: 1
+                        horizontalAlignment: Text.AlignHCenter
+                        color: blendedColors.colOnPrimary
+                        text: root.player?.isPlaying ? "pause" : "play_arrow"
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+                Layout.leftMargin: -8
+                Layout.rightMargin: -8
+                spacing: 2
+
+                ControlButton {
+                    iconName: "skip_previous"
+                    downAction: () => root.player?.previous()
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: Math.max(sliderLoader.implicitHeight, progressBarLoader.implicitHeight)
+
+                    Loader {
+                        id: sliderLoader
+                        anchors.fill: parent
+                        active: root.player?.canSeek ?? false
+                        sourceComponent: StyledSlider {
+                            configuration: StyledSlider.Configuration.Wavy
+                            highlightColor: root.contentColor
+                            trackColor: ColorUtils.transparentize(root.contentColor, 0.7)
+                            handleColor: root.contentColor
+                            value: root.player?.position / root.player?.length
+                            tooltipContent: `${StringUtils.friendlyTimeForSeconds(value * (root.player?.length ?? 0))} / ${StringUtils.friendlyTimeForSeconds(root.player?.length)}`
+                            onMoved: {
+                                root.player.position = value * root.player.length;
+                            }
+                        }
+                    }
+
+                    Loader {
+                        id: progressBarLoader
                         anchors {
-                            bottom: parent.bottom
+                            verticalCenter: parent.verticalCenter
                             left: parent.left
                             right: parent.right
                         }
-                        TrackChangeButton {
-                            iconName: "skip_previous"
-                            downAction: () => root.player?.previous()
-                        }
-                        Item {
-                            id: progressBarContainer
-                            Layout.fillWidth: true
-                            implicitHeight: Math.max(sliderLoader.implicitHeight, progressBarLoader.implicitHeight)
-
-                            Loader {
-                                id: sliderLoader
-                                anchors.fill: parent
-                                active: root.player?.canSeek ?? false
-                                sourceComponent: StyledSlider { 
-                                    configuration: StyledSlider.Configuration.Wavy
-                                    highlightColor: blendedColors.colPrimary
-                                    trackColor: blendedColors.colSecondaryContainer
-                                    handleColor: blendedColors.colPrimary
-                                    value: root.player?.position / root.player?.length
-                                    onMoved: {
-                                        root.player.position = value * root.player.length;
-                                    }
-                                }
-                            }
-
-                            Loader {
-                                id: progressBarLoader
-                                anchors {
-                                    verticalCenter: parent.verticalCenter
-                                    left: parent.left
-                                    right: parent.right
-                                }
-                                active: !(root.player?.canSeek ?? false)
-                                sourceComponent: StyledProgressBar { 
-                                    wavy: root.player?.isPlaying
-                                    highlightColor: blendedColors.colPrimary
-                                    trackColor: blendedColors.colSecondaryContainer
-                                    value: root.player?.position / root.player?.length
-                                }
-                            }
-
-                            
-                        }
-                        TrackChangeButton {
-                            iconName: "skip_next"
-                            downAction: () => root.player?.next()
+                        active: !(root.player?.canSeek ?? false)
+                        sourceComponent: StyledProgressBar {
+                            wavy: root.player?.isPlaying ?? false
+                            highlightColor: root.contentColor
+                            trackColor: ColorUtils.transparentize(root.contentColor, 0.7)
+                            value: root.player?.position / root.player?.length
                         }
                     }
+                }
 
-                    RippleButton {
-                        id: playPauseButton
-                        anchors.right: parent.right
-                        anchors.bottom: sliderRow.top
-                        anchors.bottomMargin: 5
-                        property real size: 44
-                        implicitWidth: size
-                        implicitHeight: size
-                        downAction: () => root.player.togglePlaying();
+                ControlButton {
+                    iconName: "skip_next"
+                    downAction: () => root.player?.next()
+                }
 
-                        buttonRadius: root.player?.isPlaying ? Appearance?.rounding.normal : size / 2
-                        colBackground: root.player?.isPlaying ? blendedColors.colPrimary : blendedColors.colSecondaryContainer
-                        colBackgroundHover: root.player?.isPlaying ? blendedColors.colPrimaryHover : blendedColors.colSecondaryContainerHover
-                        colRipple: root.player?.isPlaying ? blendedColors.colPrimaryActive : blendedColors.colSecondaryContainerActive
+                ControlButton {
+                    visible: root.player?.shuffleSupported ?? false
+                    iconName: "shuffle"
+                    dimmed: !root.player?.shuffle
+                    downAction: () => root.player.shuffle = !root.player.shuffle
+                }
 
-                        contentItem: MaterialSymbol {
-                            iconSize: Appearance.font.pixelSize.huge
-                            fill: 1
-                            horizontalAlignment: Text.AlignHCenter
-                            color: root.player?.isPlaying ? blendedColors.colOnPrimary : blendedColors.colOnSecondaryContainer
-                            text: root.player?.isPlaying ? "pause" : "play_arrow"
-
-                            Behavior on color {
-                                animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
-                            }
-                        }
-                    }
+                ControlButton {
+                    visible: root.player?.loopSupported ?? false
+                    iconName: root.player?.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
+                    dimmed: root.player?.loopState === MprisLoopState.None
+                    downAction: () => root.cycleLoopState()
                 }
             }
         }
