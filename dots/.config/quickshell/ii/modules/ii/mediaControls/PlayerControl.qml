@@ -21,7 +21,6 @@ Item { // Player instance
     property string artFilePath: `${artDownloadLocation}/${artFileName}`
     property color artDominantColor: ColorUtils.mix((colorQuantizer?.colors[0] ?? Appearance.colors.colPrimary), Appearance.colors.colPrimaryContainer, 0.8) || Appearance.m3colors.m3secondaryContainer
     property bool downloaded: false
-    property list<real> visualizerPoints: []
     property real maxVisualizerValue: 1000 // Max value in the data points
     property int visualizerSmoothing: 2 // Number of points to average for smoothing
     property real radius
@@ -30,6 +29,9 @@ Item { // Player instance
     readonly property string appIconName: AppSearch.guessIcon(player?.desktopEntry || player?.identity)
     readonly property color scrimColor: ColorUtils.mix(Appearance.colors.colLayer0, root.artDominantColor, 0.75)
     readonly property color contentColor: ColorUtils.mix(Appearance.colors.colOnLayer0, root.artDominantColor, 0.85)
+
+    Component.onCompleted: Cava.consumers++
+    Component.onDestruction: Cava.consumers--
 
     function cycleOutputDevice() {
         const devices = Audio.outputDevices;
@@ -173,7 +175,7 @@ Item { // Player instance
             id: visualizerCanvas
             anchors.fill: parent
             live: root.player?.isPlaying
-            points: root.visualizerPoints
+            points: Cava.points
             maxVisualizerValue: root.maxVisualizerValue
             smoothing: root.visualizerSmoothing
             color: blendedColors.colPrimary

@@ -22,7 +22,35 @@ Scope {
     readonly property real widgetWidth: Appearance.sizes.mediaControlsWidth
     readonly property real widgetHeight: Appearance.sizes.mediaControlsHeight
     property real popupRounding: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
-    property list<real> visualizerPoints: []
+
+    function focusedMediaDrawer() {
+        return GlobalStates.mediaDrawers.find(drawer => drawer.hosted && drawer.host?.visible && drawer.barWindow?.screen?.name === Hyprland.focusedMonitor?.name) ?? null;
+    }
+
+    function toggle() {
+        const drawer = root.focusedMediaDrawer();
+        if (!drawer) {
+            GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen;
+            return;
+        }
+        GlobalStates.mediaControlsOpen = false;
+        drawer.toggle();
+    }
+
+    function open() {
+        const drawer = root.focusedMediaDrawer();
+        if (!drawer) {
+            GlobalStates.mediaControlsOpen = true;
+            return;
+        }
+        GlobalStates.mediaControlsOpen = false;
+        drawer.pinned = true;
+    }
+
+    function close() {
+        GlobalStates.mediaControlsOpen = false;
+        GlobalStates.mediaDrawers.filter(drawer => drawer.pinned).forEach(drawer => drawer.dismiss());
+    }
 
     function filterDuplicatePlayers(players) {
         let filtered = [];
@@ -51,24 +79,6 @@ Scope {
             group.forEach(idx => used.add(idx));
         }
         return filtered;
-    }
-
-    Process {
-        id: cavaProc
-        running: mediaControlsLoader.active
-        onRunningChanged: {
-            if (!cavaProc.running) {
-                root.visualizerPoints = [];
-            }
-        }
-        command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/raw_output_config.txt`]
-        stdout: SplitParser {
-            onRead: data => {
-                // Parse `;`-separated values into the visualizerPoints array
-                let points = data.split(";").map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
-                root.visualizerPoints = points;
-            }
-        }
     }
 
     Loader {
@@ -133,7 +143,6 @@ Scope {
                     delegate: PlayerControl {
                         required property MprisPlayer modelData
                         player: modelData
-                        visualizerPoints: root.visualizerPoints
                         implicitWidth: root.widgetWidth
                         implicitHeight: root.widgetHeight
                         radius: root.popupRounding
@@ -192,18 +201,19 @@ Scope {
         target: "mediaControls"
 
         function toggle(): void {
-            mediaControlsLoader.active = !mediaControlsLoader.active;
-            if (mediaControlsLoader.active)
+            root.toggle();
+            if (GlobalStates.mediaControlsOpen)
                 Notifications.timeoutAll();
         }
 
         function close(): void {
-            mediaControlsLoader.active = false;
+            root.close();
         }
 
         function open(): void {
-            mediaControlsLoader.active = true;
-            Notifications.timeoutAll();
+            root.open();
+            if (GlobalStates.mediaControlsOpen)
+                Notifications.timeoutAll();
         }
     }
 
@@ -211,24 +221,18 @@ Scope {
         name: "mediaControlsToggle"
         description: "Toggles media controls on press"
 
-        onPressed: {
-            GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen;
-        }
+        onPressed: root.toggle()
     }
     GlobalShortcut {
         name: "mediaControlsOpen"
         description: "Opens media controls on press"
 
-        onPressed: {
-            GlobalStates.mediaControlsOpen = true;
-        }
+        onPressed: root.open()
     }
     GlobalShortcut {
         name: "mediaControlsClose"
         description: "Closes media controls on press"
 
-        onPressed: {
-            GlobalStates.mediaControlsOpen = false;
-        }
+        onPressed: root.close()
     }
 }

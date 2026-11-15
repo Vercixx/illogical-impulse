@@ -1,3 +1,4 @@
+import qs
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
@@ -12,6 +13,9 @@ BarDrawer {
 
     infoWhenPinned: controls === null
     controls: player ? playerComponent : null
+
+    Component.onCompleted: GlobalStates.mediaDrawers = GlobalStates.mediaDrawers.concat([root])
+    Component.onDestruction: GlobalStates.mediaDrawers = GlobalStates.mediaDrawers.filter(drawer => drawer !== root)
 
     property Component playerComponent: Component {
         PlayerControl {
