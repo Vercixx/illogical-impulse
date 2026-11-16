@@ -1157,5 +1157,12 @@
   "App: Settings app": "Приложения: Настройки",
   "App: Task manager": "Приложения: Диспетчер задач",
   "Pick a layout": "Выберите раскладку",
-  "A layout decides how to place windows. You can change it later in Settings.": "Раскладка определяет, как размещать окна. Вы сможете изменить ее позже в Настройках."
+  "A layout decides how to place windows. You can change it later in Settings.": "Раскладка определяет, как размещать окна. Вы сможете изменить ее позже в Настройках.",
+  "Borrowed code": "Заимствованный код",
+  "Qt and KDE": "Qt и KDE",
+  "GTK and GNOME": "GTK и GNOME",
+  "Utilities": "Утилиты",
+  "Python libraries": "Библиотеки Python",
+  "Fonts and themes": "Шрифты и темы",
+  "No license, used with the author's permission": "Без лицензии, используется с разрешения автора"
 }
