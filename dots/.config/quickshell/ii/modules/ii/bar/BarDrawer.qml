@@ -77,9 +77,13 @@ Item {
     onOpenChanged: {
         if (root.open) {
             root.closing = false;
+            if (root.barWindow.closingDrawer === root)
+                root.barWindow.closingDrawer = null;
             return;
         }
         root.closing = true;
+        if (root.barWindow)
+            root.barWindow.closingDrawer = root;
         releaseDelay.restart();
     }
 
@@ -103,6 +107,8 @@ Item {
         interval: Appearance.animation.elementResize.duration
         onTriggered: {
             root.closing = false;
+            if (root.barWindow?.closingDrawer === root)
+                root.barWindow.closingDrawer = null;
             if (root.barWindow?.activeDrawer === root)
                 root.barWindow.activeDrawer = null;
         }
@@ -173,7 +179,7 @@ Item {
                 animation: Appearance.animation.elementResize.numberAnimation.createObject(this)
             }
 
-            color: Appearance.m3colors.m3surfaceContainer
+            color: root.neck?.neckColor ?? Appearance.m3colors.m3surfaceContainer
             radius: Appearance.rounding.small
 
             // Corners on the neck side shrink to the overhang so the card stays flush with a neck of the same width
@@ -205,11 +211,13 @@ Item {
             }
 
             component Flare: RoundCorner {
-                implicitSize: card.flareSize
+                property real overhang
+                visible: implicitSize > 0
+                implicitSize: Math.min(card.flareSize, overhang)
                 color: card.color
             }
             Flare {
-                visible: card.overhangBefore >= implicitSize
+                overhang: card.overhangBefore
                 x: root.vertical ? (root.atEnd ? card.width : -implicitSize) : card.overhangBefore - implicitSize
                 y: root.vertical ? card.overhangBefore - implicitSize : (root.atEnd ? card.height : -implicitSize)
                 corner: root.vertical
@@ -217,7 +225,7 @@ Item {
                     : (root.atEnd ? RoundCorner.CornerEnum.TopRight : RoundCorner.CornerEnum.BottomRight)
             }
             Flare {
-                visible: card.overhangAfter >= implicitSize
+                overhang: card.overhangAfter
                 x: root.vertical ? (root.atEnd ? card.width : -implicitSize) : card.width - card.overhangAfter
                 y: root.vertical ? card.height - card.overhangAfter : (root.atEnd ? card.height : -implicitSize)
                 corner: root.vertical

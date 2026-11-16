@@ -17,9 +17,10 @@ Item {
     readonly property string toneName: tone.charAt(0).toUpperCase() + tone.slice(1)
     readonly property real padding: traits.groups === "connected" ? 0 : 5
     readonly property bool drawerOpen: {
-        const drawer = root.QsWindow.window?.activeDrawer;
-        return !!drawer && drawer.open && drawer.neck === root;
+        const w = root.QsWindow.window;
+        return [w?.activeDrawer, w?.closingDrawer].some(d => d?.neck === root && (d.open || d.closing));
     }
+    readonly property color neckColor: background.color
 
     readonly property var shownIndexes: {
         repeater.count;

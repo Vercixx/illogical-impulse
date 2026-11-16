@@ -26,9 +26,10 @@ Item {
     readonly property real padding: (segmented ? 5 : 0) + (BarModules.byId(moduleId)?.framed ? 0 : 5)
     readonly property Item neck: segmented ? root : group
     readonly property bool drawerOpen: {
-        const drawer = root.QsWindow.window?.activeDrawer;
-        return !!drawer && drawer.open && drawer.neck === root;
+        const w = root.QsWindow.window;
+        return [w?.activeDrawer, w?.closingDrawer].some(d => d?.neck === root && (d.open || d.closing));
     }
+    readonly property color neckColor: segment.color
 
     visible: available
     Layout.fillWidth: vertical || fills

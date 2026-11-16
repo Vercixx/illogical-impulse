@@ -54,6 +54,7 @@ Scope {
                 property bool superShow: false
                 property bool mustShow: hoverRegion.containsMouse || superShow || activeDrawer !== null
                 property Item activeDrawer: null
+                property Item closingDrawer: null
                 readonly property Item drawerLayer: drawerLayerItem
                 readonly property var drawerWindow: drawerWindow
                 readonly property bool hidden: Config.options.bar.autoHide.enable && !mustShow
@@ -101,11 +102,9 @@ Scope {
                     bottom: -barRoot.deadPixel * barRoot.anchors.bottom
                 }
 
-                // Drawers live on their own fixed-size surface: resizing the bar window makes it jump for a frame
                 PanelWindow {
                     id: drawerWindow
                     screen: barRoot.screen
-                    visible: barRoot.activeDrawer !== null
                     color: "transparent"
                     exclusionMode: ExclusionMode.Ignore
                     exclusiveZone: 0
