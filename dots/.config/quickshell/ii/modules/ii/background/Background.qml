@@ -83,22 +83,43 @@ Variants {
             }
         }
         // Colors
-        property bool shouldBlur: (GlobalStates.screenLocked && Config.options.lock.blur.enable)
+        readonly property bool lockRevealed: GlobalStates.screenLocked && GlobalStates.screenLockRevealed
+        property bool shouldBlur: (lockRevealed && Config.options.lock.blur.enable)
         property color dominantColor: Appearance.colors.colPrimary // Default, to be changed
         property bool dominantColorIsDark: dominantColor.hslLightness < 0.5
         property color colText: {
             if (wallpaperSafetyTriggered)
                 return CF.ColorUtils.mix(Appearance.colors.colOnLayer0, Appearance.colors.colPrimary, 0.75);
-            return (GlobalStates.screenLocked && shouldBlur) ? Appearance.colors.colOnLayer0 : CF.ColorUtils.colorWithLightness(Appearance.colors.colPrimary, (dominantColorIsDark ? 0.8 : 0.12));
+            return shouldBlur ? Appearance.colors.colOnLayer0 : CF.ColorUtils.colorWithLightness(Appearance.colors.colPrimary, (dominantColorIsDark ? 0.8 : 0.12));
         }
         Behavior on colText {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
+        // Lock reveal transition
+        property real lockZoom: lockRevealed ? Config.options.lock.blur.extraZoom : 1
+        Behavior on lockZoom {
+            animation: Appearance.animation.lockReveal.numberAnimation.createObject(this)
+        }
+
         // Layer props
         screen: modelData
         exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running) ? WlrLayer.Overlay : WlrLayer.Bottom
+        // Bottom until the lock slide ends; flipping layers on reveal makes the wallpaper flash
+        property bool lockLayerReached: false
+        Timer {
+            id: lockLayerTimer
+            interval: Appearance.animation.elementMove.duration
+            onTriggered: bgRoot.lockLayerReached = GlobalStates.screenLocked
+        }
+        Connections {
+            target: GlobalStates
+            function onScreenLockedChanged() {
+                bgRoot.lockLayerReached = false;
+                if (GlobalStates.screenLocked) lockLayerTimer.restart();
+            }
+        }
+        WlrLayershell.layer: lockLayerReached ? WlrLayer.Overlay : WlrLayer.Bottom
         // WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:background"
         anchors {
@@ -154,10 +175,11 @@ Variants {
             // Wallpaper
             StyledImage {
                 id: wallpaper
-                visible: opacity > 0 && !blurLoader.active && !bgRoot.driftActive
+                visible: opacity > 0 && !(blurLoader.active && blurLoader.opacity === 1) && !bgRoot.driftActive
                 opacity: (status === Image.Ready && !bgRoot.wallpaperIsVideo) ? 1 : 0
                 cache: false
                 smooth: false
+                scale: bgRoot.lockZoom
 
                 property int workspaceIndex: (bgRoot.monitor.activeWorkspace?.id ?? 1) - 1
                 property real middleFraction: 0.5
@@ -290,24 +312,19 @@ Variants {
 
             Loader {
                 id: blurLoader
-                active: Config.options.lock.blur.enable && (GlobalStates.screenLocked || scaleAnim.running)
+                active: Config.options.lock.blur.enable && (GlobalStates.screenLocked || opacity > 0)
                 anchors.fill: wallpaper
-                scale: GlobalStates.screenLocked ? Config.options.lock.blur.extraZoom : 1
-                Behavior on scale {
-                    NumberAnimation {
-                        id: scaleAnim
-                        duration: 400
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.animationCurves.expressiveDefaultSpatial
-                    }
+                opacity: bgRoot.lockRevealed ? 1 : 0
+                Behavior on opacity {
+                    animation: Appearance.animation.lockReveal.numberAnimation.createObject(this)
                 }
+                scale: bgRoot.lockZoom
                 sourceComponent: GaussianBlur {
                     source: wallpaper
-                    radius: GlobalStates.screenLocked ? Config.options.lock.blur.radius : 0
+                    radius: Config.options.lock.blur.radius
                     samples: radius * 2 + 1
 
                     Rectangle {
-                        opacity: GlobalStates.screenLocked ? 1 : 0
                         anchors.fill: parent
                         color: CF.ColorUtils.transparentize(Appearance.colors.colLayer0, 0.7)
                     }

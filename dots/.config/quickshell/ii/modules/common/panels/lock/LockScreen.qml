@@ -51,10 +51,10 @@ Scope {
         Connections {
             target: GlobalStates
             function onScreenLockedChanged() {
-                if (GlobalStates.screenLocked) {
-                    lockContext.reset();
-                    lockContext.tryFingerUnlock();
-                }
+                if (!GlobalStates.screenLocked) return;
+                lockContext.reset();
+                lockContext.tryFingerUnlock();
+                if (GlobalStates.screenLockRevealed) lockContext.reveal();
             }
         }
 
@@ -66,7 +66,15 @@ Scope {
             } else if (targetAction == LockContext.ActionEnum.Reboot) {
                 Session.reboot();
                 return;
+            } else if (targetAction == LockContext.ActionEnum.Logout) {
+                Session.logout();
+                return;
+            } else if (targetAction == LockContext.ActionEnum.RebootFirmware) {
+                Session.rebootToFirmware();
+                return;
             }
+            // pkexec needs the polkit dialog, which can't show over the lock
+            if (targetAction == LockContext.ActionEnum.RebootWindows) Session.rebootToWindows();
 
             // Unlock the keyring if configured to do so
             if (Config.options.lock.security.unlockKeyring) root.unlockKeyring(); // Async
@@ -92,12 +100,8 @@ Scope {
         surface: root.sessionLockSurface
     }
 
-    function lock() {
-        if (Config.options.lock.useHyprlock) {
-            Quickshell.execDetached(["bash", "-c", "pidof hyprlock || hyprlock"]);
-            return;
-        }
-        GlobalStates.screenLocked = true;
+    function lock(revealed = true) {
+        Session.lock(revealed);
     }
 
     IpcHandler {
@@ -105,6 +109,9 @@ Scope {
 
         function activate(): void {
             root.lock();
+        }
+        function activateIdle(): void {
+            root.lock(false);
         }
         function focus(): void {
             lockContext.shouldReFocus();
@@ -117,6 +124,15 @@ Scope {
 
         onPressed: {
             root.lock()
+        }
+    }
+
+    GlobalShortcut {
+        name: "lockIdle"
+        description: "Locks the screen with the password prompt hidden until input"
+
+        onPressed: {
+            root.lock(false)
         }
     }
 
@@ -144,7 +160,7 @@ Scope {
     function initIfReady() {
         if (!Config.ready || !Persistent.ready) return;
         if (Config.options.lock.launchOnStartup && Persistent.isNewHyprlandInstance) {
-            root.lock();
+            root.lock(false);
         } else {
             KeyringStorage.fetchKeyringData();
         }

@@ -257,6 +257,7 @@
   "Temperature must be between 0 and 2": "Температура должна быть от 0 до 2",
   "Automatic suspend": "Авто-сон",
   "Extra wallpaper zoom (%)": "Дополнительный зум обоев (%)",
+  "Hide password prompt after (s)": "Скрывать ввод пароля через (с)",
   "GitHub": "GitHub",
   "%1 | Right-click to configure": "%1 | ПКМ для настройки",
   "Edit directory": "Изменить папку",

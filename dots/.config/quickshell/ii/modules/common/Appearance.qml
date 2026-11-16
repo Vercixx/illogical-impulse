@@ -371,6 +371,19 @@ Singleton {
             }
         }
 
+        property QtObject lockReveal: QtObject {
+            property int duration: 600
+            property int type: Easing.BezierSpline
+            property list<real> bezierCurve: animationCurves.emphasized
+            property Component numberAnimation: Component {
+                NumberAnimation {
+                    duration: root.animation.lockReveal.duration
+                    easing.type: root.animation.lockReveal.type
+                    easing.bezierCurve: root.animation.lockReveal.bezierCurve
+                }
+            }
+        }
+
         property QtObject clickBounce: QtObject {
             property int duration: 400
             property int type: Easing.BezierSpline

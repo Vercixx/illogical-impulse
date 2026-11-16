@@ -391,6 +391,7 @@ Singleton {
                 }
                 property bool centerClock: true
                 property bool showLockedText: true
+                property int revealTimeout: 10 // Seconds
                 property JsonObject security: JsonObject {
                     property bool unlockKeyring: true
                     property bool requirePasswordToPower: false

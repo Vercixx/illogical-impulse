@@ -1,6 +1,7 @@
 pragma Singleton
 import Quickshell
 import Quickshell.Io
+import qs
 import qs.services
 import qs.modules.common
 
@@ -20,8 +21,13 @@ Singleton {
         Quickshell.execDetached(["bash", "-c", `${Config.options.apps.changePassword}`]);
     }
 
-    function lock() {
-        Quickshell.execDetached(["loginctl", "lock-session"]);
+    function lock(revealed = true) {
+        if (Config.options.lock.useHyprlock) {
+            Quickshell.execDetached(["bash", "-c", "pidof hyprlock || hyprlock"]);
+            return;
+        }
+        GlobalStates.screenLockRevealed = revealed;
+        GlobalStates.screenLocked = true;
     }
 
     function suspend() {

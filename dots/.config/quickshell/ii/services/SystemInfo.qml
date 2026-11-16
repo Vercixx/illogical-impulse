@@ -14,6 +14,7 @@ Singleton {
     property string distroId: "unknown"
     property string distroIcon: "linux-symbolic"
     property string username: "user"
+    property string realName: ""
     property string homeUrl: ""
     property string documentationUrl: ""
     property string supportUrl: ""
@@ -94,6 +95,14 @@ Singleton {
             onRead: data => {
                 root.username = data.trim()
             }
+        }
+    }
+
+    Process {
+        running: true
+        command: ["bash", "-c", "getent passwd \"$(whoami)\" | cut -d: -f5 | cut -d, -f1"]
+        stdout: StdioCollector {
+            onStreamFinished: root.realName = text.trim()
         }
     }
 

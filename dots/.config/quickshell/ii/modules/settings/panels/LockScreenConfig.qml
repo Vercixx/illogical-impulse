@@ -93,6 +93,18 @@ ContentPage {
                 }
             }
 
+            ConfigSpinBox {
+                icon: "timer"
+                text: Translation.tr("Hide password prompt after (s)")
+                value: Config.options.lock.revealTimeout
+                from: 5
+                to: 300
+                stepSize: 5
+                onValueChanged: {
+                    Config.options.lock.revealTimeout = value;
+                }
+            }
+
             ConfigSwitch {
                 buttonIcon: "shapes"
                 text: Translation.tr('Use varying shapes for password characters')

@@ -24,6 +24,7 @@ AbstractBackgroundWidget {
     x: forceCenter ? ((root.screenWidth - root.width) / 2) : targetX
     y: forceCenter ? ((root.screenHeight - root.height) / 2) : targetY
     visibleWhenLocked: true
+    opacity: (GlobalStates.screenLocked && GlobalStates.screenLockRevealed) ? 0 : 1
 
     property var textHorizontalAlignment: {
         if (!Config.options.background.widgets.clock.digital.adaptiveAlignment || root.forceCenter || Config.options.background.widgets.clock.digital.vertical) 

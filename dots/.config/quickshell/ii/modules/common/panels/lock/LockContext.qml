@@ -8,7 +8,7 @@ import Quickshell.Services.Pam
 Scope {
     id: root
 
-    enum ActionEnum { Unlock, Poweroff, Reboot }
+    enum ActionEnum { Unlock, Poweroff, Reboot, Logout, RebootWindows, RebootFirmware }
 
     signal shouldReFocus()
     signal unlocked(targetAction: var)
@@ -32,7 +32,12 @@ Scope {
     }
 
     function resetClearTimer() {
-        passwordClearTimer.restart();
+        root.reveal();
+    }
+
+    function reveal() {
+        GlobalStates.screenLockRevealed = true;
+        inactivityTimer.restart();
     }
 
     function reset() {
@@ -43,10 +48,15 @@ Scope {
     }
 
     Timer {
-        id: passwordClearTimer
-        interval: 10000
+        id: inactivityTimer
+        interval: Config.options.lock.revealTimeout * 1000
         onTriggered: {
+            if (root.unlockInProgress) {
+                restart();
+                return;
+            }
             root.reset();
+            GlobalStates.screenLockRevealed = false;
         }
     }
 
@@ -54,9 +64,9 @@ Scope {
         if (currentText.length > 0) {
             showFailure = false;
             GlobalStates.screenUnlockFailed = false;
+            root.reveal();
         }
         GlobalStates.screenLockContainsCharacters = currentText.length > 0;
-        passwordClearTimer.restart();
     }
 
     function tryUnlock(alsoInhibitIdle = false) {
