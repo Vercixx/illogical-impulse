@@ -51,6 +51,8 @@ cd ~/.cache/illogical-impulse
 ./setup install
 ```
 
+Check out the [wiki](https://github.com/Vercixx/illogical-impulse/wiki) for usage, configuration and troubleshooting.
+
 <div align="center">
     <h2>Credits</h2>
     <h3></h3>
