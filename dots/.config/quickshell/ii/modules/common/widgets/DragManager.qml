@@ -28,6 +28,10 @@ MouseArea {
     property real _dragDiffX: 0
     property real _dragDiffY: 0
 
+    function isClick(mouse) {
+        return Math.hypot(mouse.x - startX, mouse.y - startY) < Qt.styleHints.startDragDistance;
+    }
+
     function resetDrag() {
         _dragDiffX = 0
         _dragDiffY = 0

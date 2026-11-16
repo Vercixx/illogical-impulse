@@ -24,6 +24,7 @@ Singleton {
             "identifier": action.identifier,
             "text": action.text,
         })) ?? []
+        readonly property bool hasDefaultAction: actions.some(action => action.identifier === "default")
         property bool popup: false
         property bool isTransient: notification?.hints.transient ?? false
         property string appIcon: notification?.appIcon ?? ""

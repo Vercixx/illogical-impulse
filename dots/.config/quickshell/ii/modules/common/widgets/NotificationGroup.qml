@@ -84,15 +84,19 @@ MouseArea { // Notification group area
         interactive: !expanded
         automaticallyReset: false
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        readonly property bool clickable: !root.expanded && root.notificationCount === 1 && root.notifications[0].hasDefaultAction
+        cursorShape: clickable ? Qt.PointingHandCursor : Qt.ArrowCursor
 
         onPressed: {
-            if (mouse.button === Qt.RightButton) 
+            if (mouse.button === Qt.RightButton)
                 root.toggleExpanded();
         }
 
         onClicked: (mouse) => {
-            if (mouse.button === Qt.MiddleButton) 
+            if (mouse.button === Qt.MiddleButton)
                 root.destroyWithAnimation();
+            else if (mouse.button === Qt.LeftButton && clickable && isClick(mouse))
+                Notifications.attemptInvokeAction(root.notifications[0].notificationId, "default");
         }
 
         onDraggingChanged: () => {

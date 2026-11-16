@@ -17,6 +17,7 @@ Item { // Notification item area
     property real fontSize: Appearance.font.pixelSize.small
     property real padding: onlyNotification ? 0 : 8
     property real summaryElideRatio: 0.85
+    readonly property var buttonActions: notificationObject.actions.filter(action => action.identifier !== "default")
 
     property real dragConfirmThreshold: 70 // Drag further to discard notification
     property real dismissOvershoot: notificationIcon.implicitWidth + 20 // Account for gaps and bouncy animations
@@ -69,10 +70,13 @@ Item { // Notification item area
         interactive: expanded
         automaticallyReset: false
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+        cursorShape: root.expanded && root.notificationObject.hasDefaultAction ? Qt.PointingHandCursor : Qt.ArrowCursor
 
         onClicked: (mouse) => {
             if (mouse.button === Qt.MiddleButton) {
                 root.destroyWithAnimation();
+            } else if (root.notificationObject.hasDefaultAction && isClick(mouse)) {
+                Notifications.attemptInvokeAction(root.notificationObject.notificationId, "default");
             }
         }
 
@@ -252,7 +256,7 @@ Item { // Notification item area
                                 Layout.fillWidth: true
                                 buttonText: Translation.tr("Close")
                                 urgency: notificationObject.urgency
-                                implicitWidth: (notificationObject.actions.length == 0) ? ((actionsFlickable.width - actionRowLayout.spacing) / 2) : 
+                                implicitWidth: (root.buttonActions.length == 0) ? ((actionsFlickable.width - actionRowLayout.spacing) / 2) : 
                                     (contentItem.implicitWidth + leftPadding + rightPadding)
 
                                 onClicked: {
@@ -270,7 +274,7 @@ Item { // Notification item area
 
                             Repeater {
                                 id: actionRepeater
-                                model: notificationObject.actions
+                                model: root.buttonActions
                                 NotificationActionButton {
                                     id: notifAction
                                     required property var modelData
@@ -286,7 +290,7 @@ Item { // Notification item area
                             NotificationActionButton {
                                 Layout.fillWidth: true
                                 urgency: notificationObject.urgency
-                                implicitWidth: (notificationObject.actions.length == 0) ? ((actionsFlickable.width - actionRowLayout.spacing) / 2) : 
+                                implicitWidth: (root.buttonActions.length == 0) ? ((actionsFlickable.width - actionRowLayout.spacing) / 2) : 
                                     (contentItem.implicitWidth + leftPadding + rightPadding)
 
                                 onClicked: {
