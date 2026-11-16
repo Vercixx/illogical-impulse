@@ -45,7 +45,14 @@ FocusScope {
     }
 
     HoverHandler {
-        onPointChanged: root.lockContext?.reveal()
+        // Scene changes send fake hover updates without real movement
+        property point lastPos: Qt.point(-1, -1)
+        onPointChanged: {
+            const pos = point.position;
+            const moved = lastPos.x >= 0 && Math.abs(pos.x - lastPos.x) + Math.abs(pos.y - lastPos.y) > 2;
+            lastPos = pos;
+            if (moved) root.lockContext?.reveal();
+        }
     }
 
     Keys.onPressed: event => {
