@@ -1,0 +1,40 @@
+groups=(illogical-impulse)
+pkgname=illogical-impulse-space-grotesk
+pkgver=2.0.0
+pkgrel=1
+pkgdesc="Space Grotesk font with Cyrillic (floriankarsten/space-grotesk#50), installed for illogical-impulse dotfiles"
+arch=('any')
+url="https://github.com/floriankarsten/space-grotesk/pull/50"
+license=('OFL-1.1')
+provides=('otf-space-grotesk')
+conflicts=('otf-space-grotesk')
+makedepends=('python-fonttools')
+_commit=3672ea5ae67d699f93aac3c1744e5e56112cd4be
+_raw="https://raw.githubusercontent.com/floriankarsten/space-grotesk/$_commit"
+_weights=(Light Regular Medium Bold)
+source=("$_raw/OFL.txt")
+for _w in "${_weights[@]}"; do source+=("$_raw/fonts/otf/SpaceGrotesk-$_w.otf"); done
+sha256sums=('564ce565c371c5e5bbf286006565a7c9aa55a9f56e7ca58d56e05d649dd61a72'
+            '374934628349eb0af89e4294ad01aec1f1448a7aa5de05d093ff1b1e6a6201e8'
+            'cb8a345706d7f484c707c707b41e39b25e983af78376c82120ea08c20af885b1'
+            '0ed1d67847e575cf5619d2e362c317d82021c5eb262dc53ffb90fbcffb012ee7'
+            '8ef072b1a27ac26ea93e082afc22e48e5cbf87beea28e1f8e46a783ed11ee0aa')
+
+build() {
+  # The fork shrank ascent/descent to 700/-214; restore upstream's so text boxes keep their height.
+  mkdir -p out
+  python - SpaceGrotesk-*.otf <<'EOF'
+import sys
+from fontTools.ttLib import TTFont
+for path in sys.argv[1:]:
+    font = TTFont(path)
+    font["hhea"].ascent = font["OS/2"].sTypoAscender = 984
+    font["hhea"].descent = font["OS/2"].sTypoDescender = -292
+    font.save(f"out/{path}")
+EOF
+}
+
+package() {
+  install -Dm644 -t "$pkgdir/usr/share/fonts/$pkgname" out/SpaceGrotesk-*.otf
+  install -Dm644 OFL.txt "$pkgdir/usr/share/licenses/$pkgname/OFL.txt"
+}

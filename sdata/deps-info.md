@@ -76,9 +76,6 @@ Tips:
   - Used in fuzzel, Hyprland, kdeglobals and Quickshell config; kitty config is also included as dots.
 - `matugen-bin`
   - Used in Quickshell.
-- `otf-space-grotesk`
-  - [source](https://events.ccc.de/congress/2024/infos/styleguide.html)
-  - Used in Quickshell and matugen config.
 - `starship`
   - Used in Fish config.
 - `ttf-jetbrains-mono-nerd`
@@ -228,6 +225,13 @@ Extra dependencies.
 ## illogical-impulse-bibata-modern-classic-bin
 - [source](https://github.com/ful1e5/Bibata_Cursor)
 - Used in Hyprland config, not necessary.
+
+## illogical-impulse-space-grotesk
+- [source](https://github.com/floriankarsten/space-grotesk/pull/50)
+- Space Grotesk with Cyrillic. Pinned commit.
+- Ascent and descent are set back to upstream values at build time, since the fork made them smaller.
+- Replaces `otf-space-grotesk`.
+- Used in Quickshell and matugen config.
 
 ## illogical-impulse-microtex-git
 - [source](https://github.com/NanoMichael/MicroTeX)
