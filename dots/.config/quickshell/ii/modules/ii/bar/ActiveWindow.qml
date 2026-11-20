@@ -10,7 +10,7 @@ import Quickshell.Hyprland
 Item {
     id: root
     property var host: null
-    readonly property bool available: !Config.options.bar.vertical && (host?.shortenLevel ?? 0) === 0
+    readonly property bool available: !BarOptions.vertical && (host?.shortenLevel ?? 0) === 0
     readonly property bool fillsSpace: true
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(root.QsWindow.window?.screen)
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel

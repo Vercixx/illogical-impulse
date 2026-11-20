@@ -12,7 +12,7 @@ Item {
     readonly property var modules: modelData
     readonly property var bar: section.bar
     readonly property var traits: Appearance.barStyle
-    readonly property bool vertical: Config.options.bar.vertical
+    readonly property bool vertical: BarOptions.vertical
     readonly property string tone: modules.map(id => BarModules.byId(id)?.tone).find(t => !!t) ?? ""
     readonly property string toneName: tone.charAt(0).toUpperCase() + tone.slice(1)
     readonly property real padding: traits.groups === "connected" ? 0 : 5

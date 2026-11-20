@@ -9,7 +9,7 @@ Item { // Bar content region
     id: root
 
     readonly property var traits: Appearance.barStyle
-    readonly property bool vertical: Config.options.bar.vertical
+    readonly property bool vertical: BarOptions.vertical
     property var screen: root.QsWindow.window?.screen
     readonly property int shortenLevel: vertical ? 0 : (Appearance.sizes.barHellaShortenScreenWidthThreshold >= screen?.width) ? 2 : (Appearance.sizes.barShortenScreenWidthThreshold >= screen?.width) ? 1 : 0
     readonly property bool workspacesOnly: !Onboarding.shows("bar")
@@ -67,7 +67,7 @@ Item { // Bar content region
 
         BarSection {
             edge: "start"
-            groups: Config.options.bar.layout.left
+            groups: BarOptions.layout.left
             bar: root
             sideHovered: startArea.hovered
             maximumLength: (root.vertical ? startArea.height : startArea.width) - root.sectionInset - root.sectionGap
@@ -79,11 +79,11 @@ Item { // Bar content region
     BarSection {
         id: centerSection
         edge: "center"
-        groups: Config.options.bar.layout.center
+        groups: BarOptions.layout.center
         bar: root
         maximumLength: root.vertical ? root.height : root.width
-        anchorModule: Config.options.bar.layout.centerAnchor
-        anchorWholeGroup: Config.options.bar.layout.centerAnchorGroup
+        anchorModule: BarOptions.layout.centerAnchor
+        anchorWholeGroup: BarOptions.layout.centerAnchorGroup
 
         readonly property real barLength: root.vertical ? root.height : root.width
         readonly property real start: {
@@ -123,7 +123,7 @@ Item { // Bar content region
 
         BarSection {
             edge: "end"
-            groups: Config.options.bar.layout.right
+            groups: BarOptions.layout.right
             bar: root
             sideHovered: endArea.hovered
             maximumLength: (root.vertical ? endArea.height : endArea.width) - root.sectionInset - root.sectionGap

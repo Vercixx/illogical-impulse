@@ -10,7 +10,7 @@ import QtQuick.Layouts
 MouseArea {
     id: root
     property var host: null
-    readonly property bool vertical: Config.options.bar.vertical
+    readonly property bool vertical: BarOptions.vertical
     readonly property color colForeground: host?.colForeground ?? Appearance.colors.colOnLayer1
     property bool hovered: false
     implicitWidth: vertical ? Appearance.sizes.baseVerticalBarWidth : rowLayout.implicitWidth

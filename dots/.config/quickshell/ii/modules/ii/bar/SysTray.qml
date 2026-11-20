@@ -13,8 +13,8 @@ Item {
     readonly property bool available: (host?.shortenLevel ?? 0) === 0 && (pinnedItems.length > 0 || (showOverflowMenu && unpinnedItems.length > 0))
     implicitWidth: gridLayout.implicitWidth
     implicitHeight: gridLayout.implicitHeight
-    property bool vertical: host ? Config.options.bar.vertical : false
-    property bool invertSide: host ? Config.options.bar.bottom : false
+    property bool vertical: host ? BarOptions.vertical : false
+    property bool invertSide: host ? BarOptions.bottom : false
     property bool trayOverflowOpen: false
     property bool showSeparator: false
     property bool showOverflowMenu: true

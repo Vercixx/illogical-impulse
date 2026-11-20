@@ -13,7 +13,7 @@ Item {
     readonly property string moduleId: modelData
     readonly property var bar: group.bar
     readonly property var traits: Appearance.barStyle
-    readonly property bool vertical: Config.options.bar.vertical
+    readonly property bool vertical: BarOptions.vertical
     readonly property int shortenLevel: bar.shortenLevel
     readonly property bool sideHovered: group.section.sideHovered
     readonly property bool segmented: traits.groups === "connected"

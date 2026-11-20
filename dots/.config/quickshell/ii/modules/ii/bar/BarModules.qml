@@ -20,7 +20,9 @@ Singleton {
         { id: "battery", name: Translation.tr("Battery"), icon: "battery_android_full", file: "BatteryIndicator.qml", verticalFile: "vertical/VerticalBatteryIndicator.qml", tone: "primary" },
         { id: "sysTray", name: Translation.tr("Tray"), icon: "shelf_auto_hide", file: "SysTray.qml", tone: "secondary" },
         { id: "systemIndicators", name: Translation.tr("System indicators"), icon: "wifi", file: "SystemIndicators.qml", tone: "primary", framed: true },
-        { id: "weather", name: Translation.tr("Weather"), icon: "cloud", file: "weather/WeatherBar.qml", tone: "tertiary" }
+        { id: "weather", name: Translation.tr("Weather"), icon: "cloud", file: "weather/WeatherBar.qml", tone: "tertiary" },
+        { id: "start", name: Translation.tr("Start button"), icon: "apps", file: "StartButton.qml", framed: true },
+        { id: "tasks", name: Translation.tr("Tasks"), icon: "toolbar", file: "Tasks.qml", framed: true }
     ]
 
     function byId(id) {

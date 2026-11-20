@@ -38,7 +38,7 @@ ShellRoot {
 
 
     // Panel families
-    property list<string> families: ["ii", "waffle"]
+    property list<string> families: ["ii", "waffle", "classic"]
     function cyclePanelFamily() {
         const currentIndex = families.indexOf(Config.options.panelFamily)
         const nextIndex = (currentIndex + 1) % families.length
@@ -59,6 +59,12 @@ ShellRoot {
     PanelFamilyLoader {
         identifier: "waffle"
         component: WaffleFamily {}
+    }
+
+    // The ii panels; BarOptions.taskbar turns the bar into a taskbar and the overview into a start menu
+    PanelFamilyLoader {
+        identifier: "classic"
+        component: IllogicalImpulseFamily {}
     }
 
 

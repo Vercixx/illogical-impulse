@@ -31,8 +31,8 @@ Item {
     readonly property Item neck: host?.neck ?? null
     readonly property Item drawerLayer: barWindow?.drawerLayer ?? null
     readonly property bool hosted: drawerLayer !== null && neck !== null
-    readonly property bool vertical: Config.options.bar.vertical
-    readonly property bool atEnd: Config.options.bar.bottom
+    readonly property bool vertical: BarOptions.vertical
+    readonly property bool atEnd: BarOptions.bottom
 
     property bool hoverShown: false
     property bool hoverSuppressed: false

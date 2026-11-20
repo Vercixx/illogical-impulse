@@ -22,7 +22,7 @@ ButtonMouseArea {
         monitor: root.monitor
     }
 
-    property bool vertical: Config.options.bar.vertical
+    property bool vertical: BarOptions.vertical
     property bool superPressAndHeld: false // Relevant modifications at bottom of file
 
     property real workspaceButtonWidth: 26

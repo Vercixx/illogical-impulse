@@ -9,7 +9,7 @@ import qs.modules.common.functions
 RippleButton { // Right sidebar button
     id: root
     property var host: null
-    readonly property bool vertical: Config.options.bar.vertical
+    readonly property bool vertical: BarOptions.vertical
     readonly property real realSpacing: vertical ? 6 : 15
     property color colText: toggled ? Appearance.m3colors.m3onSecondaryContainer : (host?.colForeground ?? Appearance.colors.colOnLayer0)
 

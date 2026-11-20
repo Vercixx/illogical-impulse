@@ -10,8 +10,8 @@ Rectangle {
     property real endRadius: Appearance.rounding.small
     property real inset: 4
 
-    readonly property bool vertical: Config.options.bar.vertical
-    readonly property bool innerIsStart: Config.options.bar.bottom
+    readonly property bool vertical: BarOptions.vertical
+    readonly property bool innerIsStart: BarOptions.bottom
     readonly property real innerInset: drawerOpen ? 0 : inset
 
     anchors {

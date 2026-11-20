@@ -30,7 +30,7 @@ Scope {
     PanelLoader { extraCondition: barShown; component: Bar {} }
     PanelLoader { component: Background {} }
     PanelLoader { extraCondition: !Onboarding.active; component: Cheatsheet {} }
-    PanelLoader { extraCondition: Config.options.dock.enable && Onboarding.shows("dock"); component: Dock {} }
+    PanelLoader { extraCondition: Config.options.dock.enable && !BarOptions.taskbar && Onboarding.shows("dock"); component: Dock {} }
     PanelLoader { component: Lock {} }
     PanelLoader { extraCondition: !Onboarding.active; component: MediaControls {} }
     PanelLoader { extraCondition: !Onboarding.active; component: NotificationPopup {} }

@@ -21,7 +21,7 @@ Item {
 
     BoxLayout {
         id: boxLayout
-        vertical: Config.options.bar.vertical
+        vertical: BarOptions.vertical
         spacing: 4
         anchors.centerIn: parent
 

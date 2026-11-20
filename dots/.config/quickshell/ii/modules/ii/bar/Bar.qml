@@ -46,8 +46,8 @@ Scope {
                 id: barRoot
                 screen: barLoader.modelData
 
-                readonly property bool vertical: Config.options.bar.vertical
-                readonly property bool atEnd: Config.options.bar.bottom // Bottom or right
+                readonly property bool vertical: BarOptions.vertical
+                readonly property bool atEnd: BarOptions.bottom // Bottom or right
                 readonly property real thickness: vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
                 readonly property real baseThickness: vertical ? Appearance.sizes.baseVerticalBarWidth : Appearance.sizes.baseBarHeight
                 readonly property int deadPixel: Config.options.interactions.deadPixelWorkaround.enable ? 1 : 0

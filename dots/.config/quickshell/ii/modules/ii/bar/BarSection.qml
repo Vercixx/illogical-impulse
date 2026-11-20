@@ -14,8 +14,8 @@ Item {
     property bool anchorWholeGroup: false
 
     readonly property var traits: Appearance.barStyle
-    readonly property bool vertical: Config.options.bar.vertical
-    readonly property bool innerIsStart: Config.options.bar.bottom
+    readonly property bool vertical: BarOptions.vertical
+    readonly property bool innerIsStart: BarOptions.bottom
     readonly property bool tabs: traits.sections === "tabs"
     readonly property bool hasContainer: traits.sections !== "none"
     readonly property real containerPadding: 4

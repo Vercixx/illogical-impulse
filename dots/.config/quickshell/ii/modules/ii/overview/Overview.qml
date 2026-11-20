@@ -71,9 +71,12 @@ Scope {
         Column {
             id: columnLayout
             visible: GlobalStates.overviewOpen
+            // As a start menu it sits over the taskbar's start button
             anchors {
-                horizontalCenter: parent.horizontalCenter
-                top: parent.top
+                horizontalCenter: BarOptions.taskbar ? undefined : parent.horizontalCenter
+                top: BarOptions.taskbar ? undefined : parent.top
+                left: BarOptions.taskbar ? parent.left : undefined
+                bottom: BarOptions.taskbar ? parent.bottom : undefined
             }
             spacing: -8
 
@@ -94,10 +97,14 @@ Scope {
             Loader {
                 id: overviewLoader
                 anchors.horizontalCenter: parent.horizontalCenter
-                active: GlobalStates.overviewOpen && (Config?.options.overview.enable ?? true)
+                active: GlobalStates.overviewOpen && (BarOptions.taskbar || (Config?.options.overview.enable ?? true))
                 visible: (panelWindow.searchingText == "")
-                sourceComponent: Drift.activeOn(panelWindow.monitor?.activeWorkspace?.id ?? -1) ? driftOverview : workspaceOverview
+                sourceComponent: BarOptions.taskbar ? startPage : Drift.activeOn(panelWindow.monitor?.activeWorkspace?.id ?? -1) ? driftOverview : workspaceOverview
 
+                Component {
+                    id: startPage
+                    StartPage {}
+                }
                 Component {
                     id: workspaceOverview
                     OverviewWidget {

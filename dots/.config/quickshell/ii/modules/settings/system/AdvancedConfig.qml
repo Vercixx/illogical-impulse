@@ -29,6 +29,11 @@ ContentPage {
                     displayName: Translation.tr("Waffle (Windows-like)"),
                     icon: "window",
                     value: "waffle"
+                },
+                {
+                    displayName: Translation.tr("Classic (taskbar)"),
+                    icon: "desktop_windows",
+                    value: "classic"
                 }
             ]
         }
