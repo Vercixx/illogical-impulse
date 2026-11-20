@@ -1086,6 +1086,8 @@
   "Edit user keybinds": "Изменить свои бинды",
   "Shell: Toggle search": "Оболочка: Поиск",
   "Shell: Toggle overview": "Оболочка: Обзор",
+  "Shell: Switch windows": "Оболочка: Переключение окон",
+  "Shell: Switch windows backwards": "Оболочка: Переключение окон в обратном порядке",
   "Shell: Toggle left sidebar": "Оболочка: Левая панель",
   "Shell: Toggle right sidebar": "Оболочка: Правая панель",
   "Shell: Toggle cheatsheet": "Оболочка: Шпаргалка",

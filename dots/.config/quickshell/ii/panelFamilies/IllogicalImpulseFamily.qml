@@ -22,6 +22,7 @@ import qs.modules.ii.sidebarLeft
 import qs.modules.ii.sidebarRight
 import qs.modules.ii.overlay
 import qs.modules.ii.wallpaperSelector
+import qs.modules.ii.windowSwitcher
 
 Scope {
     readonly property bool barShown: Onboarding.shows("bar") || Onboarding.shows("workspaces")
@@ -45,4 +46,5 @@ Scope {
     PanelLoader { extraCondition: Onboarding.shows("sidebars"); component: SidebarLeft {} }
     PanelLoader { extraCondition: Onboarding.shows("sidebars"); component: SidebarRight {} }
     PanelLoader { extraCondition: !Onboarding.active; component: WallpaperSelector {} }
+    PanelLoader { extraCondition: !Onboarding.active; component: WindowSwitcher {} }
 }

@@ -22,6 +22,12 @@ Singleton {
     property var monitors: []
     property var layers: ({})
 
+    // Focus alone leaves a floating window under the others
+    function focusWindow(address: string) {
+        Hyprland.dispatch(`hl.dsp.window.alter_zorder({mode = "top", window = "address:${address}"})`);
+        Hyprland.dispatch(`hl.dsp.focus({window = "address:${address}"})`);
+    }
+
     // Convenient stuff
 
     function toplevelsForWorkspace(workspace) {
