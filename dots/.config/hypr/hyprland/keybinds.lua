@@ -26,8 +26,8 @@ hl.bind("ALT + SHIFT + Tab", hl.dsp.global("quickshell:windowSwitcherPrev"), { d
 hl.bind("ALT + Escape", hl.dsp.global("quickshell:windowSwitcherCancel"), { non_consuming = true })
 -- The switcher picks the selected window when Alt is released
 for _, alt in ipairs({ "ALT_L", "ALT_R" }) do
-    hl.bind(alt, hl.dsp.global("quickshell:windowSwitcherRelease"), { ignore_mods = true, transparent = true })
-    hl.bind(alt, hl.dsp.global("quickshell:windowSwitcherRelease"), { ignore_mods = true, transparent = true, release = true })
+    hl.bind(alt, hl.dsp.global("quickshell:windowSwitcherRelease"), { ignore_mods = true, non_consuming = true })
+    hl.bind(alt, hl.dsp.global("quickshell:windowSwitcherRelease"), { ignore_mods = true, non_consuming = true, release = true })
 end
 hl.bind("SUPER + V", hl.dsp.global("quickshell:overviewClipboardToggle"))
 hl.bind("SUPER + Period", hl.dsp.global("quickshell:overviewEmojiToggle"))
