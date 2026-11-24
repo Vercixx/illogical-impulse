@@ -1133,6 +1133,8 @@
   "Window: Close": "Окно: Закрыть",
   "Window: Forcefully zap a window": "Окно: Принудительно убить",
   "Window: Float/Tile": "Окно: Плавающее окно",
+  "Window: Toggle split": "Окно: Сменить направление разделения",
+  "Window: Swap split": "Окно: Поменять половины местами",
   "Window: Maximize": "Окно: Развернуть",
   "Window: Fullscreen": "Окно: Полный экран",
   "Window: Fullscreen spoof": "Окно: Фейковый полный экран",

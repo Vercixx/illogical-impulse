@@ -197,6 +197,8 @@ hl.bind("SUPER + Semicolon", drift_or("shrink", hl.dsp.layout("splitratio -0.1")
 hl.bind("SUPER + Apostrophe", drift_or("grow", hl.dsp.layout("splitratio +0.1")), { repeating = true, description = "Window: Resize" })
 --# Positioning mode
 hl.bind("SUPER + ALT + Space", hl.dsp.window.float({ action = "toggle" }), { description = "Window: Float/Tile" })
+hl.bind("SUPER + R", unless_drift(hl.dsp.layout("togglesplit")), { description = "Window: Toggle split" })
+hl.bind("SUPER + Y", unless_drift(hl.dsp.layout("swapsplit")), { description = "Window: Swap split" })
 hl.bind("SUPER + D", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }),
     { description = "Window: Maximize" })
 hl.bind("SUPER + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }),
