@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import "Lrc.js" as Lrc
+import "NetEase.js" as NetEase
 
 Singleton {
     id: root
@@ -78,20 +79,30 @@ Singleton {
             return;
         }
 
-        const xhr = new XMLHttpRequest();
         root.requesting = key;
+        root.sendRequest(`https://lrclib.net/api/get?${key}`, root.handleLrclib);
+    }
+
+    function sendRequest(url, handleBody) {
+        if (root.request)
+            root.request.onreadystatechange = null;
+        const xhr = new XMLHttpRequest();
         root.request = xhr;
-        xhr.open("GET", `https://lrclib.net/api/get?${key}`);
+        xhr.open("GET", url);
         xhr.setRequestHeader("User-Agent", "illogical-impulse (https://github.com/Vercixx/illogical-impulse)");
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE && root.request === xhr)
-                root.handleResponse(xhr);
+                root.handleResponse(xhr, handleBody);
         };
         timeout.restart();
         xhr.send();
     }
 
-    function handleResponse(xhr) {
+    function handleResponse(xhr, handleBody) {
+        if (!root.users.has(root.requesting)) {
+            root.finish(null);
+            return;
+        }
         if (xhr.status === 429 || xhr.status === 503) {
             const header = xhr.getResponseHeader("Retry-After");
             const wait = /^\d+$/.test(header) ? Number(header) * 1000 : Date.parse(header) - Date.now();
@@ -99,24 +110,61 @@ Singleton {
             root.nextRequestAt = Date.now() + delay * (1 + Math.random() * 0.3);
         }
         if (xhr.status === 404) {
-            root.finish({ status: "unavailable" });
-            return;
-        }
-        if (xhr.status === 200) {
+            handleBody(null);
+        } else if (xhr.status === 200) {
+            let body;
             try {
-                const lyrics = JSON.parse(xhr.responseText);
-                const lines = typeof lyrics.syncedLyrics === "string" ? Lrc.parse(lyrics.syncedLyrics) : [];
-                const plain = typeof lyrics.plainLyrics === "string" ? lyrics.plainLyrics.trim() : "";
-                root.finish(!lyrics.instrumental && (lines.length || plain.length)
-                    ? { status: "ready", lines, plain }
-                    : { status: "unavailable" });
-                return;
+                body = JSON.parse(xhr.responseText);
             } catch (error) {
                 root.finish({ status: "error" });
                 return;
             }
+            handleBody(body);
+        } else {
+            root.finish({ status: "error" });
         }
-        root.finish({ status: "error" });
+    }
+
+    function handleLrclib(lyrics) {
+        const lines = typeof lyrics?.syncedLyrics === "string" ? Lrc.parse(lyrics.syncedLyrics) : [];
+        const plain = typeof lyrics?.plainLyrics === "string" ? lyrics.plainLyrics.trim() : "";
+        if (lyrics?.instrumental) {
+            root.finish({ status: "unavailable" });
+        } else if (lines.length || plain.length) {
+            root.finish({ status: "ready", lines, plain });
+        } else {
+            root.searchNetEase();
+        }
+    }
+
+    function searchNetEase() {
+        const track = {};
+        for (const field of root.requesting.split("&")) {
+            const [name, value] = field.split("=");
+            track[name] = decodeURIComponent(value);
+        }
+        const search = encodeURIComponent(`${track.track_name} ${track.artist_name}`);
+        root.sendRequest(`https://music.163.com/api/search/get?type=1&limit=10&s=${search}`, response => {
+            if (response && response.code !== 200) {
+                root.finish({ status: "error" });
+                return;
+            }
+            const id = NetEase.matchTrack(response?.result?.songs, track);
+            if (id)
+                root.sendRequest(`https://music.163.com/api/song/lyric?id=${id}&lv=1`, root.handleNetEaseLyrics);
+            else
+                root.finish({ status: "unavailable" });
+        });
+    }
+
+    function handleNetEaseLyrics(response) {
+        if (response && response.code !== 200) {
+            root.finish({ status: "error" });
+            return;
+        }
+        const lrc = response?.lrc?.lyric;
+        const lines = !response?.nolyric && typeof lrc === "string" ? Lrc.parse(lrc) : [];
+        root.finish(lines.length ? { status: "ready", lines, plain: "" } : { status: "unavailable" });
     }
 
     function finish(result) {
