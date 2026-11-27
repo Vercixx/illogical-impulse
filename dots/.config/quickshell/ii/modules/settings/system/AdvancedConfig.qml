@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Io
 import qs.services
 import qs.modules.common
@@ -241,29 +242,40 @@ ContentPage {
 
     ContentSection {
         id: greeterSection
-        visible: SystemInfo.distroId !== "eonos" // ii-greeter is a system package there
+        visible: SystemInfo.distroId !== "eonos" || autoLoginAvailable
         icon: "login"
         title: Translation.tr("Login screen")
 
         readonly property string installScript: `${FileUtils.trimFileProtocol(Directories.config)}/quickshell/ii-greeter/install.sh`
+        readonly property string autoLoginScript: "/usr/local/share/ii-greeter/ii-greeter-autologin"
         property bool available: false
         property bool installed: false
+        property bool autoLoginAvailable: false
+        property string autoLoginUser: ""
         property string status: ""
 
-        function run(args) {
+        function run(args, script = greeterSection.installScript) {
             greeterSection.status = "";
-            greeterProc.command = ["pkexec", greeterSection.installScript, ...args];
+            greeterProc.command = ["pkexec", script, ...args];
             greeterProc.running = true;
         }
 
         Process {
             id: greeterCheckProc
             running: true
-            command: ["sh", "-c", "test -x \"$1\" && echo available; test -d /usr/local/share/ii-greeter && echo installed", "sh", greeterSection.installScript]
+            command: ["sh", "-c", `
+                test -x "$1" && echo available
+                test -d /usr/local/share/ii-greeter && echo installed
+                user=$("$2" status 2>/dev/null) && echo "autologin=$user"
+            `, "sh", greeterSection.installScript, greeterSection.autoLoginScript]
             stdout: StdioCollector {
                 onStreamFinished: {
-                    greeterSection.available = text.includes("available");
-                    greeterSection.installed = text.includes("installed");
+                    const lines = text.trim().split("\n");
+                    greeterSection.available = lines.includes("available");
+                    greeterSection.installed = lines.includes("installed");
+                    const autoLogin = lines.find(line => line.startsWith("autologin="));
+                    greeterSection.autoLoginAvailable = autoLogin !== undefined;
+                    greeterSection.autoLoginUser = autoLogin?.slice("autologin=".length) ?? "";
                 }
             }
         }
@@ -281,6 +293,7 @@ ContentPage {
 
         NoticeBox {
             Layout.fillWidth: true
+            visible: SystemInfo.distroId !== "eonos"
             text: greeterSection.status || (greeterSection.available
                 ? Translation.tr("A greetd frontend styled after illogical-impulse. You'll need to install and enable `greetd` manually")
                 : Translation.tr("Greeter files not found. Re-run the dotfiles installer."))
@@ -302,6 +315,22 @@ ContentPage {
             	materialIcon: "auto_stories"
             	mainText: Translation.tr("Open greeter repo")
             	onClicked: Qt.openUrlExternally("https://github.com/Vercixx/ii-greeter")
+            }
+        }
+        NoticeBox {
+            Layout.fillWidth: true
+            visible: greeterSection.autoLoginAvailable
+            text: (SystemInfo.distroId === "eonos" && greeterSection.status)
+                || Translation.tr("Automatic login opens the account without a password at boot. Logging out returns to the login screen.")
+
+            RippleButtonWithIcon {
+                enabled: !greeterProc.running && !greeterCheckProc.running
+                materialIcon: "login"
+                mainText: greeterSection.autoLoginUser
+                    ? Translation.tr("Disable automatic login for %1").arg(greeterSection.autoLoginUser)
+                    : Translation.tr("Enable automatic login for %1").arg(SystemInfo.username)
+                onClicked: greeterSection.run(greeterSection.autoLoginUser ? ["disable"]
+                    : ["enable", Quickshell.env("XDG_SESSION_DESKTOP") || "hyprland"], greeterSection.autoLoginScript)
             }
         }
     }
