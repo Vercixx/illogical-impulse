@@ -174,6 +174,22 @@ ContentPage {
                 Config.options.media.filterDuplicatePlayers = checked;
             }
         }
+
+        ConfigSwitch {
+            visible: Config.options.panelFamily !== "waffle"
+            buttonIcon: "lyrics"
+            text: Translation.tr("Show lyrics")
+            checked: Config.options.media.showLyrics
+            onCheckedChanged: Config.options.media.showLyrics = checked
+        }
+
+        StyledText {
+            visible: Config.options.panelFamily !== "waffle"
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            color: Appearance.colors.colSubtext
+            text: Translation.tr("Sends track details to LRCLIB while a media player view is open.")
+        }
     }
 
     ContentSection {

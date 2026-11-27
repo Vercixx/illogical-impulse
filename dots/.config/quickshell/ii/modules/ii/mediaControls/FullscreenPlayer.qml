@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Mpris
 import Quickshell.Wayland
@@ -24,12 +25,39 @@ PanelWindow {
         focus: true
         Keys.onEscapePressed: root.dismissRequested()
 
-        PlayerControl {
+        GridLayout {
+            id: content
+            readonly property bool showLyrics: Config.options.media.showLyrics
+            readonly property bool stacked: showLyrics && width < 760
             anchors.centerIn: parent
-            width: Math.min(720, parent.width - 32)
-            height: Math.min(480, parent.height - 104)
-            radius: Appearance.rounding.large
-            player: root.player
+            anchors.verticalCenterOffset: showLyrics ? 24 : 0
+            width: Math.min(showLyrics ? 1200 : 720, parent.width - 32)
+            height: showLyrics ? Math.min(680, parent.height - 120) : Math.min(480, parent.height - 104)
+            columns: stacked || !showLyrics ? 1 : 2
+            columnSpacing: 24
+            rowSpacing: 16
+
+            PlayerControl {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: 640
+                Layout.minimumHeight: Math.min(Appearance.sizes.mediaControlsHeight, content.height)
+                Layout.maximumHeight: content.stacked ? 250 : 480
+                radius: Appearance.rounding.large
+                player: root.player
+            }
+
+            Loader {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: 420
+                Layout.preferredHeight: content.stacked ? 300 : content.height
+                visible: active
+                active: content.showLyrics
+                sourceComponent: LyricsView {
+                    player: root.player
+                }
+            }
         }
 
         RippleButton {

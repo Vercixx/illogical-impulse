@@ -146,7 +146,7 @@ Scope {
             exclusionMode: ExclusionMode.Ignore
             exclusiveZone: 0
             implicitWidth: root.widgetWidth
-            implicitHeight: playerColumnLayout.implicitHeight
+            implicitHeight: Math.min(playerColumnLayout.implicitHeight, (screen?.height ?? 0) - Math.max(margins.top, margins.bottom) - Appearance.sizes.barHeight)
             color: "transparent"
             WlrLayershell.namespace: "quickshell:mediaControls"
 
@@ -164,7 +164,7 @@ Scope {
             }
 
             mask: Region {
-                item: playerColumnLayout
+                item: playerScroll
             }
 
             Component.onCompleted: {
@@ -180,9 +180,19 @@ Scope {
                 }
             }
 
+            Flickable {
+                id: playerScroll
+                anchors.fill: parent
+                clip: true
+                flickableDirection: Flickable.VerticalFlick
+                interactive: contentHeight > height
+                contentHeight: playerColumnLayout.implicitHeight
+            }
+
             ColumnLayout {
                 id: playerColumnLayout
-                anchors.fill: parent
+                parent: playerScroll.contentItem
+                width: playerScroll.width
                 spacing: -Appearance.sizes.elevationMargin // Shadow overlap okay
 
                 Repeater {
@@ -195,7 +205,6 @@ Scope {
                         canExpand: true
                         onExpandRequested: GlobalStates.mediaFullscreenRequested(modelData, panelWindow.screen)
                         implicitWidth: root.widgetWidth
-                        implicitHeight: root.widgetHeight
                         radius: root.popupRounding
                     }
                 }

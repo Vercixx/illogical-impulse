@@ -23,7 +23,6 @@ BarDrawer {
             canExpand: true
             onExpandRequested: GlobalStates.mediaFullscreenRequested(root.player, root.barWindow.screen)
             implicitWidth: Appearance.sizes.mediaControlsWidth
-            implicitHeight: Appearance.sizes.mediaControlsHeight
             radius: Appearance.rounding.normal
         }
     }

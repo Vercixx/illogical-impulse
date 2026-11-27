@@ -32,6 +32,8 @@ Item { // Player instance
     readonly property color scrimColor: ColorUtils.mix(Appearance.colors.colLayer0, root.artDominantColor, 0.75)
     readonly property color contentColor: ColorUtils.mix(Appearance.colors.colOnLayer0, root.artDominantColor, 0.85)
 
+    implicitHeight: Appearance.sizes.mediaControlsHeight + lyricsPreview.implicitHeight + lyricsPreview.Layout.topMargin
+
     Component.onCompleted: Cava.consumers++
     Component.onDestruction: Cava.consumers--
 
@@ -80,7 +82,7 @@ Item { // Player instance
 
     Timer { // Force update for revision
         running: root.player?.playbackState == MprisPlaybackState.Playing
-        interval: Config.options.resources.updateInterval
+        interval: Config.options.media.showLyrics && root.player?.positionSupported ? 150 : Config.options.resources.updateInterval
         repeat: true
         onTriggered: {
             root.player.positionChanged()
@@ -383,6 +385,18 @@ Item { // Player instance
                     iconName: root.player?.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
                     dimmed: root.player?.loopState === MprisLoopState.None
                     downAction: () => root.cycleLoopState()
+                }
+            }
+
+            Loader {
+                id: lyricsPreview
+                Layout.fillWidth: true
+                Layout.topMargin: implicitHeight > 0 ? 8 : 0
+                active: root.canExpand && Config.options.media.showLyrics
+                sourceComponent: LyricsView {
+                    player: root.player
+                    compact: true
+                    lineColor: root.contentColor
                 }
             }
         }
