@@ -20,7 +20,8 @@ Item {
     readonly property int currentLine: root.followsPlayback ? Lrc.activeLine(root.syncedLines, root.player.position) : -1
     property string subscribedKey: ""
 
-    implicitHeight: root.compact && root.followsPlayback ? 3 * Math.ceil(excerptFont.height) + 2 * excerpt.spacing : 0
+    readonly property int compactRowHeight: Math.ceil(excerptFont.height)
+    implicitHeight: root.compact && root.followsPlayback ? 3 * compactRowHeight + 2 * lyricsList.spacing : 0
 
     function subscribe() {
         if (root.subscribedKey === root.lookupKey)
@@ -45,85 +46,81 @@ Item {
         font.pixelSize: Appearance.font.pixelSize.small
     }
 
-    Column {
-        id: excerpt
-        width: root.width
-        spacing: 2
-        visible: root.compact && root.followsPlayback
+    ListView {
+        id: lyricsList
+        anchors.fill: parent
+        clip: true
+        interactive: !root.compact
+        spacing: root.compact ? 2 : 8
+        visible: opacity > 0
+        opacity: count > 0 ? 1 : 0
+        model: {
+            if (root.compact && !root.followsPlayback)
+                return [];
+            if (!root.followsPlayback && root.result?.plain)
+                return root.result.plain.split(/\r?\n/);
+            const lines = root.syncedLines.map(line => line.text);
+            // The empty lead-in keeps the first timed line below center until it starts.
+            return root.compact ? [""].concat(lines) : lines;
+        }
+        currentIndex: root.compact && root.followsPlayback ? root.currentLine + 1 : root.currentLine
+        highlight: Item {}
+        highlightRangeMode: root.compact ? ListView.StrictlyEnforceRange : ListView.ApplyRange
+        preferredHighlightBegin: root.compact ? root.compactRowHeight + spacing : height * 0.42
+        preferredHighlightEnd: root.compact ? preferredHighlightBegin + root.compactRowHeight : height * 0.58
+        highlightMoveDuration: Appearance.animation.elementResize.duration
+        highlightMoveVelocity: -1
+        ScrollBar.vertical: ScrollBar {
+            policy: root.compact ? ScrollBar.AlwaysOff : ScrollBar.AsNeeded
+        }
 
-        Repeater {
-            model: root.compact && root.followsPlayback ? 3 : 0
-            delegate: StyledText {
-                required property int index
-                width: excerpt.width
-                height: Math.ceil(excerptFont.height)
-                horizontalAlignment: Text.AlignHCenter
-                textFormat: Text.PlainText
-                elide: Text.ElideRight
-                color: root.lineColor
-                opacity: index === 1 ? 1 : 0.65
-                font.pixelSize: Appearance.font.pixelSize.small
-                font.bold: index === 1
-                text: root.syncedLines[root.currentLine + index - 1]?.text ?? ""
+        Behavior on opacity {
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        }
+
+        delegate: StyledText {
+            required property string modelData
+            readonly property bool activeLine: root.currentLine >= 0 && ListView.isCurrentItem
+            width: root.compact ? lyricsList.width : lyricsList.width - 16
+            height: root.compact ? root.compactRowHeight : implicitHeight
+            horizontalAlignment: root.compact ? Text.AlignHCenter : undefined
+            textFormat: Text.PlainText
+            wrapMode: root.compact ? Text.NoWrap : Text.Wrap
+            elide: root.compact ? Text.ElideRight : Text.ElideNone
+            text: modelData
+            color: activeLine && !root.compact ? Appearance.colors.colPrimary : root.lineColor
+            font.pixelSize: root.compact ? Appearance.font.pixelSize.small : Appearance.font.pixelSize.large
+            font.bold: activeLine
+            opacity: !root.followsPlayback || activeLine ? 1 : (root.compact ? 0.65 : 0.7)
+
+            Behavior on color {
+                animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+            }
+            Behavior on opacity {
+                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
             }
         }
     }
 
-    Loader {
-        anchors.fill: parent
-        active: !root.compact
-        sourceComponent: Item {
-            ListView {
-                id: lyricsList
-                anchors.fill: parent
-                clip: true
-                spacing: 8
-                visible: count > 0
-                model: !root.followsPlayback && root.result?.plain
-                    ? root.result.plain.split(/\r?\n/)
-                    : root.syncedLines.map(line => line.text)
-                currentIndex: root.currentLine
-                ScrollBar.vertical: ScrollBar {}
+    StyledText {
+        anchors.centerIn: parent
+        width: parent.width
+        visible: opacity > 0
+        opacity: !root.compact && lyricsList.count === 0 ? 1 : 0
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.Wrap
+        color: root.lineColor
 
-                function followLine() {
-                    if (lyricsList.currentIndex >= 0)
-                        lyricsList.positionViewAtIndex(lyricsList.currentIndex, ListView.Center);
-                    else
-                        lyricsList.positionViewAtBeginning();
-                }
+        Behavior on opacity {
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        }
 
-                onCurrentIndexChanged: Qt.callLater(lyricsList.followLine)
-                onCountChanged: Qt.callLater(lyricsList.followLine)
-
-                delegate: StyledText {
-                    required property int index
-                    required property string modelData
-                    width: lyricsList.width - 16
-                    text: modelData
-                    textFormat: Text.PlainText
-                    wrapMode: Text.Wrap
-                    font.pixelSize: Appearance.font.pixelSize.large
-                    font.bold: index === root.currentLine
-                    color: index === root.currentLine ? Appearance.colors.colPrimary : root.lineColor
-                    opacity: !root.followsPlayback || index === root.currentLine ? 1 : 0.7
-                }
-            }
-
-            StyledText {
-                anchors.centerIn: parent
-                width: parent.width
-                visible: !lyricsList.visible
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.Wrap
-                color: root.lineColor
-                text: {
-                    if (!root.lookupKey || root.result?.status === "unavailable")
-                        return Translation.tr("Lyrics unavailable");
-                    if (root.result?.status === "error")
-                        return Translation.tr("Could not load lyrics");
-                    return Translation.tr("Loading lyrics…");
-                }
-            }
+        text: {
+            if (!root.lookupKey || root.result?.status === "unavailable")
+                return Translation.tr("Lyrics unavailable");
+            if (root.result?.status === "error")
+                return Translation.tr("Could not load lyrics");
+            return Translation.tr("Loading lyrics…");
         }
     }
 }

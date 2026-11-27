@@ -26,13 +26,14 @@ Item { // Player instance
     property real maxVisualizerValue: 1000 // Max value in the data points
     property int visualizerSmoothing: 2 // Number of points to average for smoothing
     property real radius
+    property color lyricsBaseColor: Appearance.m3colors.m3surfaceContainer
 
     property string displayedArtFilePath: root.downloaded ? Qt.resolvedUrl(artFilePath) : ""
     readonly property string appIconName: AppSearch.guessIcon(player?.desktopEntry || player?.identity)
     readonly property color scrimColor: ColorUtils.mix(Appearance.colors.colLayer0, root.artDominantColor, 0.75)
     readonly property color contentColor: ColorUtils.mix(Appearance.colors.colOnLayer0, root.artDominantColor, 0.85)
 
-    implicitHeight: Appearance.sizes.mediaControlsHeight + lyricsPreview.implicitHeight + lyricsPreview.Layout.topMargin
+    implicitHeight: Appearance.sizes.mediaControlsHeight + lyricsSlot.height
 
     Component.onCompleted: Cava.consumers++
     Component.onDestruction: Cava.consumers--
@@ -131,6 +132,7 @@ Item { // Player instance
         id: background
         anchors.fill: parent
         anchors.margins: Appearance.sizes.elevationMargin
+        anchors.bottomMargin: Appearance.sizes.elevationMargin + lyricsSlot.height
         color: blendedColors.colLayer0
         radius: root.radius
 
@@ -387,16 +389,48 @@ Item { // Player instance
                     downAction: () => root.cycleLoopState()
                 }
             }
+        }
+    }
+
+    Item {
+        id: lyricsSlot
+        readonly property bool shown: lyricsPreview.active && lyricsPreview.implicitHeight > 0
+        readonly property int gap: 8
+        readonly property int padding: 8
+        anchors.left: background.left
+        anchors.right: background.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Appearance.sizes.elevationMargin
+        height: shown ? lyricsPreview.implicitHeight + gap + 2 * padding : 0
+
+        Behavior on height {
+            animation: Appearance.animation.elementResize.numberAnimation.createObject(this)
+        }
+
+        Rectangle {
+            y: lyricsSlot.gap
+            width: parent.width
+            height: Math.max(0, parent.height - y)
+            radius: root.radius
+            color: Qt.darker(root.lyricsBaseColor, 1.15)
+            visible: height > 0
+            opacity: lyricsSlot.shown ? 1 : 0
+            clip: true
+
+            Behavior on opacity {
+                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+            }
 
             Loader {
                 id: lyricsPreview
-                Layout.fillWidth: true
-                Layout.topMargin: implicitHeight > 0 ? 8 : 0
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: lyricsSlot.padding
                 active: root.canExpand && Config.options.media.showLyrics
                 sourceComponent: LyricsView {
                     player: root.player
                     compact: true
-                    lineColor: root.contentColor
                 }
             }
         }

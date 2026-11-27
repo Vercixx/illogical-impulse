@@ -24,6 +24,7 @@ BarDrawer {
             onExpandRequested: GlobalStates.mediaFullscreenRequested(root.player, root.barWindow.screen)
             implicitWidth: Appearance.sizes.mediaControlsWidth
             radius: Appearance.rounding.normal
+            lyricsBaseColor: root.neck?.neckColor ?? Appearance.m3colors.m3surfaceContainer
         }
     }
 
