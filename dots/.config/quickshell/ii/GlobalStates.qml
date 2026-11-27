@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
+import Quickshell.Services.Mpris
 pragma Singleton
 pragma ComponentBehavior: Bound
 
@@ -15,6 +16,7 @@ Singleton {
     property bool sidebarRightOpen: false
     property bool mediaControlsOpen: false
     property var mediaDrawers: []
+    signal mediaFullscreenRequested(player: MprisPlayer, screen: ShellScreen)
     property bool osdBrightnessOpen: false
     property bool osdVolumeOpen: false
     property bool oskOpen: false

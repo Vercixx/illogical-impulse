@@ -22,12 +22,23 @@ Scope {
     readonly property real widgetWidth: Appearance.sizes.mediaControlsWidth
     readonly property real widgetHeight: Appearance.sizes.mediaControlsHeight
     property real popupRounding: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
+    property MprisPlayer fullscreenPlayer: null
+    property ShellScreen fullscreenScreen: null
+
+    function closeFullscreen() {
+        root.fullscreenPlayer = null;
+        root.fullscreenScreen = null;
+    }
 
     function focusedMediaDrawer() {
         return GlobalStates.mediaDrawers.find(drawer => drawer.hosted && drawer.host?.visible && drawer.barWindow?.screen?.name === Hyprland.focusedMonitor?.name) ?? null;
     }
 
     function toggle() {
+        if (root.fullscreenPlayer) {
+            root.closeFullscreen();
+            return;
+        }
         const drawer = root.focusedMediaDrawer();
         if (!drawer) {
             GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen;
@@ -38,6 +49,8 @@ Scope {
     }
 
     function open() {
+        if (root.fullscreenPlayer)
+            return;
         const drawer = root.focusedMediaDrawer();
         if (!drawer) {
             GlobalStates.mediaControlsOpen = true;
@@ -48,8 +61,44 @@ Scope {
     }
 
     function close() {
+        root.closeFullscreen();
         GlobalStates.mediaControlsOpen = false;
         GlobalStates.mediaDrawers.filter(drawer => drawer.pinned).forEach(drawer => drawer.dismiss());
+    }
+
+    Connections {
+        target: GlobalStates
+
+        function onMediaFullscreenRequested(player, screen) {
+            if (!player || !screen || GlobalStates.screenLocked)
+                return;
+            root.close();
+            root.fullscreenScreen = screen;
+            root.fullscreenPlayer = player;
+        }
+
+        function onScreenLockedChanged() {
+            if (GlobalStates.screenLocked)
+                root.closeFullscreen();
+        }
+    }
+
+    Connections {
+        target: Quickshell
+
+        function onScreensChanged() {
+            if (!Quickshell.screens.includes(root.fullscreenScreen))
+                root.closeFullscreen();
+        }
+    }
+
+    Loader {
+        active: root.fullscreenPlayer !== null && root.fullscreenScreen !== null
+        sourceComponent: FullscreenPlayer {
+            player: root.fullscreenPlayer
+            screen: root.fullscreenScreen
+            onDismissRequested: root.closeFullscreen()
+        }
     }
 
     function filterDuplicatePlayers(players) {
@@ -143,6 +192,8 @@ Scope {
                     delegate: PlayerControl {
                         required property MprisPlayer modelData
                         player: modelData
+                        canExpand: true
+                        onExpandRequested: GlobalStates.mediaFullscreenRequested(modelData, panelWindow.screen)
                         implicitWidth: root.widgetWidth
                         implicitHeight: root.widgetHeight
                         radius: root.popupRounding

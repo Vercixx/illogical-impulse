@@ -20,6 +20,8 @@ BarDrawer {
     property Component playerComponent: Component {
         PlayerControl {
             player: root.player
+            canExpand: true
+            onExpandRequested: GlobalStates.mediaFullscreenRequested(root.player, root.barWindow.screen)
             implicitWidth: Appearance.sizes.mediaControlsWidth
             implicitHeight: Appearance.sizes.mediaControlsHeight
             radius: Appearance.rounding.normal

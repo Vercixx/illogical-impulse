@@ -15,6 +15,8 @@ import Quickshell.Services.Mpris
 Item { // Player instance
     id: root
     required property MprisPlayer player
+    property bool canExpand: false
+    signal expandRequested()
     property var artUrl: player?.trackArtUrl
     property string artDownloadLocation: Directories.coverArt
     property string artFileName: Qt.md5(artUrl)
@@ -242,6 +244,17 @@ Item { // Player instance
                             text: Audio.sink ? Audio.friendlyDeviceName(Audio.sink) : Translation.tr("Unknown")
                             animateChange: true
                         }
+                    }
+                }
+
+                ControlButton {
+                    visible: root.canExpand
+                    iconName: "fullscreen"
+                    Accessible.name: Translation.tr("Open fullscreen player")
+                    onClicked: root.expandRequested()
+
+                    StyledToolTip {
+                        text: Translation.tr("Open fullscreen player")
                     }
                 }
             }
