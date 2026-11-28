@@ -10,7 +10,6 @@ import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
-import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 
@@ -40,24 +39,14 @@ Variants {
         property int workspaceChunkSize: Config?.options.bar.workspaces.shown ?? 10
         property int totalWorkspaces: Math.ceil(lastWorkspaceId / workspaceChunkSize) * workspaceChunkSize
         // Wallpaper
-        property bool wallpaperIsVideo: Config.options.background.wallpaperPath.endsWith(".mp4") || Config.options.background.wallpaperPath.endsWith(".webm") || Config.options.background.wallpaperPath.endsWith(".mkv") || Config.options.background.wallpaperPath.endsWith(".avi") || Config.options.background.wallpaperPath.endsWith(".mov")
+        readonly property bool wallpaperIsVideo: Wallpapers.isVideo
         property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath
-        property bool wallpaperSafetyTriggered: {
-            const enabled = Config.options.workSafety.enable.wallpaper;
-            const sensitiveWallpaper = (CF.StringUtils.stringListContainsSubstring(wallpaperPath.toLowerCase(), Config.options.workSafety.triggerCondition.fileKeywords));
-            const sensitiveNetwork = (CF.StringUtils.stringListContainsSubstring(Network.networkName.toLowerCase(), Config.options.workSafety.triggerCondition.networkNameKeywords));
-            return enabled && sensitiveWallpaper && sensitiveNetwork;
+        readonly property bool filterWallpapers: Config.options.workSafety.enable.wallpaper && CF.StringUtils.stringListContainsSubstring(Network.networkName.toLowerCase(), Config.options.workSafety.triggerCondition.networkNameKeywords)
+        function hideWallpaper(path: string): bool {
+            return filterWallpapers && CF.StringUtils.stringListContainsSubstring(path.toLowerCase(), Config.options.workSafety.triggerCondition.fileKeywords);
         }
-        readonly property real parallaxRation: Config.options.background.parallax.workspaceZoom
-        property real minSuitableScale: 1 // Some reasonable init, to be updated
-        property real effectiveWallpaperScale: minSuitableScale * parallaxRation
-        property int wallpaperWidth: modelData.width // Some reasonable init value, to be updated
-        property int wallpaperHeight: modelData.height // Some reasonable init value, to be updated
-        property real scaledWallpaperWidth: wallpaperWidth * effectiveWallpaperScale
-        property real scaledWallpaperHeight: wallpaperHeight * effectiveWallpaperScale
-        property real parallaxTotalPixelsX: Math.max(0, scaledWallpaperWidth - screen.width)
-        property real parallaxTotalPixelsY: Math.max(0, scaledWallpaperHeight - screen.height)
-        readonly property bool verticalParallax: (Config.options.background.parallax.autoVertical && wallpaperHeight > wallpaperWidth) || Config.options.background.parallax.vertical
+        readonly property bool wallpaperSafetyTriggered: hideWallpaper(wallpaperPath)
+        readonly property real wallpaperZoom: Config.options.background.parallax.workspaceZoom
 
         readonly property bool driftCanvas: Drift.activeOn(monitor?.activeWorkspace?.id ?? -1)
         readonly property bool driftActive: driftCanvas && !GlobalStates.screenLocked
@@ -137,143 +126,78 @@ Variants {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
-        onWallpaperPathChanged: {
-            bgRoot.updateZoomScale();
-            // Clock position gets updated after zoom scale is updated
-        }
-
-        // Wallpaper zoom scale
-        function updateZoomScale() {
-            getWallpaperSizeProc.path = bgRoot.wallpaperPath;
-            getWallpaperSizeProc.running = true;
-        }
-        Process {
-            id: getWallpaperSizeProc
-            property string path: bgRoot.wallpaperPath
-            command: ["magick", "identify", "-format", "%w %h", path]
-            stdout: StdioCollector {
-                id: wallpaperSizeOutputCollector
-                onStreamFinished: {
-                    const output = wallpaperSizeOutputCollector.text;
-                    const [width, height] = output.split(" ").map(Number);
-                    const [screenWidth, screenHeight] = [bgRoot.screen.width, bgRoot.screen.height];
-                    bgRoot.wallpaperWidth = width;
-                    bgRoot.wallpaperHeight = height;
-
-                    // Perfect image; scale = 1
-                    // Small picture; scale > 1; will zoom in the picture
-                    // Big picture; scale < 1; will zoom out the picture
-                    // Choose max number so every side will fit
-                    bgRoot.minSuitableScale = Math.max(screenWidth / width, screenHeight / height);
-                }
-            }
-        }
-
         Item {
             anchors.fill: parent
 
             // Wallpaper
-            StyledImage {
-                id: wallpaper
-                visible: opacity > 0 && !(blurLoader.active && blurLoader.opacity === 1) && !bgRoot.driftActive
-                opacity: (status === Image.Ready && !bgRoot.wallpaperIsVideo) ? 1 : 0
-                cache: false
-                smooth: false
-                scale: bgRoot.lockZoom
+            WallpaperTransition {
+                id: wallpaperView
+                anchors.fill: parent
+                readonly property string imagesPath: CF.FileUtils.trimFileProtocol(`${Directories.assetsPath}/images`)
+                readonly property string seamlessPath: `${imagesPath}/default_wallpaper_drift.png`
+                readonly property real textureScale: Screen.devicePixelRatio * bgRoot.wallpaperZoom
+                readonly property real workspaceFraction: {
+                    if (bgRoot.totalWorkspaces <= 1) return 0.5;
+                    const index = (bgRoot.monitor?.activeWorkspace?.id ?? 1) - 1;
+                    return Math.max(0, Math.min(1, index / (bgRoot.totalWorkspaces - 1)));
+                }
+                readonly property real sidebarOffset: {
+                    if (!Config.options.background.parallax.enableSidebar) return 0;
+                    return (GlobalStates.sidebarRightOpen - GlobalStates.sidebarLeftOpen) * bgRoot.wallpaperZoom / bgRoot.workspaceChunkSize / 2;
+                }
+                path: {
+                    if (bgRoot.wallpaperSafetyTriggered || (bgRoot.wallpaperIsVideo && !blurLoader.active)) return "";
+                    if (bgRoot.driftActive && bgRoot.wallpaperPath === `${imagesPath}/default_wallpaper.png`) return seamlessPath;
+                    return bgRoot.wallpaperPath;
+                }
+                effect: Wallpapers.transition
+                direction: Wallpapers.transitionDirection
+                duration: Wallpapers.transitionDuration
+                visible: !bgRoot.wallpaperIsVideo && !bgRoot.wallpaperSafetyTriggered && !(blurLoader.active && blurLoader.opacity === 1)
 
-                property int workspaceIndex: (bgRoot.monitor.activeWorkspace?.id ?? 1) - 1
-                property real middleFraction: 0.5
-                property real fraction: {
-                    // 0 - start of the picture
-                    // 1 - end of the picture
-                    if (bgRoot.totalWorkspaces <= 1) {
-                        return middleFraction;
+                imageComponent: Image {
+                    id: wallpaper
+                    readonly property real coverScale: Math.max(wallpaperView.width / Math.max(1, implicitWidth), wallpaperView.height / Math.max(1, implicitHeight)) * bgRoot.wallpaperZoom
+                    readonly property bool vertical: Config.options.background.parallax.vertical || (Config.options.background.parallax.autoVertical && implicitHeight > implicitWidth)
+                    property real fractionX: {
+                        const fraction = Config.options.background.parallax.enableWorkspace && !vertical ? wallpaperView.workspaceFraction : 0.5;
+                        return Math.max(0, Math.min(1, fraction + wallpaperView.sidebarOffset));
                     }
-                    return Math.max(0, Math.min(1, workspaceIndex / (bgRoot.totalWorkspaces - 1)));
-                }
+                    property real fractionY: Config.options.background.parallax.enableWorkspace && vertical ? wallpaperView.workspaceFraction : 0.5
+                    Behavior on fractionX { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+                    Behavior on fractionY { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
 
-                property real usedFractionX: {
-                    let usedFraction = middleFraction;
-                    if (Config.options.background.parallax.enableWorkspace && !bgRoot.verticalParallax) {
-                        usedFraction = fraction;
-                    }
-                    if (Config.options.background.parallax.enableSidebar) {
-                        let sidebarFraction = bgRoot.parallaxRation / bgRoot.workspaceChunkSize / 2;
-                        usedFraction += (sidebarFraction * GlobalStates.sidebarRightOpen - sidebarFraction * GlobalStates.sidebarLeftOpen);
-                    }
-                    return Math.max(0, Math.min(1, usedFraction));
-                }
-                property real usedFractionY: {
-                    let usedFraction = middleFraction;
-                    if (Config.options.background.parallax.enableWorkspace && bgRoot.verticalParallax) {
-                        usedFraction = fraction;
-                    }
-                    return Math.max(0, Math.min(1, usedFraction));
-                }
-
-                x: {
-                    if (bgRoot.screen.width > width) {
-                        // Center the picture
-                        return (bgRoot.screen.width - width) / 2;
-                    }
-                    return - bgRoot.parallaxTotalPixelsX * usedFractionX;
-                }
-                y: {
-                    if (bgRoot.screen.height > height) {
-                        // Center the picture
-                        return (bgRoot.screen.height - height) / 2;
-                    }
-                    return - bgRoot.parallaxTotalPixelsY * usedFractionY;
-                }
-
-                source: bgRoot.wallpaperSafetyTriggered ? "" : bgRoot.wallpaperPath
-                fillMode: Image.PreserveAspectCrop
-                Behavior on x {
-                    NumberAnimation {
-                        duration: 600
-                        easing.type: Easing.OutCubic
-                    }
-                }
-                Behavior on y {
-                    NumberAnimation {
-                        duration: 600
-                        easing.type: Easing.OutCubic
-                    }
-                }
-                width: bgRoot.scaledWallpaperWidth
-                height: bgRoot.scaledWallpaperHeight
-            }
-
-            Loader {
-                active: bgRoot.driftActive && !bgRoot.wallpaperSafetyTriggered && !bgRoot.wallpaperIsVideo
-                sourceComponent: Item {
-                    id: canvasWallpaper
-                    // Mirrored 3x3 tiles. An offset wrapped to two tiles always keeps the screen covered
-                    readonly property real tileWidth: bgRoot.scaledWallpaperWidth
-                    readonly property real tileHeight: bgRoot.scaledWallpaperHeight
-                    readonly property string defaultImagesPath: CF.FileUtils.trimFileProtocol(`${Directories.assetsPath}/images`)
-                    // Default wallpaper has a seamless version for Drift
-                    readonly property bool seamless: bgRoot.wallpaperPath === `${defaultImagesPath}/default_wallpaper.png`
-
-                    x: -bgRoot.wrap((tileWidth - bgRoot.screen.width) / 2 + bgRoot.driftCamX * bgRoot.driftWallpaperFactor, tileWidth * 2)
-                    y: -bgRoot.wrap((tileHeight - bgRoot.screen.height) / 2 + bgRoot.driftCamY * bgRoot.driftWallpaperFactor, tileHeight * 2)
+                    readonly property string filePath: decodeURIComponent(CF.FileUtils.trimFileProtocol(source))
+                    readonly property bool seamless: filePath === wallpaperView.seamlessPath
+                    visible: !bgRoot.hideWallpaper(filePath)
+                    asynchronous: true
+                    retainWhileLoading: true
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize: Qt.size(wallpaperView.width * wallpaperView.textureScale, wallpaperView.height * wallpaperView.textureScale)
+                    smooth: bgRoot.driftActive
+                    scale: bgRoot.lockZoom
+                    width: Math.max(1, implicitWidth * coverScale)
+                    height: Math.max(1, implicitHeight * coverScale)
+                    x: bgRoot.driftActive ? -bgRoot.wrap((width - wallpaperView.width) / 2 + bgRoot.driftCamX * bgRoot.driftWallpaperFactor, width * 2)
+                        : (wallpaperView.width - width) * (width < wallpaperView.width ? 0.5 : fractionX)
+                    y: bgRoot.driftActive ? -bgRoot.wrap((height - wallpaperView.height) / 2 + bgRoot.driftCamY * bgRoot.driftWallpaperFactor, height * 2)
+                        : (wallpaperView.height - height) * (height < wallpaperView.height ? 0.5 : fractionY)
 
                     Repeater {
-                        model: 9
+                        model: bgRoot.driftActive && wallpaper.status === Image.Ready ? 8 : 0
                         Image {
                             required property int index
-                            readonly property int column: index % 3
-                            readonly property int row: Math.floor(index / 3)
-                            x: column * canvasWallpaper.tileWidth
-                            y: row * canvasWallpaper.tileHeight
-                            width: canvasWallpaper.tileWidth
-                            height: canvasWallpaper.tileHeight
-                            sourceSize: Qt.size(width, height)
-                            source: canvasWallpaper.seamless ? `${canvasWallpaper.defaultImagesPath}/default_wallpaper_drift.png` : bgRoot.wallpaperPath
+                            readonly property int column: (index + 1) % 3
+                            readonly property int row: Math.floor((index + 1) / 3)
+                            x: column * width
+                            y: row * height
+                            width: wallpaper.width
+                            height: wallpaper.height
+                            source: wallpaper.source
+                            sourceSize: wallpaper.sourceSize
                             fillMode: Image.PreserveAspectCrop
-                            mirror: !canvasWallpaper.seamless && column % 2 === 1
-                            mirrorVertically: !canvasWallpaper.seamless && row % 2 === 1
-                            asynchronous: true
+                            mirror: !wallpaper.seamless && column % 2 === 1
+                            mirrorVertically: !wallpaper.seamless && row % 2 === 1
                         }
                     }
                 }
@@ -313,14 +237,13 @@ Variants {
             Loader {
                 id: blurLoader
                 active: Config.options.lock.blur.enable && (GlobalStates.screenLocked || opacity > 0)
-                anchors.fill: wallpaper
+                anchors.fill: wallpaperView
                 opacity: bgRoot.lockRevealed ? 1 : 0
                 Behavior on opacity {
                     animation: Appearance.animation.lockReveal.numberAnimation.createObject(this)
                 }
-                scale: bgRoot.lockZoom
                 sourceComponent: GaussianBlur {
-                    source: wallpaper
+                    source: wallpaperView
                     radius: Config.options.lock.blur.radius
                     samples: radius * 2 + 1
 
@@ -353,17 +276,15 @@ Variants {
                 id: widgetCanvas
                 width: parent.width
                 height: parent.height
-                readonly property real parallaxFactor: {
-                    var f = Config.options.background.parallax.widgetsFactor;
-                    return f / bgRoot.parallaxRation;
+                function offset(image: Image): point {
+                    if (!image) return Qt.point(0, 0);
+                    return Qt.point(image.x - (width - image.width) / 2, image.y - (height - image.height) / 2);
                 }
-                readonly property real baseWallpaperOffsetX: (bgRoot.screen.width - wallpaper.width) / 2
-                readonly property real baseWallpaperOffsetY: (bgRoot.screen.height - wallpaper.height) / 2
-                readonly property real wallpaperTotalOffsetX: wallpaper.x - baseWallpaperOffsetX
-                readonly property real wallpaperTotalOffsetY: wallpaper.y - baseWallpaperOffsetY
-                readonly property bool locked: GlobalStates.screenLocked
-                x: bgRoot.driftActive ? -bgRoot.driftCamX : wallpaperTotalOffsetX * parallaxFactor * !locked
-                y: bgRoot.driftActive ? -bgRoot.driftCamY : wallpaperTotalOffsetY * parallaxFactor * !locked
+                readonly property real parallaxFactor: GlobalStates.screenLocked ? 0 : Config.options.background.parallax.widgetsFactor / bgRoot.wallpaperZoom
+                readonly property point currentOffset: offset(wallpaperView.currentImage)
+                readonly property point nextOffset: offset(wallpaperView.incomingImage)
+                x: bgRoot.driftActive ? -bgRoot.driftCamX : (currentOffset.x + (nextOffset.x - currentOffset.x) * wallpaperView.progress) * parallaxFactor
+                y: bgRoot.driftActive ? -bgRoot.driftCamY : (currentOffset.y + (nextOffset.y - currentOffset.y) * wallpaperView.progress) * parallaxFactor
 
                 transitions: Transition {
                     PropertyAnimation {

@@ -5,7 +5,45 @@ import qs.modules.common
 import qs.modules.common.widgets
 
 ContentPage {
+    id: page
     forceWidth: true
+
+    ContentSection {
+        icon: "transition_fade"
+        title: Translation.tr("Wallpaper transition")
+
+        WallpaperTransitionPicker {
+            inView: page.contentY < mapToItem(page.contentItem, 0, height).y
+        }
+        ContentSubsection {
+            id: directionSection
+            readonly property string effect: Config.options.background.transition
+            readonly property var directions: Wallpapers.directionsFor(effect)
+            readonly property string setting: effect === "wipe" ? "wipeDirection" : "slideDirection"
+            visible: directions.length > 0
+            title: Translation.tr("Direction")
+            ConfigSelectionArray {
+                currentValue: Config.options.background[directionSection.setting]
+                onSelected: value => Config.options.background[directionSection.setting] = value
+                options: [
+                    { displayName: Translation.tr("Random"), icon: "shuffle", value: "random" },
+                    { displayName: Translation.tr("Right to left"), icon: "arrow_back", value: "left" },
+                    { displayName: Translation.tr("Left to right"), icon: "arrow_forward", value: "right" },
+                    { displayName: Translation.tr("Up"), icon: "arrow_upward", value: "up" },
+                    { displayName: Translation.tr("Down"), icon: "arrow_downward", value: "down" }
+                ].filter(option => option.value === "random" || directionSection.directions.includes(option.value))
+            }
+        }
+        ConfigSpinBox {
+            icon: "timer"
+            text: Translation.tr("Transition duration (ms)")
+            from: 0
+            to: Wallpapers.maxTransitionDuration
+            stepSize: 100
+            value: Wallpapers.transitionDuration
+            onValueModified: Config.options.background.transitionDuration = value
+        }
+    }
 
     ContentSection {
         icon: "wallpaper_slideshow"

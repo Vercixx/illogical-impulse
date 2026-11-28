@@ -212,6 +212,10 @@ Singleton {
                     }
                 }
                 property string wallpaperPath: ""
+                property string transition: "random"
+                property string wipeDirection: "random"
+                property string slideDirection: "random"
+                property int transitionDuration: 600
                 property string thumbnailPath: ""
                 property JsonObject rotation: JsonObject {
                     property bool enable: false

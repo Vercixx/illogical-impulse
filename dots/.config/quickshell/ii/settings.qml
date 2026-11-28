@@ -16,6 +16,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.settings.bar as BarSettings // Registers the dir so URL-loaded pages resolve its types
+import qs.modules.settings.desktop as DesktopSettings
 
 ApplicationWindow {
     id: root

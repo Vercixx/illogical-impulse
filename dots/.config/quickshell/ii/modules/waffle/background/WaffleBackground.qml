@@ -37,10 +37,12 @@ Variants {
         }
         color: "transparent"
 
-        StyledImage {
+        WallpaperTransition {
             anchors.fill: parent
-            source: Config.options.background.wallpaperPath
-            fillMode: Image.PreserveAspectCrop
+            path: Wallpapers.isVideo ? "" : Config.options.background.wallpaperPath
+            effect: Wallpapers.transition
+            direction: Wallpapers.transitionDirection
+            duration: Wallpapers.transitionDuration
         }
     }
 }

@@ -29,12 +29,34 @@ Singleton {
     readonly property bool thumbnailGenerationRunning: thumbgenProc.running
     property real thumbnailGenerationProgress: 0
     readonly property bool canAdvance: Config.ready && Config.options.background.wallpaperPath.length > 0 && !nextProc.running
+    readonly property bool isVideo: /\.(mp4|webm|mkv|avi|mov)$/.test(Config.options.background.wallpaperPath)
+    readonly property list<string> transitionEffects: ["fade", "wipe", "slide", "zoom"]
+    property string randomTransition: "fade"
+    readonly property string transition: Config.options.background.transition === "random" ? randomTransition : Config.options.background.transition
+    readonly property list<string> slideDirections: ["left", "right", "up", "down"]
+    property int directionIndex: 0
+    readonly property string transitionDirection: directionFor(transition, directionIndex)
+    readonly property int maxTransitionDuration: 10000
+    readonly property int transitionDuration: Math.max(0, Math.min(maxTransitionDuration, Config.options.background.transitionDuration))
 
     signal changed()
     signal thumbnailGenerated(directory: string)
     signal thumbnailGeneratedFile(filePath: string)
 
     function load () {} // For forcing initialization
+
+    function directionsFor(effect: string): var {
+        if (effect === "wipe") return ["left", "right"];
+        if (effect === "slide") return slideDirections;
+        return [];
+    }
+
+    function directionFor(effect: string, index: int): string {
+        const directions = directionsFor(effect);
+        if (!directions.length) return "";
+        const preferred = effect === "wipe" ? Config.options.background.wipeDirection : Config.options.background.slideDirection;
+        return directions.includes(preferred) ? preferred : directions[index % directions.length];
+    }
 
     function next() {
         if (canAdvance) nextProc.running = true;
@@ -56,6 +78,8 @@ Singleton {
     Connections {
         target: Config.options.background
         function onWallpaperPathChanged() {
+            root.randomTransition = root.transitionEffects[Math.floor(Math.random() * root.transitionEffects.length)];
+            root.directionIndex = Math.floor(Math.random() * root.slideDirections.length);
             if (rotationTimer.running) rotationTimer.restart();
         }
     }
