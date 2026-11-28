@@ -28,12 +28,37 @@ Singleton {
     property list<string> wallpapers: [] // List of absolute file paths (without file://)
     readonly property bool thumbnailGenerationRunning: thumbgenProc.running
     property real thumbnailGenerationProgress: 0
+    readonly property bool canAdvance: Config.ready && Config.options.background.wallpaperPath.length > 0 && !nextProc.running
 
     signal changed()
     signal thumbnailGenerated(directory: string)
     signal thumbnailGeneratedFile(filePath: string)
 
     function load () {} // For forcing initialization
+
+    function next() {
+        if (canAdvance) nextProc.running = true;
+    }
+
+    Process {
+        id: nextProc
+        command: [Directories.wallpaperSwitchScriptPath, "--next", "--mode", Appearance.m3colors.darkmode ? "dark" : "light"]
+    }
+
+    Timer {
+        id: rotationTimer
+        interval: Math.max(1, Math.min(1440, Config.options.background.rotation.intervalMinutes)) * 60000
+        running: Config.options.background.rotation.enable && root.canAdvance
+        repeat: true
+        onTriggered: root.next()
+    }
+
+    Connections {
+        target: Config.options.background
+        function onWallpaperPathChanged() {
+            if (rotationTimer.running) rotationTimer.restart();
+        }
+    }
     
     function openFallbackPicker(darkMode = Appearance.m3colors.darkmode) {
         Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light"]);
@@ -172,6 +197,10 @@ Singleton {
 
     IpcHandler {
         target: "wallpapers"
+
+        function next(): void {
+            root.next();
+        }
 
         function apply(path: string): void {
             root.apply(path);

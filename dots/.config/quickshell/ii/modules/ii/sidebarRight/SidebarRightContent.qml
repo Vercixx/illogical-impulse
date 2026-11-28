@@ -256,6 +256,15 @@ Item {
             padding: 4
 
             QuickToggleButton {
+                buttonIcon: "wallpaper_slideshow"
+                enabled: Wallpapers.canAdvance
+                Accessible.name: Translation.tr("Next wallpaper")
+                onClicked: Wallpapers.next()
+                StyledToolTip {
+                    text: parent.Accessible.name
+                }
+            }
+            QuickToggleButton {
                 toggled: root.editMode
                 visible: Config.options.sidebar.quickToggles.style === "android"
                 buttonIcon: "edit"

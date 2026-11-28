@@ -8,6 +8,28 @@ ContentPage {
     forceWidth: true
 
     ContentSection {
+        icon: "wallpaper_slideshow"
+        title: Translation.tr("Wallpaper rotation")
+
+        ConfigSwitch {
+            buttonIcon: "autorenew"
+            text: Translation.tr("Cycle through the current wallpaper folder")
+            checked: Config.options.background.rotation.enable
+            onCheckedChanged: Config.options.background.rotation.enable = checked
+        }
+
+        ConfigSpinBox {
+            icon: "timer"
+            text: Translation.tr("Interval (minutes)")
+            enabled: Config.options.background.rotation.enable
+            from: 1
+            to: 1440
+            value: Config.options.background.rotation.intervalMinutes
+            onValueModified: Config.options.background.rotation.intervalMinutes = value
+        }
+    }
+
+    ContentSection {
         icon: "sync_alt"
         title: Translation.tr("Parallax")
 
