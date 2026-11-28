@@ -11,7 +11,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
-import Qt.labs.synchronizer
 import Quickshell
 import qs.services
 import qs.modules.common
@@ -366,9 +365,10 @@ ApplicationWindow {
                             enableShadow: false
                             ToolbarTabBar {
                                 tabButtonList: root.shownTabs
-                                Synchronizer on currentIndex {
-                                    sourceObject: root
-                                    sourceProperty: "currentTab"
+                                currentIndex: root.currentTab
+                                onCurrentIndexChanged: {
+                                    if (currentIndex >= 0)
+                                        root.currentTab = currentIndex;
                                 }
                             }
                         }
