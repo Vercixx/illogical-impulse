@@ -21,6 +21,12 @@ GridLayout {
         wipe: Translation.tr("Wipe"),
         slide: Translation.tr("Slide"),
         zoom: Translation.tr("Zoom"),
+        disc: Translation.tr("Disc"),
+        stripes: Translation.tr("Stripes"),
+        tiles: Translation.tr("Tiles"),
+        pixelate: Translation.tr("Pixelate"),
+        ripple: Translation.tr("Ripple"),
+        melt: Translation.tr("Melt"),
         none: Translation.tr("None")
     })
     property int previewStep: 0

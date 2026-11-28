@@ -69,6 +69,45 @@ TestCase {
         compare(grabImage(view).blue(60, 40), 255);
     }
 
+    function test_shaderTransition_data() {
+        return [
+            { tag: "disc", revealed: [60, 40], covered: [2, 2] },
+            { tag: "stripes", revealed: [0, 5], covered: [0, 11] },
+            { tag: "tiles", revealed: [3, 3], covered: [73, 3] },
+            { tag: "pixelate" },
+            { tag: "ripple", revealed: [60, 40], covered: [2, 2] },
+            { tag: "melt", revealed: [2, 3], covered: [116, 74] }
+        ];
+    }
+
+    function test_shaderTransition(row) {
+        view.effect = row.tag;
+        view.duration = 1400;
+        view.path = "data:image/svg+xml," + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80">'
+            + '<linearGradient id="g"><stop stop-color="red"/><stop offset="1" stop-color="magenta"/></linearGradient>'
+            + '<rect width="120" height="80" fill="url(#g)"/></svg>');
+        tryVerify(() => view.currentImage !== null);
+        const software = view.GraphicsInfo.api === GraphicsInfo.Software;
+        const next = software ? "blue" : "none";
+        view.path = solid(next);
+        tryVerify(() => view.progress > 0.4 && view.progress < 0.6);
+        const frame = grabImage(testCase);
+        if (software) {
+            verify(frame.red(2, 2) > 0 && frame.blue(2, 2) > 15);
+        } else if (row.tag === "pixelate") {
+            verify(frame.green(1, 40) > 0 && frame.red(1, 40) > 0);
+            compare(frame.blue(1, 40), frame.blue(3, 40));
+            verify(frame.blue(55, 40) > frame.blue(1, 40) + 20);
+        } else {
+            compare(frame.green(...row.revealed), 255);
+            compare(frame.red(...row.covered), 255);
+        }
+        show(next);
+        const last = grabImage(testCase);
+        compare(software ? last.blue(60, 40) : last.green(60, 40), 255);
+    }
+
     function test_direction_data() {
         const rows = [];
         for (const [direction, dx, dy] of [["left", -1, 0], ["right", 1, 0], ["up", 0, -1], ["down", 0, 1]]) {

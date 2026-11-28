@@ -5,6 +5,7 @@ import QtQuick
 import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
+import "../assets/shaders/WallpaperEffects.js" as WallpaperEffects
 pragma Singleton
 pragma ComponentBehavior: Bound
 
@@ -30,7 +31,7 @@ Singleton {
     property real thumbnailGenerationProgress: 0
     readonly property bool canAdvance: Config.ready && Config.options.background.wallpaperPath.length > 0 && !nextProc.running
     readonly property bool isVideo: /\.(mp4|webm|mkv|avi|mov)$/.test(Config.options.background.wallpaperPath)
-    readonly property list<string> transitionEffects: ["fade", "wipe", "slide", "zoom"]
+    readonly property list<string> transitionEffects: ["fade", "wipe", "slide", "zoom", ...WallpaperEffects.names]
     property string randomTransition: "fade"
     readonly property string transition: Config.options.background.transition === "random" ? randomTransition : Config.options.background.transition
     readonly property list<string> slideDirections: ["left", "right", "up", "down"]

@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import "../../../assets/shaders/WallpaperEffects.js" as WallpaperEffects
 
 Item {
     id: root
@@ -32,6 +33,7 @@ Item {
     readonly property bool wiping: activeEffect === "wipe"
     readonly property bool sliding: activeEffect === "slide"
     readonly property bool fading: !wiping && !sliding
+    readonly property int shaderIndex: WallpaperEffects.names.indexOf(activeEffect)
     readonly property real fadeInEnd: 0.85
     clip: true
 
@@ -113,6 +115,26 @@ Item {
             width: root.width
             height: root.height
             scale: root.activeEffect === "zoom" ? 1 + 0.35 * (1 - root.progress) : 1
+        }
+    }
+    Loader {
+        anchors.fill: parent
+        active: root.shaderIndex >= 0 && root.progress > 0 && GraphicsInfo.api !== GraphicsInfo.Software
+        sourceComponent: ShaderEffect {
+            readonly property int pattern: root.shaderIndex
+            readonly property real progress: root.progress
+            readonly property size viewport: Qt.size(width, height)
+            property var outgoing: ShaderEffectSource {
+                sourceItem: background
+                hideSource: true
+                visible: false
+            }
+            property var incoming: ShaderEffectSource {
+                sourceItem: foreground
+                hideSource: true
+                visible: false
+            }
+            fragmentShader: Qt.resolvedUrl("../../../assets/shaders/wallpaper.frag.qsb")
         }
     }
     NumberAnimation {
